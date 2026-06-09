@@ -6,49 +6,36 @@ export default function AdminCategoriesPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
   const [saving, setSaving] = useState(false);
-  const [editId, setEditId] = useState<string | null>(null);
-  const [editName, setEditName] = useState("");
-  const [editSlug, setEditSlug] = useState("");
 
   const load = () =>
-    fetch("/api/categories").then((r) => r.json()).then(({ data }) => { setItems(data ?? []); setLoading(false); });
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then(({ data }) => { setItems(data ?? []); setLoading(false); });
 
   useEffect(() => { load(); }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !slug) return;
+    if (!name.trim()) return;
     setSaving(true);
-    await fetch("/api/categories", {
+    const res = await fetch("/api/categories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, slug }),
+      body: JSON.stringify({ name: name.trim() }),
     });
-    setName(""); setSlug("");
+    if (res.ok) {
+      const { data } = await res.json();
+      setItems((prev) => [...prev, data]);
+      setName("");
+    }
     setSaving(false);
-    load();
-  };
-
-  const handleUpdate = async (id: string) => {
-    await fetch(`/api/categories/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: editName, slug: editSlug }),
-    });
-    setEditId(null);
-    load();
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("削除しますか？")) return;
     await fetch(`/api/categories/${id}`, { method: "DELETE" });
-    load();
-  };
-
-  const startEdit = (item: any) => {
-    setEditId(item.id); setEditName(item.name); setEditSlug(item.slug);
+    setItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
@@ -61,16 +48,17 @@ export default function AdminCategoriesPage() {
         <h2 className="font-bold text-gray-900 mb-4 text-sm">新規追加</h2>
         <div className="flex gap-3">
           <input
-            type="text" placeholder="名前（例：クレジットカード）" value={name}
+            type="text"
+            placeholder="名前（例：クレジットカード）"
+            value={name}
             onChange={(e) => setName(e.target.value)}
             className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
           />
-          <input
-            type="text" placeholder="slug（例：credit-card）" value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
-          <button type="submit" disabled={saving} className="bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50">
+          <button
+            type="submit"
+            disabled={saving || !name.trim()}
+            className="bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+          >
             追加
           </button>
         </div>
@@ -82,23 +70,13 @@ export default function AdminCategoriesPage() {
         ) : (
           items.map((item) => (
             <div key={item.id} className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-50 last:border-b-0">
-              {editId === item.id ? (
-                <>
-                  <input value={editName} onChange={(e) => setEditName(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
-                  <input value={editSlug} onChange={(e) => setEditSlug(e.target.value)}
-                    className="flex-1 border border-gray-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500" />
-                  <button onClick={() => handleUpdate(item.id)} className="text-xs bg-red-600 text-white px-3 py-1.5 rounded-lg hover:bg-red-700">保存</button>
-                  <button onClick={() => setEditId(null)} className="text-xs text-gray-500 hover:text-gray-700">キャンセル</button>
-                </>
-              ) : (
-                <>
-                  <span className="flex-1 text-sm font-medium text-gray-900">{item.name}</span>
-                  <span className="text-xs text-gray-400 font-mono">{item.slug}</span>
-                  <button onClick={() => startEdit(item)} className="text-xs text-blue-600 hover:text-blue-700 px-2">編集</button>
-                  <button onClick={() => handleDelete(item.id)} className="text-xs text-red-500 hover:text-red-700 px-2">削除</button>
-                </>
-              )}
+              <span className="flex-1 text-sm font-medium text-gray-900">{item.name}</span>
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="text-xs text-red-500 hover:text-red-700 px-2"
+              >
+                削除
+              </button>
             </div>
           ))
         )}

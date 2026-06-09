@@ -6,11 +6,11 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
   const { id } = await params;
   const supabase = await createAdminClient();
   const body = await request.json();
-  const { name, slug } = body;
+  const { name } = body;
 
   const { data, error } = await supabase
     .from("categories")
-    .update({ name, slug })
+    .update({ name })
     .eq("id", id)
     .select()
     .single();
