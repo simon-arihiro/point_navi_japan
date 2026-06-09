@@ -52,7 +52,7 @@
 |------|-----|
 | Project URL | `https://ulkvbkrhyndjnrckfptt.supabase.co` |
 | Project Ref | `ulkvbkrhyndjnrckfptt` |
-| Anon Key (公開可) | `sb_publishable_xEp9_5ntGtb09GxAzfSHgg__GBYv_c7` |
+| Anon Key (公開可) | `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVsa3Via3JoeW5kam5yY2tmcHR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5ODE4MzEsImV4cCI6MjA5NjU1NzgzMX0.rnGQo8R-MQx-vy1lw41Z4CJXcIhhuq3HmalS8lhWg4I` |
 | ダッシュボード | https://supabase.com/dashboard/project/ulkvbkrhyndjnrckfptt |
 | SQL Editor | https://supabase.com/dashboard/project/ulkvbkrhyndjnrckfptt/sql |
 
