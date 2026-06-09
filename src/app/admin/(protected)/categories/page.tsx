@@ -60,15 +60,15 @@ export default function AdminCategoriesPage() {
         <div className="flex gap-3">
           <input
             type="text"
-            placeholder="名前（例：クレジットカード）"
+            placeholder="カテゴリ名"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+            className="flex-1 min-w-0 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
           />
           <button
             type="submit"
             disabled={saving || !name.trim()}
-            className="bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
+            className="shrink-0 whitespace-nowrap bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
           >
             {saving ? "追加中..." : "追加"}
           </button>
