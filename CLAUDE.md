@@ -64,7 +64,7 @@
 | 項目 | 値 |
 |------|-----|
 | リポジトリ | `kaunehyn5/point_navi_japan` |
-| デプロイブランチ | `claude/coder-22kjut` |
+| デプロイブランチ | `main`（コード変更は必ずここに push） |
 | ダッシュボード | https://vercel.com/dashboard |
 
 ## 環境変数まとめ（Vercel Dashboard に設定する）
