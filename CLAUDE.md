@@ -36,3 +36,45 @@
 | Supabase | DB (PostgreSQL) + Auth + Storage | 500MB DB / 50K MAU |
 | Vercel | ホスティング + Cron Jobs | Hobby プラン無料 |
 | Anthropic API | AI 記事生成（Claude） | 従量課金のみ（$5〜） |
+
+---
+
+# 環境変数・API 情報
+
+## Supabase
+
+| 項目 | 値 |
+|------|-----|
+| Project URL | `https://ulkvbkrhyndjnrckfptt.supabase.co` |
+| Project Ref | `ulkvbkrhyndjnrckfptt` |
+| Anon Key (公開可) | `sb_publishable_xEp9_5ntGtb09GxAzfSHgg__GBYv_c7` |
+| ダッシュボード | https://supabase.com/dashboard/project/ulkvbkrhyndjnrckfptt |
+| SQL Editor | https://supabase.com/dashboard/project/ulkvbkrhyndjnrckfptt/sql |
+
+> **Service Role Key は秘密鍵のため git には記載しない。**
+> `.env.local` と Vercel Dashboard の Environment Variables に保管すること。
+
+## Vercel
+
+| 項目 | 値 |
+|------|-----|
+| リポジトリ | `kaunehyn5/point_navi_japan` |
+| デプロイブランチ | `claude/coder-22kjut` |
+| ダッシュボード | https://vercel.com/dashboard |
+
+## 環境変数まとめ（Vercel Dashboard に設定する）
+
+| 変数名 | 値 / 保管場所 |
+|--------|-------------|
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://ulkvbkrhyndjnrckfptt.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `sb_publishable_xEp9_5ntGtb09GxAzfSHgg__GBYv_c7` |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API → service_role |
+| `CRON_SECRET` | `dd48e776ebcfe52a48251c87483f3c0e02c2cf0ad75dd5af` |
+| `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys（未取得） |
+| `NEXT_PUBLIC_SITE_URL` | Vercel デプロイ後に発行されるドメイン |
+
+## DB マイグレーション
+
+- ファイル: `supabase/migrations/001_initial_schema.sql`
+- 実行場所: Supabase SQL Editor（上記リンク）
+- 初回のみ手動実行が必要
