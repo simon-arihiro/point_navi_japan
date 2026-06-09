@@ -1,8 +1,14 @@
 import Anthropic from "@anthropic-ai/sdk";
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+function getClient() {
+  if (!process.env.ANTHROPIC_API_KEY) {
+    throw new Error("ANTHROPIC_API_KEY is not configured");
+  }
+  return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+}
 
 export async function generateText(systemPrompt: string, userPrompt: string): Promise<string> {
+  const client = getClient();
   const message = await client.messages.create({
     model: "claude-opus-4-8",
     max_tokens: 4096,
