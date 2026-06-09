@@ -22,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
-      <body className={`${notoSansJP.className} bg-gray-50 text-gray-900 antialiased`}>
+    <html lang="ja" className={notoSansJP.className}>
+      <body className="bg-gray-50 text-gray-900 antialiased">
         <Header />
         <main>{children}</main>
         <Footer />

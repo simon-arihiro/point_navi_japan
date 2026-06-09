@@ -2,16 +2,12 @@ import { programs } from "@/data/programs";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
-type Props = {
-  params: Promise<{ id: string }>;
-};
-
 export async function generateStaticParams() {
   return programs.map((p) => ({ id: p.id }));
 }
 
-export default async function ProgramDetailPage({ params }: Props) {
-  const { id } = await params;
+export default async function ProgramDetailPage(props: PageProps<"/programs/[id]">) {
+  const { id } = await props.params;
   const program = programs.find((p) => p.id === id);
 
   if (!program) notFound();
