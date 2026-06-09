@@ -100,7 +100,7 @@ export default function NewServicePage() {
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
         <p className="text-xs text-gray-500 bg-blue-50 rounded-lg px-4 py-3">
-          保存後、AIが自動でサービス情報（description、カテゴリ、タグ）を補完し、紹介記事を生成します。
+          保存後、AIが自動でサービス情報（description、カテゴリ）を補完し、紹介記事を生成します。
         </p>
 
         <button
