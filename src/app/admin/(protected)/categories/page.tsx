@@ -7,6 +7,7 @@ export default function AdminCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/categories")
@@ -18,15 +19,22 @@ export default function AdminCategoriesPage() {
     e.preventDefault();
     if (!name.trim()) return;
     setSaving(true);
-    const res = await fetch("/api/categories", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim() }),
-    });
-    if (res.ok) {
-      const { data } = await res.json();
-      setItems((prev) => [...prev, data]);
-      setName("");
+    setError(null);
+    try {
+      const res = await fetch("/api/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setItems((prev) => [...prev, json.data]);
+        setName("");
+      } else {
+        setError(json.error?.message ?? `エラー: ${res.status}`);
+      }
+    } catch (err) {
+      setError("通信エラーが発生しました");
     }
     setSaving(false);
   };
@@ -34,7 +42,11 @@ export default function AdminCategoriesPage() {
   const handleDelete = async (id: string) => {
     if (!confirm("削除しますか？")) return;
     const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
-    if (res.ok) setItems((prev) => prev.filter((item) => item.id !== id));
+    if (res.ok) {
+      setItems((prev) => prev.filter((item) => item.id !== id));
+    } else {
+      alert("削除に失敗しました");
+    }
   };
 
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
@@ -58,9 +70,12 @@ export default function AdminCategoriesPage() {
             disabled={saving || !name.trim()}
             className="bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            追加
+            {saving ? "追加中..." : "追加"}
           </button>
         </div>
+        {error && (
+          <p className="mt-2 text-xs text-red-600">{error}</p>
+        )}
       </form>
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100">
