@@ -54,6 +54,15 @@ export default function EditServicePage() {
     alert("紹介記事の再生成を開始しました");
   };
 
+  const handleGenerateArticle = async () => {
+    await fetch("/api/ai/generate-article", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ service_id: id }),
+    });
+    alert("関連記事の生成を開始しました");
+  };
+
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
   if (!form) return <div className="text-red-600 text-sm">サービスが見つかりません</div>;
 
@@ -106,6 +115,19 @@ export default function EditServicePage() {
           </select>
         </div>
 
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="hide_articles_on_inactive"
+            checked={form.hide_articles_on_inactive ?? false}
+            onChange={(e) => setForm((prev: any) => ({ ...prev, hide_articles_on_inactive: e.target.checked }))}
+            className="w-4 h-4 text-red-600"
+          />
+          <label htmlFor="hide_articles_on_inactive" className="text-sm text-gray-700">
+            inactive 時に公開済み記事も非表示にする
+          </label>
+        </div>
+
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
         <div className="flex gap-3 pt-2">
@@ -118,6 +140,13 @@ export default function EditServicePage() {
             className="px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
           >
             紹介記事を再生成
+          </button>
+          <button
+            type="button"
+            onClick={handleGenerateArticle}
+            className="px-4 py-3 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+          >
+            今すぐ記事生成
           </button>
           <button
             type="button"

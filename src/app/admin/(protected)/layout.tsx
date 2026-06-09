@@ -24,6 +24,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             { href: "/admin", label: "ダッシュボード" },
             { href: "/admin/services", label: "サービス管理" },
             { href: "/admin/articles", label: "記事管理" },
+            { href: "/admin/categories", label: "カテゴリ" },
+            { href: "/admin/tags", label: "タグ" },
             { href: "/admin/settings", label: "設定" },
           ].map((item) => (
             <Link

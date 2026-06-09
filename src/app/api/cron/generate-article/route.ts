@@ -12,6 +12,20 @@ export async function POST(request: NextRequest) {
   const supabase = await createAdminClient();
 
   const { data: settings } = await supabase.from("system_settings").select("*").eq("id", 1).single();
+
+  if (settings?.auto_generate_enabled === false) {
+    return Response.json({ ok: true, generated: 0, reason: "auto_generate_disabled" });
+  }
+
+  const maxPending = settings?.max_pending_articles ?? 10;
+  const { count: reviewingCount } = await supabase
+    .from("articles")
+    .select("*", { count: "exact", head: true })
+    .eq("status", "reviewing");
+  if ((reviewingCount ?? 0) >= maxPending) {
+    return Response.json({ ok: true, generated: 0, reason: "max_pending_reached" });
+  }
+
   const count = settings?.daily_article_count ?? 1;
   const windowDays = settings?.ranking_window_days ?? 30;
   const windowStart = new Date();

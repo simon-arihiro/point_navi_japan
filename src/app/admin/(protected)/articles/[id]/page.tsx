@@ -3,7 +3,13 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-const STATUS_OPTIONS = ["draft", "reviewing", "approved", "published", "archived"];
+const STATUS_OPTIONS = ["reviewing", "published", "rejected", "archived"] as const;
+const STATUS_LABEL: Record<string, string> = {
+  reviewing: "審査待ちに戻す",
+  published: "✓ 公開する",
+  rejected: "✕ 却下する",
+  archived: "アーカイブ",
+};
 
 export default function AdminArticleDetailPage() {
   const params = useParams();
@@ -95,9 +101,14 @@ export default function AdminArticleDetailPage() {
             <dl className="space-y-2 text-sm">
               <div><dt className="text-gray-500 text-xs">サービス</dt><dd className="font-medium">{article.primary_service?.name ?? "—"}</dd></div>
               <div><dt className="text-gray-500 text-xs">種別</dt><dd>{article.article_type}</dd></div>
+              <div><dt className="text-gray-500 text-xs">AI書き直し回数</dt><dd>{article.revision_count ?? 0} 回</dd></div>
               <div><dt className="text-gray-500 text-xs">現在のステータス</dt>
                 <dd>
-                  <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${article.status === "published" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
+                  <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${
+                    article.status === "published" ? "bg-green-100 text-green-700" :
+                    article.status === "rejected" ? "bg-red-100 text-red-700" :
+                    "bg-yellow-100 text-yellow-700"
+                  }`}>
                     {article.status}
                   </span>
                 </dd>
@@ -118,10 +129,12 @@ export default function AdminArticleDetailPage() {
                       ? "bg-gray-100 text-gray-400 cursor-default"
                       : s === "published"
                       ? "bg-green-600 text-white hover:bg-green-700"
+                      : s === "rejected"
+                      ? "bg-red-600 text-white hover:bg-red-700"
                       : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
                   }`}
                 >
-                  {s === "published" ? "✓ 公開する" : s}
+                  {STATUS_LABEL[s] ?? s}
                 </button>
               ))}
             </div>

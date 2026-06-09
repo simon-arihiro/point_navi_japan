@@ -54,6 +54,32 @@ export default function AdminSettingsPage() {
         <div className="flex items-center gap-3">
           <input
             type="checkbox"
+            id="auto_generate_enabled"
+            checked={settings?.auto_generate_enabled ?? true}
+            onChange={set("auto_generate_enabled")}
+            className="w-4 h-4 text-red-600"
+          />
+          <label htmlFor="auto_generate_enabled" className="text-sm font-medium text-gray-700">
+            AI自動生成を有効化（Cronによる毎日の自動記事生成）
+          </label>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">審査待ち上限数</label>
+          <input
+            type="number"
+            min={1}
+            max={50}
+            value={settings?.max_pending_articles ?? 10}
+            onChange={set("max_pending_articles")}
+            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+          <p className="text-xs text-gray-400 mt-1">reviewing 状態の記事がこの数を超えると自動生成を一時停止</p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
             id="auto_distribution"
             checked={settings?.auto_distribution ?? false}
             onChange={set("auto_distribution")}

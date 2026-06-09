@@ -1,6 +1,6 @@
 export type ServiceStatus = "active" | "inactive";
 export type ArticleType = "introduction" | "guide" | "faq" | "comparison" | "campaign" | "earnings";
-export type ArticleStatus = "draft" | "reviewing" | "approved" | "published" | "archived";
+export type ArticleStatus = "draft" | "reviewing" | "published" | "rejected" | "archived";
 export type EventType =
   | "page_view"
   | "service_view"
@@ -25,6 +25,7 @@ export interface Service {
   logo_url: string | null;
   logo_storage_path: string | null;
   status: ServiceStatus;
+  hide_articles_on_inactive: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -71,6 +72,7 @@ export interface Article {
   content: string;
   article_type: ArticleType;
   status: ArticleStatus;
+  revision_count: number;
   published_at: string | null;
   created_at: string;
   updated_at: string;
@@ -123,8 +125,10 @@ export interface AdminNotification {
 export interface SystemSettings {
   id: 1;
   operation_mode: OperationMode;
+  auto_generate_enabled: boolean;
   auto_distribution: boolean;
   daily_article_count: number;
+  max_pending_articles: number;
   ranking_window_days: number;
   updated_at: string;
 }
