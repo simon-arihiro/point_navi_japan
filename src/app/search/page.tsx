@@ -1,0 +1,92 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { createClient } from "@/lib/supabase/client";
+import ServiceCard from "@/components/ServiceCard";
+import ArticleCard from "@/components/ArticleCard";
+
+export default function SearchPage() {
+  const [query, setQuery] = useState("");
+  const [services, setServices] = useState<any[]>([]);
+  const [articles, setArticles] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!query.trim()) {
+      setServices([]);
+      setArticles([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      const supabase = createClient();
+      const q = `%${query}%`;
+      const [svcRes, artRes] = await Promise.all([
+        supabase
+          .from("services")
+          .select(`*, categories:service_categories(category:categories(*))`)
+          .eq("status", "active")
+          .or(`name.ilike.${q},description.ilike.${q}`)
+          .limit(12),
+        supabase
+          .from("articles")
+          .select("*, primary_service:services(name, slug)")
+          .eq("status", "published")
+          .or(`title.ilike.${q},description.ilike.${q}`)
+          .limit(9),
+      ]);
+      setServices(svcRes.data ?? []);
+      setArticles(artRes.data ?? []);
+      setLoading(false);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  return (
+    <div>
+      <div className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <h1 className="text-2xl font-black text-gray-900 mb-4">検索</h1>
+          <input
+            type="text"
+            placeholder="サービス名・キーワードで検索..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            autoFocus
+            className="w-full max-w-xl border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {loading && <p className="text-gray-400 text-sm">検索中...</p>}
+
+        {!loading && query && services.length === 0 && articles.length === 0 && (
+          <p className="text-gray-400 text-sm">「{query}」の検索結果はありません</p>
+        )}
+
+        {services.length > 0 && (
+          <div className="mb-10">
+            <h2 className="text-lg font-bold text-gray-900 mb-4">サービス ({services.length}件)</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {services.map((svc) => (
+                <ServiceCard key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {articles.length > 0 && (
+          <div>
+            <h2 className="text-lg font-bold text-gray-900 mb-4">関連記事 ({articles.length}件)</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {articles.map((a) => (
+                <ArticleCard key={a.id} article={a} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
