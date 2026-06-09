@@ -1,6 +1,6 @@
 # SPECIFICATION.md
 
-Version: v1.4.0
+Version: v1.4.1
 Status: 🟢 Active
 Date: 2026-06-09
 
@@ -454,8 +454,13 @@ AI生成・常時最新
 
 **Categories 管理：**
 
-* Admin 手动创建、删除 categories，作为 AI 自动匹配的候选池
-* 系统初次使用时由 Admin 初始化基础分类数据
+* 输入字段：仅「名前」一个文本框（slug 由后端 `toSlug()` 自动生成，UI 不展示）
+* 新規追加フォーム：名前テキストボックス + 「追加」ボタンを横並び（同一行）
+* 追加成功後：新分类立即追加到列表末尾（Optimistic Update — 直接追加 API 返回的对象，不重新 fetch 整张表）
+* 追加失败時：フォーム下部に赤字小テキスト（`text-xs text-red-600`）で API 返回的 `error.message` を表示
+* 列表行：名前 + 「削除」ボタンのみ（名称错误直接删除重建，无编辑功能）
+* 削除確認：`confirm()` ダイアログで確認後、成功したらローカルリストから即時 filter 除去
+* Admin 手动初始化基础分类数据（系统初次使用时）
 * Tags は V2 対応（現バージョンでは非表示）
 
 **通知中心：**
@@ -792,6 +797,7 @@ function toSlug(name: string, prefix = "item"): string {
 **模式：**
 - 表单：仅显示必要的用户输入字段（系统自动生成的字段不展示）
 - 追加後：**Optimistic Update** —— API 响应成功后直接将返回的新对象追加到本地列表，不重新 fetch 整张表
+- 追加失败時：フォーム下部に赤字小テキスト（`text-xs text-red-600`）で API 返回的 `error.message` を表示；`error` state を持ち `setSaving(false)` と同タイミングでクリア・セット
 - 删除後：直接从本地列表 filter 掉对应 id，不重新 fetch
 - 列表行操作：保持最简，默认只提供「削除」，无需编辑功能（名称错误直接删除重建）
 
@@ -802,6 +808,23 @@ function toSlug(name: string, prefix = "item"): string {
 ### F.3 Tags 管理页（V2 対応）
 
 Tags 管理は V2 で実装予定。実装時は F.1 + F.2 パターンに従い、`/api/tags` エンドポイントを使用、slug prefix は `tag`。
+
+---
+
+### F.4 Admin API 認証・権限要件
+
+Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdminClient()` を使用し、`SUPABASE_SERVICE_ROLE_KEY` で RLS を完全バイパスする。
+
+**必須環境変数：**
+
+| 環境変数 | 取得元 | 未設定時の症状 |
+|---|---|---|
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API → service_role | `permission denied for table {テーブル名}` |
+
+**注意：**
+- service_role key は Git に絶対コミットしない
+- `.env.local` および Vercel Dashboard の Environment Variables にのみ保管
+- READ 系 API（GET）も `createAdminClient()` を使用すること（RLS `public_read` policy があっても統一する）
 
 ---
 
