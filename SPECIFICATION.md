@@ -1,6 +1,6 @@
 # SPECIFICATION.md
 
-Version: v1.4.2
+Version: v1.4.3
 Status: 🟢 Active
 Date: 2026-06-09
 
@@ -855,6 +855,41 @@ Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdm
 - service_role key は Git に絶対コミットしない
 - `.env.local` および Vercel Dashboard の Environment Variables にのみ保管
 - READ 系 API（GET）も `createAdminClient()` を使用すること（RLS `public_read` policy があっても統一する）
+
+---
+
+### F.5 横並びフォーム（Input + Button）レイアウト規則
+
+**適用範囲：** 全ページ・全コンポーネントにおける「テキスト入力 + 送信ボタン」横並びレイアウト
+
+**問題：** `input` に `flex-1` のみ指定すると、モバイル幅でボタンが押しつぶされてテキストが折り返す（例：「追\n加」）
+
+**必須クラスセット：**
+
+| 要素 | 必須クラス | 理由 |
+|------|-----------|------|
+| 外側コンテナ | `flex gap-3` | 横並び・間隔 |
+| `<input>` | `flex-1 min-w-0` | `min-w-0` がないと flex アイテムが最小コンテンツ幅以下に縮めない |
+| `<button>` | `shrink-0 whitespace-nowrap` | ボタン幅を固定・テキスト折り返し禁止 |
+
+**正しい実装例：**
+```tsx
+<div className="flex gap-3">
+  <input
+    className="flex-1 min-w-0 border border-gray-200 rounded-xl px-4 py-2.5 text-sm ..."
+    placeholder="カテゴリ名"  // placeholder は短く（全角10文字以内）
+  />
+  <button
+    className="shrink-0 whitespace-nowrap bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm ..."
+  >
+    追加
+  </button>
+</div>
+```
+
+**placeholder の指針：** モバイルで入力欄が狭くなることを考慮し、全角10文字以内に抑える。詳細な例示が必要な場合は `title` 属性または下部ヒントテキストで補足する。
+
+**参照実装：** `src/app/admin/(protected)/categories/page.tsx`
 
 ---
 
