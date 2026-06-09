@@ -31,15 +31,15 @@
 
 ## SPECIFICATION.md 同步规则
 
-每次更新本仓库的 `SPECIFICATION.md` 文件后，必须同步更新 Notion 中对应页面：
+**Notion 同步不再自动执行，改为用户主动通知后才进行。**
 
-- **Notion SPECIFICATION.md 页面**：https://app.notion.com/p/3792dbb3bccd80f1909df23b4bc6c645
-
-操作要求：
-1. 将最新的 SPECIFICATION.md 全文内容覆盖写入该 Notion 页面
-2. 页面标题保持 `SPECIFICATION.md` 不变
-3. 遵循 File_Version_Management 规范：旧版本内容移入 Toggle 归档，新版本正文暴露在最顶层
-4. 严禁只更新 GitHub 而不同步 Notion，两者必须始终保持一致
+- 更新本仓库 `SPECIFICATION.md` 后，默认只更新本地文件 + git（commit/push），**不主动同步 Notion**
+- 本地 SPEC 与 Notion 页面可能暂时存在版本差异，这是预期行为，无需主动提醒用户
+- 仅当用户明确要求同步 Notion 时，才执行以下操作：
+  - **Notion SPECIFICATION.md 页面**：https://app.notion.com/p/3792dbb3bccd80f1909df23b4bc6c645
+  1. 将最新的 SPECIFICATION.md 全文内容覆盖写入该 Notion 页面
+  2. 页面标题保持 `SPECIFICATION.md` 不变
+  3. 遵循 File_Version_Management 规范：旧版本内容移入 Toggle 归档，新版本正文暴露在最顶层（含累积的多个版本差）
 
 ---
 
