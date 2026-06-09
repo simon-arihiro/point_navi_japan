@@ -2,11 +2,16 @@
 
 import { useState, useEffect } from "react";
 
+function toSlug(name: string) {
+  return name.trim().toLowerCase().replace(/\s+/g, "-").replace(/[^\w぀-鿿-]/g, "") || name.trim();
+}
+
 export default function AdminCategoriesPage() {
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
+  const [slugEdited, setSlugEdited] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editName, setEditName] = useState("");
@@ -17,16 +22,22 @@ export default function AdminCategoriesPage() {
 
   useEffect(() => { load(); }, []);
 
+  const handleNameChange = (v: string) => {
+    setName(v);
+    if (!slugEdited) setSlug(toSlug(v));
+  };
+
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !slug) return;
+    if (!name) return;
+    const finalSlug = slug || toSlug(name);
     setSaving(true);
     await fetch("/api/categories", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, slug }),
+      body: JSON.stringify({ name, slug: finalSlug }),
     });
-    setName(""); setSlug("");
+    setName(""); setSlug(""); setSlugEdited(false);
     setSaving(false);
     load();
   };
@@ -59,20 +70,22 @@ export default function AdminCategoriesPage() {
 
       <form onSubmit={handleAdd} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6">
         <h2 className="font-bold text-gray-900 mb-4 text-sm">新規追加</h2>
-        <div className="flex gap-3">
+        <div className="flex gap-3 mb-3">
           <input
             type="text" placeholder="名前（例：クレジットカード）" value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => handleNameChange(e.target.value)}
             className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
           />
-          <input
-            type="text" placeholder="slug（例：credit-card）" value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            className="flex-1 border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
-          <button type="submit" disabled={saving} className="bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50">
+          <button type="submit" disabled={saving || !name} className="bg-red-600 text-white px-5 py-2.5 rounded-xl text-sm font-medium hover:bg-red-700 transition-colors disabled:opacity-50">
             追加
           </button>
+        </div>
+        <div>
+          <input
+            type="text" placeholder="slug（自動生成・変更可）" value={slug}
+            onChange={(e) => { setSlug(e.target.value); setSlugEdited(true); }}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2 text-sm text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500"
+          />
         </div>
       </form>
 
