@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
     const supabase = createClient();
     const { error: err } = await supabase.auth.signInWithPassword({ email, password });
     if (err) {
-      setError("メールアドレスまたはパスワードが正しくありません");
+      setError(err.message);
       setLoading(false);
     } else {
       router.push("/admin");
