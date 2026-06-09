@@ -1,6 +1,6 @@
 # SPECIFICATION.md
 
-Version: v1.1
+Version: v1.4.0
 Status: 🟢 Active
 Date: 2026-06-09
 
@@ -174,7 +174,16 @@ Service是系统唯一核心资产。
 
 ---
 
-### 2.4 AI 内容语言规范
+### 2.4 响应式设计原则
+
+所有页面必须同时支持 PC 端和手机端布局，不得只做单端设计。
+
+* 移动优先（Mobile First）：以手机端布局为基础，向上扩展 PC 端
+* 断点：手机（< 768px）/ 平板（768px~1024px）/ PC（> 1024px）
+* 核心页面（Homepage / Service Page / Article Page / Admin Dashboard）必须各自定义手机端和 PC 端的具体布局
+* TailwindCSS 响应式前缀（`sm:` / `md:` / `lg:`）贯穿所有 UI 组件
+
+### 2.5 AI 内容语言规范
 
 * 全日文输出
 * 语气：个人博主体验分享风格（口语化、亲切、有温度）
@@ -200,6 +209,7 @@ Service是系统唯一核心资产。
 | logo_url | text | 原始Logo URL，可空 |
 | logo_storage_path | text | Supabase Storage本地副本路径 |
 | status | enum | active / inactive |
+| hide_articles_on_inactive | boolean | inactive 时是否同时隐藏已发布文章，默认 false |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
@@ -217,34 +227,12 @@ Service是系统唯一核心资产。
 
 ---
 
-### tags
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | uuid | 主键 |
-| name | text | 标签名（日文） |
-| slug | text | URL用slug |
-| created_at | timestamptz | |
-
-初期与 categories 数据一致，预留独立扩展空间。
-
----
-
 ### service_categories
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | service_id | uuid | FK → services |
 | category_id | uuid | FK → categories |
-
----
-
-### service_tags
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| service_id | uuid | FK → services |
-| tag_id | uuid | FK → tags |
 
 ---
 
@@ -271,7 +259,8 @@ Service是系统唯一核心资产。
 | description | text | SEO meta description，AI生成 |
 | content | text | 正文（Markdown） |
 | article_type | enum | introduction / guide / faq / comparison / campaign / earnings |
-| status | enum | draft / reviewing / approved / published / archived |
+| status | enum | draft / reviewing / published / rejected / archived |
+| revision_count | int | AI重写次数，默认0 |
 | published_at | timestamptz | |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
@@ -354,8 +343,10 @@ Service是系统唯一核心资产。
 |------|------|------|
 | id | int | 固定值 = 1 |
 | operation_mode | enum | manual / auto |
+| auto_generate_enabled | boolean | 是否启用自动生成，默认 true |
 | auto_distribution | boolean | 文章发布后自动分发 |
 | daily_article_count | int | 每日自动生成Service関連文章数，默认 1 |
+| max_pending_articles | int | 审核队列积压上限，超过则暂停生成，默认 10 |
 | ranking_window_days | int | Ranking统计时间窗口，默认 30 |
 | updated_at | timestamptz | |
 
@@ -449,11 +440,23 @@ AI生成・常時最新
 * 已发布 Article 数（Service介绍 + Service関連 分开计数）
 * 待审核文章数（一键跳转）
 * AI 生成队列状态
+* AI 自动生成开关（`auto_generate_enabled` 一键切换，显示当前积压数 / 上限）
 
 **Service 行为明细表：**
 
 * 每个 Service 的 page_view / referral_click / copy_code
 * 支持按时间段筛选（7天 / 30天）
+
+**Service 管理：**
+
+* 每条 Service 详情页提供「立即生成文章」按钮，立即为该 Service 触发一次 Service関連 文章生成，不受 `auto_generate_enabled` / `max_pending_articles` 限制
+* 将 Service 设为 inactive 时，提示是否同时隐藏该 Service 的已发布文章（写入 `hide_articles_on_inactive`）
+
+**Categories 管理：**
+
+* Admin 手动创建、删除 categories，作为 AI 自动匹配的候选池
+* 系统初次使用时由 Admin 初始化基础分类数据
+* Tags は V2 対応（現バージョンでは非表示）
 
 **通知中心：**
 
@@ -477,7 +480,7 @@ AI抓取官网信息
 
 ↓
 
-AI自动匹配 categories & tags
+AI自动匹配 categories
 
 ↓
 
@@ -489,7 +492,8 @@ AI自动匹配 categories & tags
 
 ↓
 
-根据 operation_mode 决定：人工审核发布 or 自动发布
+MANUAL模式：文章自动转 `reviewing`（进入审核队列，无需人工触发）
+AUTO模式：文章直接 `published`
 
 ---
 
@@ -509,6 +513,12 @@ AI自动匹配 categories & tags
 * 自动从 service_images 选取相关图片插入正文
 * 同步生成 SEO description
 
+执行前检查（两者均满足方可触发生成）：
+
+* `auto_generate_enabled = true`
+* 当前 `reviewing` 状态文章数 < `max_pending_articles`
+* 任一不满足则跳过本次生成，并发送 `article_pending` 通知
+
 发布流程：
 
 * 根据 operation_mode：manual → Draft等待审核 / auto → 直接发布
@@ -516,21 +526,36 @@ AI自动匹配 categories & tags
 
 ---
 
-### Rewrite Workflow
+### Service介绍 更新机制
 
-Admin输入修改意见
+Service 关键信息变更后（name / referral_code / referral_link / official_url 等），系统自动触发：
 
-↓
+1. 基于旧文章内容生成新版 Service介绍（微调更新，保留文章结构，替换变更信息）
+2. 旧文章状态 → `archived`（前台不再展示）
+3. 新文章按当前 operation_mode 处理：MANUAL → `reviewing` / AUTO → `published`
 
-AI重写
+---
 
-↓
+### Article 审核状态机（MANUAL模式）
 
-Reviewing
+```
+AI生成 → draft ──[MANUAL: 自动]──→ reviewing（进入审核队列）
+               └──[AUTO: 直接]────→ published（跳过审核）
 
-↓
+reviewing 阶段 Admin 有三个选项：
+         ┌─ ✅ 发布   → published（直接上线）
+         ├─ ✏️ 修改意见 → AI重写 → reviewing（revision_count +1，循环审核）
+         └─ ❌ 拒绝   → rejected（永久丢弃，不展示，不发布）
+```
 
-再次审核
+**状态说明：**
+- `draft`：AI生成完毕，尚未进入审核队列
+- `reviewing`：在 Admin 审核队列中等待处理
+- `published`：Admin 审核通过并发布
+- `rejected`：Admin 拒绝，文章永久丢弃，前台不展示，不可恢复
+- `archived`：已发布后由 Admin 手动归档下架
+
+**revision_count**：记录该文章被 AI 重写的累计次数，供 Admin 参考判断是否直接拒绝。
 
 ---
 
@@ -562,6 +587,15 @@ POST   /api/articles
 GET    /api/articles/:id
 PUT    /api/articles/:id
 DELETE /api/articles/:id
+```
+
+### Categories
+
+```
+GET    /api/categories
+POST   /api/categories
+PUT    /api/categories/:id
+DELETE /api/categories/:id
 ```
 
 ### Analytics
@@ -616,7 +650,7 @@ POST /api/distribution/trigger  # 手动触发分发
 
 ### Hot Ranking
 
-統計ウィンドウ：直近30日
+統計ウィンドウ：`system_settings.ranking_window_days` 日（默认 30）
 
 ```
 score = page_views + referral_clicks × 2 + copy_code_count × 1
@@ -626,7 +660,7 @@ score = page_views + referral_clicks × 2 + copy_code_count × 1
 
 ### Profit Ranking
 
-統計ウィンドウ：直近30日
+統計ウィンドウ：`system_settings.ranking_window_days` 日（默认 30）
 
 ```
 score = referral_clicks × 5 + copy_code_count × 2
@@ -640,7 +674,7 @@ score = referral_clicks × 5 + copy_code_count × 2
 weight(service) = 1 / (recent_article_count + 1)
 ```
 
-recent_article_count = 直近30日内该 Service 已生成的 Service関連 文章数
+recent_article_count = 直近 `system_settings.ranking_window_days` 日内该 Service 已生成的 Service関連 文章数
 
 ---
 
@@ -648,7 +682,7 @@ recent_article_count = 直近30日内该 Service 已生成的 Service関連 文�
 
 ### V1（初期リリース）
 
-* Service 管理（CRUD + カテゴリ/タグ）
+* Service 管理（CRUD + カテゴリ）
 * Service介绍 自动生成
 * Service関連 自动调度生成
 * Article 审核流程
@@ -659,9 +693,11 @@ recent_article_count = 直近30日内该 Service 已生成的 Service関連 文�
 
 ### V2（自动化拡張）
 
+* Tags 管理（カテゴリと同様の UI / API、サービスへのタグ付け）
 * 社交媒体自动分发（X / Instagram / Threads）
 * 自动活动监控
 * 自动内容更新
+* Admin 邮件通知（article_pending 积压提醒）
 
 ### V3（AI運営Agent）
 
@@ -721,6 +757,51 @@ AI生成 → 直接发布，Admin 无需介入
 * `/privacy`（プライバシーポリシー）
 * `/contact`（お問い合わせ）
 * `/disclosure`（アフィリエイト収益開示）
+
+---
+
+## Appendix F: Implementation Conventions
+
+本章记录已确立的实现模式，Coder 在开发同类功能时必须遵循，保持全站一致性。
+
+---
+
+### F.1 Slug 自动生成规则
+
+**适用范围：** categories、services（slug字段）、articles（slug字段）
+
+**规则：**
+- slug 字段由**系统后端自动生成**，前台 Admin UI 不提供 slug 输入框
+- 生成逻辑：将 name 转小写、空格替换为 `-`、去除非 ASCII 字符
+- 若 name 全为日文/非ASCII字符，降级为 `{prefix}-{timestamp}`（例：`cat-1749481200000`）
+- 生成后不对外暴露，Admin 不需要感知
+
+```typescript
+function toSlug(name: string, prefix = "item"): string {
+  const base = name.toLowerCase().trim().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  return base || `${prefix}-${Date.now()}`;
+}
+```
+
+---
+
+### F.2 列表管理页 UI 标准模式
+
+**适用范围：** categories 等简单列表管理页
+
+**模式：**
+- 表单：仅显示必要的用户输入字段（系统自动生成的字段不展示）
+- 追加後：**Optimistic Update** —— API 响应成功后直接将返回的新对象追加到本地列表，不重新 fetch 整张表
+- 删除後：直接从本地列表 filter 掉对应 id，不重新 fetch
+- 列表行操作：保持最简，默认只提供「削除」，无需编辑功能（名称错误直接删除重建）
+
+**示例参考：** `src/app/admin/(protected)/categories/page.tsx`
+
+---
+
+### F.3 Tags 管理页（V2 対応）
+
+Tags 管理は V2 で実装予定。実装時は F.1 + F.2 パターンに従い、`/api/tags` エンドポイントを使用、slug prefix は `tag`。
 
 ---
 
