@@ -15,6 +15,18 @@
 
 **禁止**：先推到其他分支再合并到 `main`。代码改动一律直接在 `main` 上提交推送。
 
+### Session 工作分支与本表冲突时的处理（标准规则）
+
+每次 session 开始时，系统会指定一个本次会话的开发分支（如 `claude/se-xxxxxx`），并要求"未经明确许可不得推送到其他分支"。这与本表"代码改动一律推送到 `main`"的规则会产生冲突，曾多次导致代码改动停留在 session 分支、Vercel 未能部署的问题。
+
+**用户已预先授权**，遇到该冲突时按以下流程处理，无需再次确认：
+
+1. 正常在 session 指定的分支（如 `claude/se-xxxxxx`）上开发、提交、推送（满足"未经许可不推送到其他分支"的约束）
+2. 完成后，将该分支 `fetch` 并与 `origin/main` 比较：
+   - 若可以 fast-forward（`origin/main` 是该分支的祖先），直接 `git checkout -B main origin/main && git merge --ff-only <session分支> && git push -u origin main`
+   - 若有分叉，先与用户确认合并方式，不擅自使用 `--force` 或丢弃任何一方的提交
+3. 合并到 `main` 后保留 session 分支，不删除（不做破坏性操作）
+
 ---
 
 ## SPECIFICATION.md 同步规则
