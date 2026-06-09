@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   const { data: settings } = await supabase.from("system_settings").select("*").eq("id", 1).single();
 

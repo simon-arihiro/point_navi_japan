@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   const { service_id, article_type } = await request.json();
   if (!service_id) return errorResponse(ErrorCode.VALIDATION_ERROR, "service_id は必須です");
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   const { data: service } = await supabase.from("services").select("*").eq("id", service_id).single();
   if (!service) return errorResponse(ErrorCode.SERVICE_NOT_FOUND, "サービスが見つかりません", 404);

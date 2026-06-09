@@ -3,7 +3,7 @@ import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
   const service_id = searchParams.get("service_id");
@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const body = await request.json();
 
   const { primary_service_id, title, slug, description, content, article_type, status } = body;

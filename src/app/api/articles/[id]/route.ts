@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 
 export async function GET(_req: NextRequest, props: RouteContext<"/api/articles/[id]">) {
   const { id } = await props.params;
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   const { data, error } = await supabase
     .from("articles")
@@ -18,7 +18,7 @@ export async function GET(_req: NextRequest, props: RouteContext<"/api/articles/
 
 export async function PUT(request: NextRequest, props: RouteContext<"/api/articles/[id]">) {
   const { id } = await props.params;
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const body = await request.json();
 
   if (body.status === "published" && !body.published_at) {
@@ -38,7 +38,7 @@ export async function PUT(request: NextRequest, props: RouteContext<"/api/articl
 
 export async function DELETE(_req: NextRequest, props: RouteContext<"/api/articles/[id]">) {
   const { id } = await props.params;
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   const { error } = await supabase.from("articles").delete().eq("id", id);
   if (error) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500);

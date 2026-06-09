@@ -8,7 +8,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
   const searchParams = await props.searchParams;
   const days = searchParams.days === "7" ? 7 : 30;
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const windowStart = new Date();
   windowStart.setDate(windowStart.getDate() - days);
 

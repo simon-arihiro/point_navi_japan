@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
   const device = /Mobile|Android|iPhone/i.test(ua) ? "mobile" : "desktop";
   const source = request.headers.get("referer") ?? "";
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const { error } = await supabase.from("analytics_events").insert({
     event_type,
     service_id: service_id ?? null,

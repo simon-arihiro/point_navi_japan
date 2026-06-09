@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const yesterday = new Date();
   yesterday.setDate(yesterday.getDate() - 1);
   const dateStr = yesterday.toISOString().split("T")[0];

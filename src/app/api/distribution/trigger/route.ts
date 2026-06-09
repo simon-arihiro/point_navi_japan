@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
   const { article_id, platforms } = await request.json();
   if (!article_id) return errorResponse(ErrorCode.VALIDATION_ERROR, "article_id は必須です");
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   // 発行済み記事のみ許可
   const { data: article } = await supabase.from("articles").select("*").eq("id", article_id).single();

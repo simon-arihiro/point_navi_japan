@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   const { service_id } = await request.json();
   if (!service_id) return errorResponse(ErrorCode.VALIDATION_ERROR, "service_id は必須です");
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   // 取得 service
   const { data: service, error: svcErr } = await supabase

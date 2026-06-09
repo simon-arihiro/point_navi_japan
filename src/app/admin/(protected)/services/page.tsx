@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = { title: "サービス管理" };
 
 export default async function AdminServicesPage() {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
 
   const { data: services } = await supabase
     .from("services")

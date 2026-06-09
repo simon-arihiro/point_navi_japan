@@ -17,7 +17,7 @@ export default async function AdminArticlesPage(props: PageProps<"/admin/article
   const statusFilter = searchParams.status as string | undefined;
   const typeFilter = searchParams.type as string | undefined;
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   let query = supabase
     .from("articles")
     .select("*, primary_service:services(name, slug)")

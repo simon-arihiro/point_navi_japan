@@ -3,7 +3,7 @@ import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
 export async function GET() {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase.from("categories").select("*").order("name");
   if (error) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500);
   return Response.json({ data });
@@ -15,7 +15,7 @@ function toSlug(name: string): string {
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const body = await request.json();
   const { name } = body;
   if (!name) return errorResponse(ErrorCode.VALIDATION_ERROR, "name is required", 400);

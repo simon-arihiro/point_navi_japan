@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
     return errorResponse(ErrorCode.VALIDATION_ERROR, "article_id と feedback は必須です");
   }
 
-  const supabase = await createAdminClient();
+  const supabase = createAdminClient();
   const { data: article } = await supabase.from("articles").select("*").eq("id", article_id).single();
   if (!article) return errorResponse(ErrorCode.ARTICLE_NOT_FOUND, "記事が見つかりません", 404);
 
