@@ -1,8 +1,8 @@
 # SPECIFICATION.md
 
-Version: v1.4.4
+Version: v1.4.5
 Status: 🟢 Active
-Date: 2026-06-09
+Date: 2026-06-10
 
 Project Name:
 Poikatsu AI Affiliate Platform
@@ -449,6 +449,10 @@ AI生成・常時最新
 
 **Service 管理：**
 
+* サービス追加フォーム（`/admin/services/new`）：
+  - 入力項目：サービス名 / スラッグ / 公式URL / 招待コード / 招待リンク / ロゴURL / 説明 / カテゴリ（複数選択可・チップ入力、既存カテゴリは候補表示）/ ステータス
+  - 「AI補完」ボタン：公式URLを基にAIが説明文・カテゴリ候補をフォームへ自動入力（DB書き込み・記事生成は行わない）
+  - 「追加」ボタン：入力内容で Service レコードを作成し、選択中のカテゴリを `service_categories` に紐付け。紹介記事は自動生成されない
 * 每条 Service 详情页提供「立即生成文章」按钮，立即为该 Service 触发一次 Service関連 文章生成，不受 `auto_generate_enabled` / `max_pending_articles` 限制
 * 将 Service 设为 inactive 时，提示是否同时隐藏该 Service 的已发布文章（写入 `hide_articles_on_inactive`）
 
@@ -504,32 +508,33 @@ AI生成・常時最新
 
 ### Service Creation Flow
 
-新增Service
+Admin 在「サービスを追加」表单（`/admin/services/new`）填写必填项（サービス名 / スラッグ / 公式URL）
 
 ↓
 
-AI抓取官网信息
+（可选）点击「AI補完」按钮
+→ `POST /api/ai/autofill-service` 解析公式URL，返回 description / slug候补 / categories候补
+→ 自动填入表单（不写入DB、不生成文章）
 
 ↓
 
-生成 name / description / slug
+Admin 确认/修改 description、カテゴリ等（カテゴリ可多选，也可新增）
 
 ↓
 
-AI自动匹配 categories
+点击「追加」按钮
+→ `POST /api/services` 创建 Service 记录，并将选中的カテゴリ写入 `service_categories`
+→ Service介绍 文章不会自动生成（手动触发方式见下文）
 
-↓
+---
 
-爬取官网及相关页面图片 → 下载至 Supabase Storage（service_images）
+### Service介绍 文章生成（手动触发）
 
-↓
+在 Service 编辑页点击「再生成紹介記事」按钮，触发 `POST /api/ai/generate-service`：
 
-生成 Service介绍 文章（introduction类型）→ 保存 Draft
-
-↓
-
-MANUAL模式：文章自动转 `reviewing`（进入审核队列，无需人工触发）
-AUTO模式：文章直接 `published`
+1. AI 解析公式URL，重新补完 description / categories / tags（覆盖已有值，新分类・标签自动创建）
+2. 生成 Service介绍 文章（introduction类型）并保存
+3. MANUAL模式：保存为 `draft` 并发送 `article_pending` 通知 / AUTO模式：直接 `published`
 
 ---
 
@@ -645,7 +650,8 @@ POST /api/analytics/track
 ### AI
 
 ```
-POST /api/ai/generate-service
+POST /api/ai/autofill-service   # 新建Service时のAI補完プレビュー（DB書き込みなし）
+POST /api/ai/generate-service   # description/categories/tags補完 + 紹介記事生成（手动トリガー）
 POST /api/ai/generate-article
 POST /api/ai/rewrite
 ```

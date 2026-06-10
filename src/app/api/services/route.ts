@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
   const supabase = createAdminClient();
   const body = await request.json();
 
-  const { name, slug, description, referral_code, referral_link, official_url, logo_url, status } = body;
+  const { name, slug, description, referral_code, referral_link, official_url, logo_url, status, category_ids } = body;
   if (!name || !slug || !official_url) {
     return errorResponse(ErrorCode.VALIDATION_ERROR, "name, slug, official_url は必須です");
   }
@@ -44,5 +44,13 @@ export async function POST(request: NextRequest) {
     .single();
 
   if (error) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500);
+
+  if (Array.isArray(category_ids) && category_ids.length > 0) {
+    const { error: catError } = await supabase
+      .from("service_categories")
+      .insert(category_ids.map((category_id: string) => ({ service_id: data.id, category_id })));
+    if (catError) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, catError.message, 500);
+  }
+
   return Response.json({ data }, { status: 201 });
 }
