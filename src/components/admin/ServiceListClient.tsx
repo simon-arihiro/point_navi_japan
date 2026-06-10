@@ -32,19 +32,88 @@ function formatDate(iso: string | null) {
 }
 
 export default function ServiceListClient({ services, allCategories }: Props) {
+  const [localServices, setLocalServices] = useState(services);
   const [status, setStatus] = useState("");
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
+  const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return services.filter((s) => {
+    return localServices.filter((s) => {
       if (status && s.status !== status) return false;
       if (categoryIds.length > 0 && !s.categories.some((c) => categoryIds.includes(c.id))) return false;
       if (q && !s.name.toLowerCase().includes(q) && !s.slug.toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [services, status, categoryIds, query]);
+  }, [localServices, status, categoryIds, query]);
+
+  // ステータスの有効/無効をワンクリックで切り替え
+  const handleToggleStatus = async (e: React.MouseEvent, svc: ServiceRow) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (togglingId) return;
+
+    const nextStatus = svc.status === "active" ? "inactive" : "active";
+    setTogglingId(svc.id);
+
+    const res = await fetch(`/api/services/${svc.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: nextStatus }),
+    });
+
+    if (res.ok) {
+      setLocalServices((prev) => prev.map((s) => (s.id === svc.id ? { ...s, status: nextStatus } : s)));
+    }
+    setTogglingId(null);
+  };
+
+  const toggleMenu = (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenuOpenId((prev) => (prev === id ? null : id));
+  };
+
+  const closeMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenuOpenId(null);
+  };
+
+  const handleUpdateIntro = async (e: React.MouseEvent, svc: ServiceRow) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenuOpenId(null);
+    setActionLoadingId(svc.id);
+
+    const res = await fetch("/api/ai/generate-service", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ service_id: svc.id }),
+    });
+
+    setActionLoadingId(null);
+    alert(res.ok ? `「${svc.name}」の紹介文を更新しました` : "紹介文の更新に失敗しました");
+  };
+
+  const handleAddRelatedArticle = async (e: React.MouseEvent, svc: ServiceRow) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setMenuOpenId(null);
+    setActionLoadingId(svc.id);
+
+    const res = await fetch("/api/ai/generate-article", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ service_id: svc.id }),
+    });
+
+    setActionLoadingId(null);
+    alert(res.ok ? `「${svc.name}」の関連記事を追加しました` : "関連記事の追加に失敗しました");
+  };
 
   return (
     <div>
@@ -80,7 +149,7 @@ export default function ServiceListClient({ services, allCategories }: Props) {
         />
       </div>
 
-      <p className="text-xs text-gray-400 mb-3">{filtered.length} / {services.length} 件</p>
+      <p className="text-xs text-gray-400 mb-3">{filtered.length} / {localServices.length} 件</p>
 
       <div className="space-y-3">
         {filtered.map((svc) => (
@@ -101,13 +170,60 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                 <h3 className="font-bold text-gray-900 text-base leading-snug break-words">{svc.name}</h3>
                 <p className="text-xs text-gray-400">{svc.slug}</p>
               </div>
-              <span className="text-gray-300 shrink-0">›</span>
+
+              <div className="flex flex-col items-end gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={(e) => handleToggleStatus(e, svc)}
+                  disabled={togglingId === svc.id}
+                  title={svc.status === "active" ? "クリックで無効化" : "クリックで有効化"}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${
+                    svc.status === "active" ? "bg-green-500" : "bg-gray-300"
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      svc.status === "active" ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
+
+                <div className="relative">
+                  <button
+                    type="button"
+                    onClick={(e) => toggleMenu(e, svc.id)}
+                    disabled={actionLoadingId === svc.id}
+                    className="text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg px-2.5 py-1.5 hover:bg-indigo-100 transition-colors disabled:opacity-50 whitespace-nowrap"
+                  >
+                    {actionLoadingId === svc.id ? "更新中..." : "記事生成"}
+                  </button>
+
+                  {menuOpenId === svc.id && (
+                    <>
+                      <div className="fixed inset-0 z-10" onClick={closeMenu} />
+                      <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden">
+                        <button
+                          type="button"
+                          onClick={(e) => handleUpdateIntro(e, svc)}
+                          className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                          紹介文を更新
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => handleAddRelatedArticle(e, svc)}
+                          className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
+                        >
+                          関連記事を追加
+                        </button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
-              <span className={`font-medium rounded-full px-2.5 py-1 ${svc.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-                {svc.status}
-              </span>
               <span className="text-gray-500">記事 {svc.articleCount}件</span>
               <span className="text-gray-400">追加: {formatDate(svc.created_at)}</span>
               <span className="text-gray-400">更新: {formatDate(svc.latestPublishedAt)}</span>
