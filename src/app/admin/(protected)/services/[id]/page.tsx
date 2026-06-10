@@ -13,7 +13,9 @@ export default function EditServicePage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
+  const [aiError, setAiError] = useState("");
   const [form, setForm] = useState<any>(null);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [categoryNames, setCategoryNames] = useState<string[]>([]);
@@ -85,22 +87,51 @@ export default function EditServicePage() {
     }
   };
 
-  const handleRegenerateIntro = async () => {
-    await fetch("/api/ai/generate-service", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ service_id: id }),
-    });
-    alert("紹介記事の再生成を開始しました");
-  };
+  // AI補完: 公式URLをもとに説明・カテゴリ・キャンペーン情報・ロゴURLをフォームに反映する（保存ボタンを押すまでDBは更新されない）
+  const handleAutofill = async () => {
+    if (!form.official_url) {
+      setAiError("AI補完には公式URLが必要です");
+      return;
+    }
+    setAiError("");
+    setAiLoading(true);
 
-  const handleGenerateArticle = async () => {
-    await fetch("/api/ai/generate-article", {
+    const res = await fetch("/api/ai/autofill-service", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ service_id: id }),
+      body: JSON.stringify({ official_url: form.official_url }),
     });
-    alert("関連記事の生成を開始しました");
+
+    if (!res.ok) {
+      const data = await res.json();
+      setAiError(data.error?.message ?? "AI補完に失敗しました");
+      setAiLoading(false);
+      return;
+    }
+
+    const { data } = await res.json();
+
+    setForm((prev: typeof form) => ({
+      ...prev,
+      description: data.description || prev.description,
+      campaign_bonus: data.campaign_bonus || prev.campaign_bonus,
+      campaign_expires_at: data.campaign_expires_at ? toDatetimeLocalValue(data.campaign_expires_at) : prev.campaign_expires_at,
+      logo_url: data.logo_url || prev.logo_url,
+    }));
+
+    if (Array.isArray(data.categories)) {
+      // AI補完の結果で選択中のカテゴリを上書きする
+      const aiCategories: string[] = [];
+      for (const name of data.categories) {
+        const trimmed = String(name).trim();
+        if (trimmed && !aiCategories.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
+          aiCategories.push(trimmed);
+        }
+      }
+      if (aiCategories.length > 0) setCategoryNames(aiCategories);
+    }
+
+    setAiLoading(false);
   };
 
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
@@ -160,32 +191,29 @@ export default function EditServicePage() {
         </div>
 
         {error && <p className="text-red-600 text-sm">{error}</p>}
+        {aiError && <p className="text-amber-600 text-sm">{aiError}</p>}
 
-        <div className="grid grid-cols-2 gap-3 pt-2">
-          <button type="submit" disabled={saving} className="bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50">
-            {saving ? "保存中..." : "保存"}
-          </button>
+        <div className="space-y-3 pt-2">
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={handleAutofill}
+              disabled={aiLoading || saving}
+              className="bg-white border border-red-200 text-red-600 font-bold py-3 rounded-xl hover:bg-red-50 transition-colors disabled:opacity-50"
+            >
+              {aiLoading ? "AI補完中..." : "AI補完"}
+            </button>
+            <button type="submit" disabled={saving || aiLoading} className="bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50">
+              {saving ? "保存中..." : "保存"}
+            </button>
+          </div>
           <button
             type="button"
             onClick={handleDelete}
             disabled={deleting}
-            className="bg-white border border-red-200 text-red-600 font-bold py-3 rounded-xl hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="w-full bg-white border border-gray-200 text-gray-500 font-bold py-3 rounded-xl hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-colors disabled:opacity-50"
           >
             {deleting ? "削除中..." : "削除"}
-          </button>
-          <button
-            type="button"
-            onClick={handleRegenerateIntro}
-            className="bg-blue-600 text-white text-sm font-medium py-3 rounded-xl hover:bg-blue-700 transition-colors"
-          >
-            紹介記事
-          </button>
-          <button
-            type="button"
-            onClick={handleGenerateArticle}
-            className="bg-indigo-600 text-white text-sm font-medium py-3 rounded-xl hover:bg-indigo-700 transition-colors"
-          >
-            関連記事
           </button>
         </div>
       </form>
