@@ -1,4 +1,4 @@
-import Image from "next/image";
+"use client";
 
 type Props = {
   name: string;
@@ -48,11 +48,11 @@ export default function LogoFallback({ name, logoUrl, logoStoragePath, officialU
         className={`relative overflow-hidden rounded-xl ${className}`}
         style={{ width: size, height: size, minWidth: size }}
       >
-        <Image
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
           src={imgSrc}
           alt={`${name} logo`}
-          fill
-          className="object-contain"
+          className="absolute inset-0 w-full h-full object-contain"
           onError={(e) => {
             (e.currentTarget as HTMLImageElement).style.display = "none";
           }}
