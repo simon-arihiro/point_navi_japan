@@ -21,11 +21,15 @@ export default function CategorySelector({ allCategories, selected, onToggle }: 
 
   useEffect(() => {
     if (!open) return;
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: Event) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, [open]);
 
   return (
@@ -51,24 +55,35 @@ export default function CategorySelector({ allCategories, selected, onToggle }: 
           </button>
 
           {open && (
-            <div className="absolute z-10 mt-1 w-full max-h-60 overflow-y-auto bg-white border border-gray-200 rounded-xl shadow-lg p-2">
-              {names.map((name) => {
-                const isSelected = selected.some((s) => s.toLowerCase() === name.toLowerCase());
-                return (
-                  <label
-                    key={name}
-                    className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer text-sm text-gray-700"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => onToggle(name)}
-                      className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
-                    />
-                    {name}
-                  </label>
-                );
-              })}
+            <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+              <div className="max-h-60 overflow-y-auto p-2">
+                {names.map((name) => {
+                  const isSelected = selected.some((s) => s.toLowerCase() === name.toLowerCase());
+                  return (
+                    <label
+                      key={name}
+                      className="flex items-center gap-2 px-2 py-2 rounded-lg hover:bg-gray-50 cursor-pointer text-sm text-gray-700"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => onToggle(name)}
+                        className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
+                      />
+                      {name}
+                    </label>
+                  );
+                })}
+              </div>
+              <div className="flex items-center justify-end border-t border-gray-100 px-3 py-2">
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="text-xs font-medium text-red-600 hover:text-red-700"
+                >
+                  閉じる
+                </button>
+              </div>
             </div>
           )}
 
