@@ -2,19 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import ArticleCard from "@/components/ArticleCard";
 import Link from "next/link";
 import type { Metadata } from "next";
+import { ARTICLE_TYPE_LABEL as TYPE_LABEL } from "@/lib/articleTypes";
 
 export const metadata: Metadata = {
   title: "記事一覧",
   description: "ポイ活サービスの使い方・攻略・比較記事一覧です。",
-};
-
-const TYPE_LABEL: Record<string, string> = {
-  introduction: "サービス紹介",
-  guide: "使い方ガイド",
-  faq: "よくある質問",
-  comparison: "比較",
-  campaign: "キャンペーン",
-  earnings: "収益実績",
 };
 
 export default async function ArticlesPage() {

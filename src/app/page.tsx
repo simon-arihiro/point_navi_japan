@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { calcHotScore, calcProfitScore } from "@/lib/ranking";
-import ServiceCard from "@/components/ServiceCard";
 import ArticleCard from "@/components/ArticleCard";
+import RankingListItem from "@/components/RankingListItem";
 import Mascot from "@/components/Mascot";
 import Link from "next/link";
 
@@ -9,6 +9,7 @@ export default async function HomePage() {
   let hotServices: any[] = [];
   let profitServices: any[] = [];
   let latestArticles: any[] = [];
+  let categories: any[] = [];
 
   try {
     const supabase = await createClient();
@@ -17,7 +18,7 @@ export default async function HomePage() {
     const windowStart = new Date();
     windowStart.setDate(windowStart.getDate() - windowDays);
 
-    const [servicesRes, dailyRes, articlesRes] = await Promise.all([
+    const [servicesRes, dailyRes, articlesRes, categoriesRes] = await Promise.all([
       supabase
         .from("services")
         .select(`*, categories:service_categories(category:categories(*)), tags:service_tags(tag:tags(*))`)
@@ -28,10 +29,11 @@ export default async function HomePage() {
         .gte("date", windowStart.toISOString().split("T")[0]),
       supabase
         .from("articles")
-        .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
+        .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
         .eq("status", "published")
         .order("published_at", { ascending: false })
-        .limit(6),
+        .limit(7),
+      supabase.from("categories").select("*").order("name").limit(8),
     ]);
 
     const services = servicesRes.data ?? [];
@@ -52,12 +54,15 @@ export default async function HomePage() {
       return { ...svc, hotScore: calcHotScore(st.pv, st.rc, st.cc), profitScore: calcProfitScore(st.rc, st.cc) };
     });
 
-    hotServices = [...ranked].sort((a, b) => b.hotScore - a.hotScore).slice(0, 8);
-    profitServices = [...ranked].sort((a, b) => b.profitScore - a.profitScore).slice(0, 8);
+    hotServices = [...ranked].sort((a, b) => b.hotScore - a.hotScore).slice(0, 5);
+    profitServices = [...ranked].sort((a, b) => b.profitScore - a.profitScore).slice(0, 5);
     latestArticles = articlesRes.data ?? [];
+    categories = categoriesRes.data ?? [];
   } catch {
     // Supabase 未接続時は空表示
   }
+
+  const [featuredArticle, ...gridArticles] = latestArticles;
 
   return (
     <div>
@@ -87,64 +92,98 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Hot Ranking */}
-      {hotServices.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <p className="text-amber-700 text-xs font-semibold uppercase tracking-wider mb-1">人気ランキング</p>
-              <h2 className="text-2xl font-black text-gray-900">Hot Ranking 🔥</h2>
-            </div>
-            <Link href="/ranking" className="text-amber-700 font-medium text-sm hover:underline">すべて見る →</Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {hotServices.slice(0, 4).map((svc, i) => (
-              <ServiceCard key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} rank={i + 1} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Profit Ranking */}
-      {profitServices.length > 0 && (
-        <section className="bg-white py-14">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-6">
-              <div>
-                <p className="text-orange-600 text-xs font-semibold uppercase tracking-wider mb-1">収益性ランキング</p>
-                <h2 className="text-2xl font-black text-gray-900">Profit Ranking 💰</h2>
+      {/* メインコンテンツ */}
+      {(latestArticles.length > 0 || hotServices.length > 0) ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* 最新記事 */}
+            <div className="lg:col-span-2">
+              <div className="flex items-end justify-between mb-6">
+                <div>
+                  <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">新着</p>
+                  <h2 className="text-2xl font-black text-gray-900">最新記事</h2>
+                </div>
+                <Link href="/articles" className="text-amber-700 font-medium text-sm hover:underline">すべて見る →</Link>
               </div>
-              <Link href="/ranking?type=profit" className="text-orange-600 font-medium text-sm hover:underline">すべて見る →</Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {profitServices.slice(0, 4).map((svc, i) => (
-                <ServiceCard key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} rank={i + 1} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
-      {/* Latest Articles */}
-      {latestArticles.length > 0 && (
-        <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="flex items-end justify-between mb-6">
-            <div>
-              <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">新着</p>
-              <h2 className="text-2xl font-black text-gray-900">最新記事</h2>
+              {latestArticles.length > 0 ? (
+                <div className="space-y-4">
+                  <ArticleCard article={featuredArticle} size="featured" />
+                  {gridArticles.length > 0 && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {gridArticles.map((article: any) => (
+                        <ArticleCard key={article.id} article={article} size="lg" />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-gray-400">
+                  <p className="text-3xl mb-2">📝</p>
+                  <p className="text-sm">記事はまだありません</p>
+                </div>
+              )}
             </div>
-            <Link href="/articles" className="text-amber-700 font-medium text-sm hover:underline">すべて見る →</Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {latestArticles.map((article: any) => (
-              <ArticleCard key={article.id} article={article} />
-            ))}
-          </div>
-        </section>
-      )}
 
-      {/* Empty state */}
-      {hotServices.length === 0 && latestArticles.length === 0 && (
+            {/* サイドバー */}
+            <div className="space-y-6">
+              {/* 人気ランキング */}
+              {hotServices.length > 0 && (
+                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                  <div className="mb-1">
+                    <p className="text-amber-700 text-xs font-semibold uppercase tracking-wider">人気ランキング</p>
+                    <h2 className="text-lg font-black text-gray-900">Hot Ranking 🔥</h2>
+                  </div>
+                  <div className="divide-y divide-gray-50">
+                    {hotServices.map((svc, i) => (
+                      <RankingListItem key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} rank={i + 1} />
+                    ))}
+                  </div>
+                  <Link href="/ranking" className="block text-center text-amber-700 font-medium text-sm hover:underline mt-3 pt-3 border-t border-gray-50">
+                    ランキングをすべて見る →
+                  </Link>
+                </div>
+              )}
+
+              {/* 収益性ランキング */}
+              {profitServices.length > 0 && (
+                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                  <div className="mb-1">
+                    <p className="text-orange-600 text-xs font-semibold uppercase tracking-wider">収益性ランキング</p>
+                    <h2 className="text-lg font-black text-gray-900">Profit Ranking 💰</h2>
+                  </div>
+                  <div className="divide-y divide-gray-50">
+                    {profitServices.map((svc, i) => (
+                      <RankingListItem key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} rank={i + 1} />
+                    ))}
+                  </div>
+                  <Link href="/ranking?type=profit" className="block text-center text-orange-600 font-medium text-sm hover:underline mt-3 pt-3 border-t border-gray-50">
+                    ランキングをすべて見る →
+                  </Link>
+                </div>
+              )}
+
+              {/* カテゴリーから探す */}
+              {categories.length > 0 && (
+                <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                  <h2 className="font-black text-gray-900 text-sm mb-3">カテゴリーから探す</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {categories.map((c) => (
+                      <Link
+                        key={c.id}
+                        href={`/services/${c.slug}`}
+                        className="text-xs bg-gray-100 text-gray-600 rounded-full px-3 py-1.5 hover:bg-amber-50 hover:text-amber-700 transition-colors"
+                      >
+                        {c.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
           <p className="text-4xl mb-4">🚀</p>
           <h2 className="text-xl font-bold text-gray-900 mb-2">準備中です</h2>

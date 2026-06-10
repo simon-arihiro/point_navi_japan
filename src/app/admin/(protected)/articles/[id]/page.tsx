@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import LogoFallback from "@/components/LogoFallback";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
+import { ARTICLE_TYPE_LABEL as TYPE_LABEL, ARTICLE_TYPE_ICON as TYPE_ICON } from "@/lib/articleTypes";
 
 const STATUS_OPTIONS = ["reviewing", "published", "rejected", "archived"] as const;
 const STATUS_LABEL: Record<string, string> = {
@@ -11,24 +12,6 @@ const STATUS_LABEL: Record<string, string> = {
   published: "✓ 公開する",
   rejected: "✕ 却下する",
   archived: "アーカイブ",
-};
-
-const TYPE_LABEL: Record<string, string> = {
-  introduction: "サービス紹介",
-  guide: "使い方ガイド",
-  faq: "よくある質問",
-  comparison: "比較",
-  campaign: "キャンペーン",
-  earnings: "収益実績",
-};
-
-const TYPE_ICON: Record<string, string> = {
-  introduction: "📄",
-  guide: "📖",
-  faq: "❓",
-  comparison: "⚖️",
-  campaign: "🎉",
-  earnings: "💰",
 };
 
 export default function AdminArticleDetailPage() {
