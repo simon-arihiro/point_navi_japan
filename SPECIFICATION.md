@@ -1,6 +1,6 @@
 # SPECIFICATION.md
 
-Version: v1.4.9
+Version: v1.5.0
 Status: 🟢 Active
 Date: 2026-06-10
 
@@ -449,6 +449,7 @@ AI生成・常時最新
 
 **Service 管理：**
 
+* サービス一覧（`/admin/services`）：F.8「Admin 一覧ページ標準パターン」に従ったカード形式リスト。フィルターバー（検索 / ステータス / カテゴリ）で絞り込み可能
 * サービス追加フォーム（`/admin/services/new`）：
   - 入力項目：サービス名 / スラッグ / 公式URL / 招待コード / 招待リンク / ロゴURL / 説明 / カテゴリ（既存カテゴリ一覧からのドロップダウン・チェックボックス選択式、F.6 参照）/ ステータス
   - 「AI補完」ボタン：公式URLを基にAIが説明文・カテゴリ候補をフォームへ自動入力（DB書き込み・記事生成は行わない）。AI が返したカテゴリ候補は手動選択済みのカテゴリを**上書き**する
@@ -943,6 +944,32 @@ Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdm
 **カスケード削除：** Service 削除時は DB の `ON DELETE CASCADE` 制約により `service_categories` / `service_tags` / `service_images` / `articles`（`primary_service_id` 経由）/ `article_services` / `analytics_daily` が連動削除され、`analytics_events.service_id` は `NULL`化される（`supabase/migrations/001_initial_schema.sql` 参照）。アプリケーション側で個別削除する必要はない
 
 **参照実装：** `src/app/admin/(protected)/services/[id]/page.tsx`（Service）/ `src/app/admin/(protected)/categories/page.tsx`（Category）
+
+---
+
+### F.8 Admin 一覧ページ標準パターン（カード形式 + フィルターバー）
+
+**適用範囲：** Service 一覧（`/admin/services`）。今後追加される件数の多い一覧ページ（Article 一覧など）にも適用を検討する
+
+**背景：** 旧テーブル形式は、サービス名が長い場合にセル内で改行が発生してレイアウトが崩れ、また絞り込み手段がなく目的のサービスを探しにくかった
+
+**実装パターン：**
+- **データ取得（Server Component）：** 一覧データに加えて、関連集計値をサーバー側で1回のクエリ群で算出し、Client Component に props として渡す
+  - 例：`articles` テーブルを `primary_service_id, published_at` で全件取得し、JS側で service ごとに件数と `MAX(published_at)` を集計（`Map` で集計、DB側に集計用 RPC/View は作らない）
+- **フィルターバー（Client Component）：** `bg-white rounded-2xl p-4 shadow-sm border border-gray-100` のグリッド内に設置し、フィルタ条件は **すべてクライアント側 state で即時に in-memory filter**（URL 同期やサーバー再フェッチは行わない。一覧データ件数が小規模な Admin 専用画面のため）
+  - テキスト検索：name / slug を対象に部分一致（大文字小文字無視）
+  - ステータス等の単一選択：ネイティブ `<select>`（「すべて」をデフォルト値の空文字とする）
+  - カテゴリ等の複数選択：`src/components/admin/MultiSelectFilter.tsx`（ドロップダウン + チェックボックス、F.6 のドロップダウンUIと同系統）。選択は OR 条件（いずれかのカテゴリに該当すれば表示）
+  - 複数フィルタ間は AND 条件
+- **カードレイアウト：** 1件 = 1カード（`bg-white rounded-2xl p-5 shadow-sm border border-gray-100`）を縦に `space-y-3` で並べる（マルチカラムにしない）
+  - 1行目：ロゴ（`LogoFallback`）+ タイトル（**専用の行を占有し、折り返し可能** = `break-words`）+ 右端に `›` で詳細遷移を示唆
+  - 2行目：ステータスバッジ・件数・日付などの属性をインラインで `flex flex-wrap gap-2` 表示
+  - 3行目（任意）：カテゴリ等のタグを小さい pill で表示
+  - カード全体を `<Link>` にして詳細/編集ページへ遷移（カード内にネストした `<button>`/`<Link>` は置かない）
+- **絞り込み結果件数表示：** フィルターバー直下に `{filtered.length} / {total} 件` を表示する
+- **0件時：** カードと同じ角丸・枠線のプレースホルダーで「条件に一致する◯◯がありません」を表示する
+
+**参照実装：** `src/app/admin/(protected)/services/page.tsx` / `src/components/admin/ServiceListClient.tsx` / `src/components/admin/MultiSelectFilter.tsx`
 
 ---
 
