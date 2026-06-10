@@ -67,11 +67,11 @@ export default async function ServicePage(
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav className="text-sm text-gray-500 flex items-center gap-2 flex-wrap">
-            <Link href="/" className="hover:text-red-600">ホーム</Link>
+            <Link href="/" className="hover:text-slate-900">ホーム</Link>
             <span>/</span>
-            <Link href="/services" className="hover:text-red-600">サービス一覧</Link>
+            <Link href="/services" className="hover:text-slate-900">サービス一覧</Link>
             <span>/</span>
-            <Link href={`/services/${categorySlug}`} className="hover:text-red-600">
+            <Link href={`/services/${categorySlug}`} className="hover:text-slate-900">
               {service.categories?.[0]?.category?.name ?? categorySlug}
             </Link>
             <span>/</span>
@@ -101,7 +101,7 @@ export default async function ServicePage(
                       <Link
                         key={c.category?.id}
                         href={`/services/${c.category?.slug}`}
-                        className="text-xs bg-gray-100 text-gray-600 rounded-full px-3 py-1 hover:bg-red-50 hover:text-red-600 transition-colors"
+                        className="text-xs bg-gray-100 text-gray-600 rounded-full px-3 py-1 hover:bg-amber-50 hover:text-slate-900 transition-colors"
                       >
                         {c.category?.name}
                       </Link>
@@ -119,7 +119,7 @@ export default async function ServicePage(
                     href={service.official_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-gray-400 hover:text-red-600 mt-2 inline-block"
+                    className="text-xs text-gray-400 hover:text-slate-900 mt-2 inline-block"
                   >
                     公式サイト →
                   </a>

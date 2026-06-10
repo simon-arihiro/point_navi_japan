@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect, useRef } from "react";
 import { Category } from "@/types/database";
+import Mascot from "@/components/Mascot";
 
 type Props = {
   categories?: Category[];
@@ -29,24 +30,22 @@ export default function Header({ categories = [] }: Props) {
         <div className="flex justify-between items-center h-16">
           {/* ロゴ */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <div className="w-8 h-8 bg-red-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">P</span>
-            </div>
+            <Mascot className="w-8 h-8" />
             <span className="text-xl font-bold text-gray-900">
-              ポイ活<span className="text-red-600">ナビ</span>
+              ポイ活<span className="text-amber-600">ナビ</span>
             </span>
           </Link>
 
           {/* PC Nav */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-gray-600 hover:text-red-600 font-medium transition-colors text-sm">
+            <Link href="/" className="text-gray-600 hover:text-slate-900 font-medium transition-colors text-sm">
               ホーム
             </Link>
 
             {/* サービス一覧 + ドロップダウン */}
             <div ref={dropRef} className="relative">
               <button
-                className="flex items-center gap-1 text-gray-600 hover:text-red-600 font-medium transition-colors text-sm"
+                className="flex items-center gap-1 text-gray-600 hover:text-slate-900 font-medium transition-colors text-sm"
                 onMouseEnter={() => setDropOpen(true)}
                 onClick={() => setDropOpen((v) => !v)}
               >
@@ -62,7 +61,7 @@ export default function Header({ categories = [] }: Props) {
                 >
                   <Link
                     href="/services"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-slate-900"
                     onClick={() => setDropOpen(false)}
                   >
                     すべて表示
@@ -72,7 +71,7 @@ export default function Header({ categories = [] }: Props) {
                     <Link
                       key={cat.id}
                       href={`/services/${cat.slug}`}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-50 hover:text-red-600"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-slate-900"
                       onClick={() => setDropOpen(false)}
                     >
                       {cat.name}
@@ -82,10 +81,10 @@ export default function Header({ categories = [] }: Props) {
               )}
             </div>
 
-            <Link href="/ranking" className="text-gray-600 hover:text-red-600 font-medium transition-colors text-sm">
+            <Link href="/ranking" className="text-gray-600 hover:text-slate-900 font-medium transition-colors text-sm">
               ランキング
             </Link>
-            <Link href="/articles" className="text-gray-600 hover:text-red-600 font-medium transition-colors text-sm">
+            <Link href="/articles" className="text-gray-600 hover:text-slate-900 font-medium transition-colors text-sm">
               記事
             </Link>
           </nav>
@@ -94,7 +93,7 @@ export default function Header({ categories = [] }: Props) {
           <div className="hidden md:flex items-center gap-3">
             <Link
               href="/search"
-              className="p-2 text-gray-500 hover:text-red-600 transition-colors"
+              className="p-2 text-gray-500 hover:text-slate-900 transition-colors"
               aria-label="検索"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,15 +128,15 @@ export default function Header({ categories = [] }: Props) {
         {/* スマホメニュー */}
         {menuOpen && (
           <div className="md:hidden border-t border-gray-100 py-4 space-y-1">
-            <Link href="/" className="block px-2 py-2 text-gray-700 hover:text-red-600 text-sm" onClick={() => setMenuOpen(false)}>ホーム</Link>
-            <Link href="/services" className="block px-2 py-2 text-gray-700 hover:text-red-600 text-sm" onClick={() => setMenuOpen(false)}>サービス一覧</Link>
+            <Link href="/" className="block px-2 py-2 text-gray-700 hover:text-slate-900 text-sm" onClick={() => setMenuOpen(false)}>ホーム</Link>
+            <Link href="/services" className="block px-2 py-2 text-gray-700 hover:text-slate-900 text-sm" onClick={() => setMenuOpen(false)}>サービス一覧</Link>
             {categories.map((cat) => (
-              <Link key={cat.id} href={`/services/${cat.slug}`} className="block px-6 py-1.5 text-gray-500 hover:text-red-600 text-xs" onClick={() => setMenuOpen(false)}>
+              <Link key={cat.id} href={`/services/${cat.slug}`} className="block px-6 py-1.5 text-gray-500 hover:text-slate-900 text-xs" onClick={() => setMenuOpen(false)}>
                 └ {cat.name}
               </Link>
             ))}
-            <Link href="/ranking" className="block px-2 py-2 text-gray-700 hover:text-red-600 text-sm" onClick={() => setMenuOpen(false)}>ランキング</Link>
-            <Link href="/articles" className="block px-2 py-2 text-gray-700 hover:text-red-600 text-sm" onClick={() => setMenuOpen(false)}>記事</Link>
+            <Link href="/ranking" className="block px-2 py-2 text-gray-700 hover:text-slate-900 text-sm" onClick={() => setMenuOpen(false)}>ランキング</Link>
+            <Link href="/articles" className="block px-2 py-2 text-gray-700 hover:text-slate-900 text-sm" onClick={() => setMenuOpen(false)}>記事</Link>
           </div>
         )}
       </div>

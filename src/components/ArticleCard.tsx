@@ -27,14 +27,14 @@ export default function ArticleCard({ article, categorySlug }: Props) {
     <Link href={href} className="group block">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all h-full">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs bg-red-50 text-red-600 font-medium rounded-full px-3 py-1">
+          <span className="text-xs bg-amber-50 text-amber-700 font-medium rounded-full px-3 py-1">
             {TYPE_LABEL[article.article_type] ?? article.article_type}
           </span>
           {article.primary_service && (
             <span className="text-xs text-gray-500">{article.primary_service.name}</span>
           )}
         </div>
-        <h3 className="font-bold text-gray-900 text-sm leading-snug group-hover:text-red-600 transition-colors line-clamp-2 mb-2">
+        <h3 className="font-bold text-gray-900 text-sm leading-snug group-hover:text-amber-700 transition-colors line-clamp-2 mb-2">
           {article.title}
         </h3>
         {article.description && (

@@ -50,9 +50,9 @@ export default async function ArticlePage(
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav className="text-sm text-gray-500 flex items-center gap-2 flex-wrap">
-            <Link href="/" className="hover:text-red-600">ホーム</Link>
+            <Link href="/" className="hover:text-slate-900">ホーム</Link>
             <span>/</span>
-            <Link href="/articles" className="hover:text-red-600">記事</Link>
+            <Link href="/articles" className="hover:text-slate-900">記事</Link>
             <span>/</span>
             <span className="text-gray-900 truncate">{article.title}</span>
           </nav>
@@ -64,13 +64,13 @@ export default async function ArticlePage(
           {/* 記事本文 */}
           <article className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-xs bg-red-50 text-red-600 font-medium rounded-full px-3 py-1">
+              <span className="text-xs bg-amber-50 text-amber-700 font-medium rounded-full px-3 py-1">
                 {article.article_type}
               </span>
               {service && (
                 <Link
                   href={`/services/${categorySlug}/${service.slug}`}
-                  className="text-xs text-gray-500 hover:text-red-600"
+                  className="text-xs text-gray-500 hover:text-slate-900"
                 >
                   {service.name}
                 </Link>
@@ -83,7 +83,7 @@ export default async function ArticlePage(
             </h1>
 
             {article.description && (
-              <div className="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4 mb-8">
+              <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-4 mb-8">
                 <p className="text-gray-700 text-sm leading-relaxed">{article.description}</p>
               </div>
             )}

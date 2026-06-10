@@ -1,6 +1,6 @@
 # SPECIFICATION.md
 
-Version: v1.5.0
+Version: v1.6.0
 Status: 🟢 Active
 Date: 2026-06-10
 
@@ -970,6 +970,31 @@ Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdm
 - **0件時：** カードと同じ角丸・枠線のプレースホルダーで「条件に一致する◯◯がありません」を表示する
 
 **参照実装：** `src/app/admin/(protected)/services/page.tsx` / `src/components/admin/ServiceListClient.tsx` / `src/components/admin/MultiSelectFilter.tsx`
+
+---
+
+### F.9 公開サイト ブランドカラー・マスコット規約
+
+**適用範囲：** 公開サイト（`/`, `/services/**`, `/articles/**`, `/ranking`, `/search`, `/contact`, `/privacy`, `/disclosure` および `Header` / `Footer` / `ServiceCard` / `ArticleCard` / `ConversionArea`）。**Admin 画面（`/admin/**`）は対象外**で、従来どおり `red-600` 系を使用する
+
+**背景：** 旧デザインは `red-600` をブランド主色として Header / Hero / 全 CTA ボタン / バッジ / リンクに多用しており、画面全体が「赤一色」で圧迫感があった。落ち着いた印象にしつつ、返点・お得情報や個人ブログらしい温かみを強調する方向にリニューアルした
+
+**カラーパレット：**
+| 用途 | クラス | 説明 |
+|------|--------|------|
+| ブランドアクセント（ロゴ「ナビ」、見出しラベル） | `text-amber-600` | 大きめ・bold なテキストに使用 |
+| 返点・お得・CTA系の強調（バッジ、ハイライト枠、ゴールドボタン） | `bg-amber-50`/`text-amber-700`（バッジ）、`bg-amber-400 text-slate-900 hover:bg-amber-500`（ボタン） | 「招待コードあり」「コピー」ボタン、記事タイプバッジ、引用ハイライト枠など |
+| 落ち着いたプライマリ（ナビhover、ダークボタン、フッター背景） | `hover:text-slate-900`、`bg-slate-900 text-white hover:bg-slate-800`、`bg-slate-900`（Footer） | 個人サイト・情報サイトらしい紺系トーン |
+| フォーカスリング | `focus:ring-amber-500` | フォーム入力欄共通 |
+| 成功状態 | `bg-green-600`（変更なし） | 「コピー済み」など |
+
+**Hero セクション：** `bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100` のソフトな暖色グラデーション + `text-slate-900`。CTA は「ダーク（`bg-slate-900`）＋ゴールド（`bg-amber-400 text-slate-900`）」の2ボタン構成
+
+**マスコット：** `src/components/Mascot.tsx`（コインキャラクターの SVG、`className` でサイズ指定）。Header ロゴ・Footer ロゴ・Hero（`lg:` 以上で右側に大きく表示）に使用。新たな装飾箇所を追加する場合もこのコンポーネントを再利用する
+
+**ConversionArea：** 返点訴求の中心コンポーネントとして、見出しに🎁を付け（`🎁 お得な招待情報`）、背景を `bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200`、コピー ボタンをゴールド（`bg-amber-400 text-slate-900`）にして視認性を強化
+
+**参照実装：** `src/components/Mascot.tsx` / `src/components/Header.tsx` / `src/components/Footer.tsx` / `src/app/page.tsx` / `src/components/ConversionArea.tsx` / `src/components/ServiceCard.tsx` / `src/components/ArticleCard.tsx`
 
 ---
 

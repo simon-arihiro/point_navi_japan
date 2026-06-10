@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { calcHotScore, calcProfitScore } from "@/lib/ranking";
 import ServiceCard from "@/components/ServiceCard";
 import ArticleCard from "@/components/ArticleCard";
+import Mascot from "@/components/Mascot";
 import Link from "next/link";
 
 export default async function HomePage() {
@@ -61,27 +62,28 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-red-600 to-red-800 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+      <section className="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 text-slate-900 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
           <div className="max-w-3xl">
-            <p className="text-red-200 text-sm font-medium uppercase tracking-widest mb-4">日本のポイ活・招待コードをナビゲート</p>
+            <p className="text-amber-700 text-sm font-medium uppercase tracking-widest mb-4">日本のポイ活・招待コードをナビゲート</p>
             <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
               正直なところ、<br />
-              <span className="text-yellow-300">これは本当におすすめ</span><br />
+              <span className="text-orange-600">これは本当におすすめ</span><br />
               のサービスだけ集めました
             </h1>
-            <p className="text-red-100 text-lg leading-relaxed mb-8">
+            <p className="text-slate-600 text-lg leading-relaxed mb-8">
               実際に使ってみた体験をもとに、ポイ活サービスの招待コード・招待リンクをまとめています。
             </p>
             <div className="flex flex-wrap gap-4">
-              <Link href="/services" className="bg-white text-red-700 font-bold px-6 py-3 rounded-xl hover:bg-red-50 transition-colors">
+              <Link href="/services" className="bg-slate-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-slate-800 transition-colors">
                 サービス一覧を見る
               </Link>
-              <Link href="/ranking" className="bg-red-700 text-white font-bold px-6 py-3 rounded-xl border border-red-400 hover:bg-red-600 transition-colors">
+              <Link href="/ranking" className="bg-amber-400 text-slate-900 font-bold px-6 py-3 rounded-xl border border-amber-300 hover:bg-amber-500 transition-colors">
                 ランキングを見る
               </Link>
             </div>
           </div>
+          <Mascot className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 w-56 h-56 opacity-90" />
         </div>
       </section>
 
@@ -90,10 +92,10 @@ export default async function HomePage() {
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
           <div className="flex items-end justify-between mb-6">
             <div>
-              <p className="text-red-600 text-xs font-semibold uppercase tracking-wider mb-1">人気ランキング</p>
+              <p className="text-amber-700 text-xs font-semibold uppercase tracking-wider mb-1">人気ランキング</p>
               <h2 className="text-2xl font-black text-gray-900">Hot Ranking 🔥</h2>
             </div>
-            <Link href="/ranking" className="text-red-600 font-medium text-sm hover:underline">すべて見る →</Link>
+            <Link href="/ranking" className="text-amber-700 font-medium text-sm hover:underline">すべて見る →</Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {hotServices.slice(0, 4).map((svc, i) => (
@@ -131,7 +133,7 @@ export default async function HomePage() {
               <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-1">新着</p>
               <h2 className="text-2xl font-black text-gray-900">最新記事</h2>
             </div>
-            <Link href="/articles" className="text-red-600 font-medium text-sm hover:underline">すべて見る →</Link>
+            <Link href="/articles" className="text-amber-700 font-medium text-sm hover:underline">すべて見る →</Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {latestArticles.map((article: any) => (

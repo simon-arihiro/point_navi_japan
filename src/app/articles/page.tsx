@@ -43,7 +43,7 @@ export default async function ArticlesPage() {
             <Link
               key={type}
               href={`/articles?type=${type}`}
-              className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-xs hover:border-red-300 transition-colors"
+              className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-xs hover:border-amber-300 transition-colors"
             >
               {label}
             </Link>

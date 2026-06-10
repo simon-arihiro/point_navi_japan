@@ -27,7 +27,7 @@ export default function ServiceCard({ service, categorySlug, rank }: Props) {
             size={48}
           />
           <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-gray-900 group-hover:text-red-600 transition-colors truncate">
+            <h3 className="font-bold text-gray-900 group-hover:text-amber-700 transition-colors truncate">
               {service.name}
             </h3>
             {service.categories?.[0] && (
@@ -46,7 +46,7 @@ export default function ServiceCard({ service, categorySlug, rank }: Props) {
 
         <div className="mt-3 flex gap-2 flex-wrap">
           {service.referral_code && (
-            <span className="text-xs bg-red-50 text-red-700 rounded-full px-2 py-0.5">招待コードあり</span>
+            <span className="text-xs bg-amber-50 text-amber-700 rounded-full px-2 py-0.5">招待コードあり</span>
           )}
           {service.referral_link && (
             <span className="text-xs bg-orange-50 text-orange-700 rounded-full px-2 py-0.5">招待リンクあり</span>

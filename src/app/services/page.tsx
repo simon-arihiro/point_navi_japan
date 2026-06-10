@@ -35,14 +35,14 @@ export default async function ServicesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* カテゴリフィルター */}
         <div className="flex flex-wrap gap-2 mb-8">
-          <Link href="/services" className="px-4 py-2 bg-red-600 text-white rounded-full text-sm font-medium">
+          <Link href="/services" className="px-4 py-2 bg-slate-900 text-white rounded-full text-sm font-medium">
             すべて
           </Link>
           {categories.map((cat: any) => (
             <Link
               key={cat.id}
               href={`/services/${cat.slug}`}
-              className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-sm hover:border-red-300 transition-colors"
+              className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-sm hover:border-amber-300 transition-colors"
             >
               {cat.name}
             </Link>

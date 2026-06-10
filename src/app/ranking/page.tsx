@@ -54,7 +54,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
           <div className="flex gap-2">
             <a
               href="/ranking"
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${type === "hot" ? "bg-red-600 text-white" : "bg-white border border-gray-200 text-gray-600"}`}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${type === "hot" ? "bg-slate-900 text-white" : "bg-white border border-gray-200 text-gray-600"}`}
             >
               🔥 Hot Ranking
             </a>

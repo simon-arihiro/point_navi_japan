@@ -15,7 +15,7 @@ export default function PrivacyPage() {
         <h2 className="text-lg font-bold text-gray-900">アフィリエイトについて</h2>
         <p>当サイトはアフィリエイトプログラムを利用しており、サービスへのリンクを経由して報酬を受け取ることがあります。</p>
         <h2 className="text-lg font-bold text-gray-900">お問い合わせ</h2>
-        <p>プライバシーに関するお問い合わせは<a href="/contact" className="text-red-600 hover:underline">お問い合わせページ</a>よりご連絡ください。</p>
+        <p>プライバシーに関するお問い合わせは<a href="/contact" className="text-amber-700 hover:underline">お問い合わせページ</a>よりご連絡ください。</p>
       </div>
     </div>
   );

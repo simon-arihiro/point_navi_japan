@@ -38,9 +38,9 @@ export default async function CategoryPage(props: PageProps<"/services/[category
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <nav className="text-sm text-gray-500 mb-4 flex items-center gap-2">
-            <Link href="/" className="hover:text-red-600">ホーム</Link>
+            <Link href="/" className="hover:text-slate-900">ホーム</Link>
             <span>/</span>
-            <Link href="/services" className="hover:text-red-600">サービス一覧</Link>
+            <Link href="/services" className="hover:text-slate-900">サービス一覧</Link>
             <span>/</span>
             <span className="text-gray-900">{category.name}</span>
           </nav>
