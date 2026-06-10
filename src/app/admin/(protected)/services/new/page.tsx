@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Category, resolveCategoryIds } from "@/lib/categories";
 import CategorySelector from "@/components/admin/CategorySelector";
 import { fromDatetimeLocalValue } from "@/lib/campaign";
+import { toSlug } from "@/lib/slug";
 
 export default function NewServicePage() {
   const router = useRouter();
@@ -12,10 +13,11 @@ export default function NewServicePage() {
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
   const [aiError, setAiError] = useState("");
+  const [slugTouched, setSlugTouched] = useState(false);
   const [form, setForm] = useState({
     name: "",
     slug: "",
-    official_url: "",
+    official_url: "http://a.com",
     referral_code: "",
     referral_link: "",
     campaign_bonus: "",
@@ -36,6 +38,17 @@ export default function NewServicePage() {
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
+
+  // サービス名の入力に合わせてスラッグを自動同期（手動編集後は同期しない）
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const name = e.target.value;
+    setForm((prev) => ({ ...prev, name, slug: slugTouched ? prev.slug : toSlug(name, "service") }));
+  };
+
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSlugTouched(true);
+    setForm((prev) => ({ ...prev, slug: e.target.value }));
+  };
 
   const toggleCategory = (name: string) => {
     setCategoryNames((prev) =>
@@ -146,7 +159,7 @@ export default function NewServicePage() {
             <input
               type={type}
               value={(form as any)[key]}
-              onChange={set(key)}
+              onChange={key === "name" ? handleNameChange : key === "slug" ? handleSlugChange : set(key)}
               placeholder={placeholder}
               required={label.includes("*")}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
