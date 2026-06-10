@@ -1,6 +1,6 @@
 # SPECIFICATION.md
 
-Version: v1.6.0
+Version: v1.7.0
 Status: 🟢 Active
 Date: 2026-06-10
 
@@ -205,6 +205,8 @@ Service是系统唯一核心资产。
 | description | text | SEO meta description，AI生成，150字以内 |
 | referral_code | text | 可空 |
 | referral_link | text | 可空 |
+| campaign_bonus | text | 可空。期间限定キャンペーン内容（Admin 手动入力，AI 自动生成不触及，详见 F.10） |
+| campaign_expires_at | timestamptz | 可空。キャンペーン终了日时（Admin 手动入力）。过期后徽章自动隐藏，无需手动清空 |
 | official_url | text | 官网URL |
 | logo_url | text | 原始Logo URL，可空 |
 | logo_storage_path | text | Supabase Storage本地副本路径 |
@@ -995,6 +997,44 @@ Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdm
 **ConversionArea：** 返点訴求の中心コンポーネントとして、見出しに🎁を付け（`🎁 お得な招待情報`）、背景を `bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200`、コピー ボタンをゴールド（`bg-amber-400 text-slate-900`）にして視認性を強化
 
 **参照実装：** `src/components/Mascot.tsx` / `src/components/Header.tsx` / `src/components/Footer.tsx` / `src/app/page.tsx` / `src/components/ConversionArea.tsx` / `src/components/ServiceCard.tsx` / `src/components/ArticleCard.tsx`
+
+---
+
+### F.10 期間限定キャンペーン徽章（Campaign Badge）
+
+**適用範囲：** `ServiceCard` / Service詳細ページ（`ConversionArea` 周辺）/ Admin Service 追加・編集フォーム（`/admin/services/new`, `/admin/services/[id]`）
+
+**背景：** ポイ活サイトでは「期間限定で還元率アップ」「今だけ+◯◯円分」のような時限キャンペーン情報が転化率に直結する。これを視覚的に強調する徽章（バッジ）機能を追加する。
+
+**DB字段（`services` 表，详见 Chapter 3）：**
+- `campaign_bonus`：text，可空。キャンペーン特典内容（例：「期間限定+1,000円分のポイント」）
+- `campaign_expires_at`：timestamptz，可空。キャンペーン終了日時
+
+**财务级安全原则（重要・禁止事项）：**
+- 上记2个字段**仅允许 Admin 手动输入/编辑**
+- `POST /api/ai/autofill-service`（AI補完プレビュー）与 `POST /api/ai/generate-service`（AI再生成）**禁止**读取、生成或覆盖这两个字段，避免 AI 产生未经核实的「虚假优惠期限」造成法律与信任风险
+- Admin 将 `campaign_expires_at` 清空即视为立即结束キャンペーン
+
+**显示逻辑（共享工具 `src/lib/campaign.ts` 提供 `getCampaignBadge(service)`）：**
+- `campaign_expires_at` 为 `null` → 不显示徽章
+- `campaign_expires_at` ≤ 当前时间 → 视为已过期，徽章自动隐藏（无需 Admin 手动清理）
+- `campaign_expires_at` > 当前时间 → 显示徽章，剩余天数 = `ceil((expires_at - now) / 1天)`
+  - 剩余天数 ≤ 0（当日内）→ 文案「本日まで」
+  - 剩余天数 ≥ 1 → 文案「あと{N}日」
+  - 剩余天数 ≤ 3 → 紧急样式（`bg-orange-500 text-white`）
+  - 剩余天数 > 3 → 常规样式（`bg-amber-100 text-amber-800`）
+
+**展示位置：**
+- `ServiceCard`：右上角追加「🔥 期間限定」+ 倒计时徽章（`campaign_bonus` 正文不在卡片展示，仅徽章+倒计时）
+- Service詳細ページ：`ConversionArea` 上部に専用ハイライト枠で `campaign_bonus` 全文 + 倒计时徽章を表示
+
+**Admin フォーム：**
+- `/admin/services/new`、`/admin/services/[id]` に任意項目を2つ追加：
+  - 「キャンペーン内容」（テキスト入力、placeholder: 例：期間限定+1,000pt）
+  - 「キャンペーン終了日時」（`datetime-local` input）
+- 「AI補完」ボタンはこの2項目を変更しない
+
+**参照実装：** `src/lib/campaign.ts` / `src/components/ServiceCard.tsx` / `src/components/ConversionArea.tsx` / `src/app/admin/(protected)/services/new/page.tsx` / `src/app/admin/(protected)/services/[id]/page.tsx` / `supabase/migrations/004_campaign_badge.sql`
 
 ---
 
