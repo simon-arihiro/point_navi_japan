@@ -7,6 +7,7 @@ export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/settings")
@@ -21,14 +22,25 @@ export default function AdminSettingsPage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await fetch("/api/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(settings),
-    });
+    setError(null);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      const json = await res.json();
+      if (res.ok) {
+        setSettings(json.data);
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      } else {
+        setError(json.error?.message ?? `エラー: ${res.status}`);
+      }
+    } catch {
+      setError("通信エラーが発生しました");
+    }
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   };
 
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
@@ -136,6 +148,9 @@ export default function AdminSettingsPage() {
         >
           {saved ? "保存しました ✓" : saving ? "保存中..." : "設定を保存"}
         </button>
+        {error && (
+          <p className="text-xs text-red-600 text-center">保存に失敗しました: {error}</p>
+        )}
       </div>
     </div>
   );
