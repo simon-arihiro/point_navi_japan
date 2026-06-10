@@ -96,7 +96,7 @@ export default function ServiceListClient({ services, allCategories }: Props) {
     });
 
     setActionLoadingId(null);
-    alert(res.ok ? `「${svc.name}」の紹介文を更新しました` : "紹介文の更新に失敗しました");
+    alert(res.ok ? `「${svc.name}」の紹介記事を更新しました` : "紹介記事の更新に失敗しました");
   };
 
   const handleAddRelatedArticle = async (e: React.MouseEvent, svc: ServiceRow) => {
@@ -206,14 +206,14 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                           onClick={(e) => handleUpdateIntro(e, svc)}
                           className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
                         >
-                          紹介文を更新
+                          紹介記事
                         </button>
                         <button
                           type="button"
                           onClick={(e) => handleAddRelatedArticle(e, svc)}
                           className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
                         >
-                          関連記事を追加
+                          関連記事
                         </button>
                       </div>
                     </>
