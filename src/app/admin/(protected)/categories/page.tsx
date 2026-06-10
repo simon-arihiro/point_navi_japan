@@ -83,14 +83,19 @@ export default function AdminCategoriesPage() {
           <p className="text-center py-10 text-gray-400 text-sm">カテゴリがありません</p>
         ) : (
           items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between px-5 py-3.5 border-b border-gray-50 last:border-b-0">
-              <span className="text-sm font-medium text-gray-900">{item.name}</span>
-              <button
-                onClick={() => handleDelete(item.id)}
-                className="text-xs text-red-500 hover:text-red-700 px-2"
-              >
-                削除
-              </button>
+            <div key={item.id} className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-gray-50 last:border-b-0">
+              <span className="text-sm font-medium text-gray-900 truncate">{item.name}</span>
+              <div className="flex items-center gap-3 shrink-0">
+                <span className="text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded-full px-2.5 py-1 whitespace-nowrap">
+                  関連サービス {item.service_categories?.[0]?.count ?? 0}件
+                </span>
+                <button
+                  onClick={() => handleDelete(item.id)}
+                  className="text-xs text-red-500 hover:text-red-700 px-2"
+                >
+                  削除
+                </button>
+              </div>
             </div>
           ))
         )}

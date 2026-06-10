@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 
 export async function GET() {
   const supabase = createAdminClient();
-  const { data, error } = await supabase.from("categories").select("*").order("name");
+  const { data, error } = await supabase.from("categories").select("*, service_categories(count)").order("name");
   if (error) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500);
   return Response.json({ data });
 }
