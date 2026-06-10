@@ -1018,8 +1018,8 @@ Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdm
 **显示逻辑（共享工具 `src/lib/campaign.ts` 提供 `getCampaignBadge(service)`）：**
 - `campaign_expires_at` 为 `null` → 不显示徽章
 - `campaign_expires_at` ≤ 当前时间 → 视为已过期，徽章自动隐藏（无需 Admin 手动清理）
-- `campaign_expires_at` > 当前时间 → 显示徽章，剩余天数 = `ceil((expires_at - now) / 1天)`
-  - 剩余天数 ≤ 0（当日内）→ 文案「本日まで」
+- `campaign_expires_at` > 当前时间 → 显示徽章，剩余天数 = JST基准下「終了日のカレンダー日」−「今日のカレンダー日」
+  - 剩余天数 ≤ 0（终了日＝当日，JST基准）→ 文案「本日まで」
   - 剩余天数 ≥ 1 → 文案「あと{N}日」
   - 剩余天数 ≤ 3 → 紧急样式（`bg-orange-500 text-white`）
   - 剩余天数 > 3 → 常规样式（`bg-amber-100 text-amber-800`）

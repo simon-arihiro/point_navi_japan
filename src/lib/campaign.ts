@@ -6,6 +6,12 @@ export type CampaignBadge = {
 };
 
 const DAY_MS = 1000 * 60 * 60 * 24;
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+
+// JST基準の日付通し番号（カレンダー日の差分計算用）
+function toJstDayNumber(ms: number): number {
+  return Math.floor((ms + JST_OFFSET_MS) / DAY_MS);
+}
 
 // 期間限定キャンペーン徽章（F.10）。期限切れ・未設定時は null
 export function getCampaignBadge(
@@ -13,11 +19,11 @@ export function getCampaignBadge(
 ): CampaignBadge | null {
   if (!service.campaign_expires_at) return null;
 
-  const expiresAt = new Date(service.campaign_expires_at).getTime();
-  const now = Date.now();
-  if (expiresAt <= now) return null;
+  const expiresAtMs = new Date(service.campaign_expires_at).getTime();
+  const nowMs = Date.now();
+  if (expiresAtMs <= nowMs) return null;
 
-  const remainingDays = Math.ceil((expiresAt - now) / DAY_MS);
+  const remainingDays = toJstDayNumber(expiresAtMs) - toJstDayNumber(nowMs);
   const label = remainingDays <= 0 ? "本日まで" : `あと${remainingDays}日`;
 
   return { label, urgent: remainingDays <= 3 };
