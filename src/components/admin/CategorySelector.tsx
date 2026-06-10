@@ -19,6 +19,15 @@ export default function CategorySelector({ allCategories, selected, onToggle }: 
     if (!names.some((n) => n.toLowerCase() === name.toLowerCase())) names.push(name);
   }
 
+  const allSelected = names.length > 0 && names.every((name) => selected.some((s) => s.toLowerCase() === name.toLowerCase()));
+
+  const handleToggleAll = () => {
+    for (const name of names) {
+      const isSelected = selected.some((s) => s.toLowerCase() === name.toLowerCase());
+      if (allSelected || !isSelected) onToggle(name);
+    }
+  };
+
   useEffect(() => {
     if (!open) return;
     const handleClickOutside = (e: Event) => {
@@ -56,6 +65,15 @@ export default function CategorySelector({ allCategories, selected, onToggle }: 
 
           {open && (
             <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+              <label className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer text-sm font-medium text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={allSelected}
+                  onChange={handleToggleAll}
+                  className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
+                />
+                全て
+              </label>
               <div className="max-h-60 overflow-y-auto p-2">
                 {names.map((name) => {
                   const isSelected = selected.some((s) => s.toLowerCase() === name.toLowerCase());

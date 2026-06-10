@@ -49,6 +49,17 @@ export default function MultiSelectFilter({ label, options, selected, onChange, 
 
       {open && (
         <div className="absolute z-10 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+          {options.length > 0 && (
+            <label className="flex items-center gap-2 px-3 py-2 border-b border-gray-100 hover:bg-gray-50 cursor-pointer text-sm font-medium text-gray-700">
+              <input
+                type="checkbox"
+                checked={selected.length === options.length}
+                onChange={() => onChange(selected.length === options.length ? [] : options.map((o) => o.value))}
+                className="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"
+              />
+              全て
+            </label>
+          )}
           <div className="max-h-60 overflow-y-auto p-2">
             {options.length === 0 ? (
               <p className="text-xs text-gray-400 px-2 py-2">選択肢がありません</p>
