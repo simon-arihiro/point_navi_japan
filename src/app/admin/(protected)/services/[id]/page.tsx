@@ -11,6 +11,7 @@ export default function EditServicePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState<any>(null);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
@@ -67,9 +68,17 @@ export default function EditServicePage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm("このサービスを削除しますか？関連記事もすべて削除されます。")) return;
-    await fetch(`/api/services/${id}`, { method: "DELETE" });
-    router.push("/admin/services");
+    if (!confirm(`「${form.name}」を削除しますか？関連する記事・画像・カテゴリ紐付けもすべて削除されます。この操作は元に戻せません。`)) return;
+    setDeleting(true);
+    setError("");
+    const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.push("/admin/services");
+    } else {
+      const d = await res.json().catch(() => null);
+      setError(d?.error?.message ?? "削除に失敗しました");
+      setDeleting(false);
+    }
   };
 
   const handleRegenerateIntro = async () => {
@@ -153,9 +162,10 @@ export default function EditServicePage() {
           <button
             type="button"
             onClick={handleDelete}
-            className="bg-white border border-red-200 text-red-600 font-bold py-3 rounded-xl hover:bg-red-50 transition-colors"
+            disabled={deleting}
+            className="bg-white border border-red-200 text-red-600 font-bold py-3 rounded-xl hover:bg-red-50 transition-colors disabled:opacity-50"
           >
-            削除
+            {deleting ? "削除中..." : "削除"}
           </button>
           <button
             type="button"

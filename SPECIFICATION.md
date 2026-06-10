@@ -1,6 +1,6 @@
 # SPECIFICATION.md
 
-Version: v1.4.8
+Version: v1.4.9
 Status: 🟢 Active
 Date: 2026-06-10
 
@@ -926,6 +926,23 @@ Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdm
 - 編集ページの保存（`PUT /api/services/[id]`）は `category_ids` を受け取り、`service_categories` の当該 service_id の行を**全削除→再挿入**することで全置換する
 
 **参照実装：** `src/lib/categories.ts` / `src/components/admin/CategorySelector.tsx` / `src/app/admin/(protected)/services/new/page.tsx` / `src/app/admin/(protected)/services/[id]/page.tsx`
+
+---
+
+### F.7 削除操作の確認・エラーハンドリング規則
+
+**適用範囲：** Admin の全「削除」ボタン（Service / Category / 将来追加される Article 等）
+
+**必須実装：**
+- 実行前に `confirm()` で二次確認を行う。確認メッセージには対象名（例：サービス名）と、連動して削除される関連データ（記事・画像・カテゴリ紐付け等）を明記し、「この操作は元に戻せません」を含める
+- `fetch` の戻り値 `res.ok` を必ずチェックする：
+  - 成功時：一覧へ遷移、またはローカル一覧から即時 filter 除去
+  - 失敗時：`res.json()` の `error.message` を画面上に表示する（**サイレント失敗で確認ダイアログだけ通って何も起きない、という状態を作らない**）
+- 削除中はボタンを `disabled` にし、ラベルを「削除中...」に変更する（連打防止）
+
+**カスケード削除：** Service 削除時は DB の `ON DELETE CASCADE` 制約により `service_categories` / `service_tags` / `service_images` / `articles`（`primary_service_id` 経由）/ `article_services` / `analytics_daily` が連動削除され、`analytics_events.service_id` は `NULL`化される（`supabase/migrations/001_initial_schema.sql` 参照）。アプリケーション側で個別削除する必要はない
+
+**参照実装：** `src/app/admin/(protected)/services/[id]/page.tsx`（Service）/ `src/app/admin/(protected)/categories/page.tsx`（Category）
 
 ---
 
