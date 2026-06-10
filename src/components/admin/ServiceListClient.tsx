@@ -200,18 +200,18 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                   {menuOpenId === svc.id && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={closeMenu} />
-                      <div className="absolute right-0 top-full mt-1.5 w-40 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden">
+                      <div className="absolute right-0 top-full mt-1.5 w-24 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden">
                         <button
                           type="button"
                           onClick={(e) => handleUpdateIntro(e, svc)}
-                          className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
+                          className="block w-full text-center px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           紹介記事
                         </button>
                         <button
                           type="button"
                           onClick={(e) => handleAddRelatedArticle(e, svc)}
-                          className="block w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
+                          className="block w-full text-center px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
                         >
                           関連記事
                         </button>
