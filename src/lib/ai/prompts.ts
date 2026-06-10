@@ -6,19 +6,21 @@ export const SYSTEM_PROMPT_BASE = `あなたは日本のポイ活・招待コー
 出力言語：日本語のみ。`;
 
 export function buildServiceInfoPrompt(officialUrl: string) {
-  return `以下の公式サイトURLを参照して、サービス情報をJSON形式で返してください。
+  return `あなたはこのURLに直接アクセスすることはできません。URLのドメイン名やパス、サービス名から推測できる一般的な知識をもとに、サービス情報を推測してJSON形式で返してください。
 URL: ${officialUrl}
 
 返却するJSON形式：
 {
-  "name": "サービス名（日本語）",
+  "name": "サービス名（日本語、推測でよい）",
   "slug": "url-friendly-slug（英小文字・ハイフン区切り）",
   "description": "SEO meta description（150字以内・日本語）",
   "categories": ["カテゴリ名1", "カテゴリ名2"],
   "tags": ["タグ1", "タグ2", "タグ3"]
 }
 
-注意：JSONのみ返却してください。`;
+注意：
+- 「アクセスできません」「わかりません」のような断り書きは一切不要です。必ず推測で値を埋めてください。
+- 前置きや補足説明、コードブロック記号（\`\`\`）は付けず、JSONオブジェクトのみを出力してください。`;
 }
 
 export function buildIntroductionArticlePrompt(service: {

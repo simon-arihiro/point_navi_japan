@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { generateText } from "@/lib/ai/claude";
+import { generateText, extractJson } from "@/lib/ai/claude";
 import {
   buildServiceInfoPrompt,
   buildIntroductionArticlePrompt,
@@ -31,12 +31,7 @@ export async function POST(request: NextRequest) {
       buildServiceInfoPrompt(service.official_url)
     );
 
-    let aiInfo: { name?: string; slug?: string; description?: string; categories?: string[]; tags?: string[] } = {};
-    try {
-      aiInfo = JSON.parse(infoJson.replace(/```json\n?|\n?```/g, "").trim());
-    } catch {
-      // パースエラーは無視してデフォルト値を使用
-    }
+    const aiInfo = extractJson<{ name?: string; slug?: string; description?: string; categories?: string[]; tags?: string[] }>(infoJson) ?? {};
 
     // slug / description を更新
     const updates: Record<string, string> = {};

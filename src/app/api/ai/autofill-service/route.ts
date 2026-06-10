@@ -1,4 +1,4 @@
-import { generateText } from "@/lib/ai/claude";
+import { generateText, extractJson } from "@/lib/ai/claude";
 import { buildServiceInfoPrompt } from "@/lib/ai/prompts";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
@@ -15,10 +15,8 @@ export async function POST(request: NextRequest) {
       buildServiceInfoPrompt(official_url)
     );
 
-    let aiInfo: { name?: string; slug?: string; description?: string; categories?: string[]; tags?: string[] };
-    try {
-      aiInfo = JSON.parse(infoJson.replace(/```json\n?|\n?```/g, "").trim());
-    } catch {
+    const aiInfo = extractJson<{ name?: string; slug?: string; description?: string; categories?: string[]; tags?: string[] }>(infoJson);
+    if (!aiInfo) {
       return errorResponse(ErrorCode.AI_GENERATION_FAILED, "AIの応答を解析できませんでした", 500);
     }
 
