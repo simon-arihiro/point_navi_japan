@@ -15,11 +15,15 @@ URL: ${officialUrl}
   "slug": "url-friendly-slug（英小文字・ハイフン区切り）",
   "description": "SEO meta description（150字以内・日本語）",
   "categories": ["カテゴリ名1", "カテゴリ名2"],
-  "tags": ["タグ1", "タグ2", "タグ3"]
+  "tags": ["タグ1", "タグ2", "タグ3"],
+  "campaign_bonus": "現在実施中のキャンペーン内容（例: 期間限定+1,000pt）。確信が持てない場合は null",
+  "campaign_expires_at": "キャンペーン終了日時（YYYY-MM-DD形式）。確信が持てない場合は null",
+  "logo_url": "サービスロゴ画像の直接URL。確信が持てない場合は null"
 }
 
 注意：
-- 「アクセスできません」「わかりません」のような断り書きは一切不要です。必ず推測で値を埋めてください。
+- 「アクセスできません」「わかりません」のような断り書きは一切不要です。name, slug, description, categories, tags は必ず推測で値を埋めてください。
+- campaign_bonus, campaign_expires_at, logo_url は正確な情報に確信が持てる場合のみ値を入れ、不確かな場合は必ず null にしてください（架空の金額や日付を作らないこと）。
 - 前置きや補足説明、コードブロック記号（\`\`\`）は付けず、JSONオブジェクトのみを出力してください。`;
 }
 

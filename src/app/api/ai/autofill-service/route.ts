@@ -15,7 +15,16 @@ export async function POST(request: NextRequest) {
       buildServiceInfoPrompt(official_url)
     );
 
-    const aiInfo = extractJson<{ name?: string; slug?: string; description?: string; categories?: string[]; tags?: string[] }>(infoJson);
+    const aiInfo = extractJson<{
+      name?: string;
+      slug?: string;
+      description?: string;
+      categories?: string[];
+      tags?: string[];
+      campaign_bonus?: string | null;
+      campaign_expires_at?: string | null;
+      logo_url?: string | null;
+    }>(infoJson);
     if (!aiInfo) {
       return errorResponse(ErrorCode.AI_GENERATION_FAILED, "AIの応答を解析できませんでした", 500);
     }
