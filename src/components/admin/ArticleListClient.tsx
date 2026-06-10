@@ -4,7 +4,13 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import LogoFallback from "@/components/LogoFallback";
 import MultiSelectFilter from "@/components/admin/MultiSelectFilter";
-import { getArticleTypeLabel, getArticleTypeIcon, getArticleTypeBadgeClass, getArticleStatusLabel } from "@/lib/articleTypes";
+import {
+  getArticleTypeLabel,
+  getArticleTypeIcon,
+  getArticleTypeBadgeClass,
+  getArticleStatusLabel,
+  getArticleStatusBadgeClass,
+} from "@/lib/articleTypes";
 
 type CategoryOption = { id: string; name: string };
 
@@ -35,47 +41,27 @@ function formatDate(iso: string | null) {
 }
 
 export default function ArticleListClient({ articles, allCategories }: Props) {
-  const [localArticles, setLocalArticles] = useState(articles);
   const [status, setStatus] = useState("");
+  const [articleType, setArticleType] = useState("");
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
-  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return localArticles.filter((a) => {
+    return articles.filter((a) => {
       if (status === "published" && a.status !== "published") return false;
       if (status === "reviewing" && a.status === "published") return false;
+      if (articleType === "introduction" && a.article_type !== "introduction") return false;
+      if (articleType === "related" && a.article_type === "introduction") return false;
       if (categoryIds.length > 0 && !(a.primary_service?.categories ?? []).some((c) => categoryIds.includes(c.id))) return false;
       if (q && !a.title.toLowerCase().includes(q) && !(a.primary_service?.name ?? "").toLowerCase().includes(q)) return false;
       return true;
     });
-  }, [localArticles, status, categoryIds, query]);
-
-  // ステータスをワンクリックで「公開中」⇔「審査待ち」に切り替え
-  const handleToggleStatus = async (e: React.MouseEvent, article: ArticleRow) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (togglingId) return;
-
-    const nextStatus = article.status === "published" ? "reviewing" : "published";
-    setTogglingId(article.id);
-
-    const res = await fetch(`/api/articles/${article.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ status: nextStatus }),
-    });
-
-    if (res.ok) {
-      setLocalArticles((prev) => prev.map((a) => (a.id === article.id ? { ...a, status: nextStatus } : a)));
-    }
-    setTogglingId(null);
-  };
+  }, [articles, status, articleType, categoryIds, query]);
 
   return (
     <div>
-      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">検索</label>
           <input
@@ -98,6 +84,18 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
             <option value="reviewing">審査待ち</option>
           </select>
         </div>
+        <div>
+          <label className="block text-xs font-medium text-gray-500 mb-1">種別</label>
+          <select
+            value={articleType}
+            onChange={(e) => setArticleType(e.target.value)}
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            <option value="">すべて</option>
+            <option value="introduction">紹介</option>
+            <option value="related">関連</option>
+          </select>
+        </div>
         <MultiSelectFilter
           label="カテゴリ"
           options={allCategories.map((c) => ({ value: c.id, label: c.name }))}
@@ -107,7 +105,7 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
         />
       </div>
 
-      <p className="text-xs text-gray-400 mb-3">{filtered.length} / {localArticles.length} 件</p>
+      <p className="text-xs text-gray-400 mb-3">{filtered.length} / {articles.length} 件</p>
 
       <div className="space-y-3">
         {filtered.map((a) => (
@@ -128,23 +126,6 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
                 <h3 className="font-bold text-gray-900 text-base leading-snug break-words line-clamp-2">{a.title}</h3>
                 <p className="text-xs text-gray-400 truncate">{a.primary_service?.name ?? "—"}</p>
               </div>
-
-              <div className="flex flex-col gap-2 shrink-0 w-24">
-                <button
-                  type="button"
-                  onClick={(e) => handleToggleStatus(e, a)}
-                  disabled={togglingId === a.id}
-                  title={a.status === "published" ? "クリックで審査待ちに戻す" : "クリックで公開する"}
-                  className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors disabled:opacity-50 ${
-                    a.status === "published"
-                      ? "bg-green-100 text-green-700 hover:bg-green-200"
-                      : "bg-yellow-100 text-yellow-700 hover:bg-yellow-200"
-                  }`}
-                >
-                  <span className={`h-2 w-2 rounded-full shrink-0 ${a.status === "published" ? "bg-green-500" : "bg-yellow-500"}`} />
-                  {getArticleStatusLabel(a.status)}
-                </button>
-              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
@@ -153,6 +134,9 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
               </span>
               <span className="text-gray-400">作成: {formatDate(a.created_at)}</span>
               {a.published_at && <span className="text-gray-400">公開: {formatDate(a.published_at)}</span>}
+              <span className={`ml-auto rounded-full px-2.5 py-0.5 font-bold ${getArticleStatusBadgeClass(a.status)}`}>
+                {getArticleStatusLabel(a.status)}
+              </span>
             </div>
 
             {(a.primary_service?.categories ?? []).length > 0 && (
