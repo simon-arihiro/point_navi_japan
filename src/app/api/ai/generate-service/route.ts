@@ -74,17 +74,16 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Service介绍 記事を生成
+    // Service紹介記事を生成（タイトルは全サービス共通フォーマットで統一）
     const updatedService = { ...service, ...updates };
-    const articleContent = await generateText(SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(updatedService));
-
-    const titleMatch = articleContent.match(/^#\s+(.+)/m);
-    const title = titleMatch ? titleMatch[1].trim() : `${service.name}の紹介`;
-    const contentWithoutTitle = articleContent.replace(/^#\s+.+\n?/, "").trim();
+    const title = `${updatedService.name}を実際に使ってみた感想｜メリット・デメリット・始め方まとめ`;
+    const articleContent = (await generateText(SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(updatedService)))
+      .replace(/^#\s+.+\n+/, "") // AIが誤ってh1タイトルを出力した場合の保険
+      .trim();
 
     const description = await generateText(
       "SEO meta descriptionを150字以内で生成するアシスタントです。",
-      buildDescriptionPrompt(title, contentWithoutTitle)
+      buildDescriptionPrompt(title, articleContent)
     );
 
     const articleSlug = `${updatedService.slug ?? service_id}-introduction`;
