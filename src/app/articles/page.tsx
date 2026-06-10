@@ -2,22 +2,35 @@ import { createClient } from "@/lib/supabase/server";
 import ArticleCard from "@/components/ArticleCard";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { ARTICLE_TYPE_LABEL as TYPE_LABEL } from "@/lib/articleTypes";
 
 export const metadata: Metadata = {
   title: "記事一覧",
   description: "ポイ活サービスの使い方・攻略・比較記事一覧です。",
 };
 
-export default async function ArticlesPage() {
+const TYPE_FILTERS = [
+  { value: undefined, label: "すべて" },
+  { value: "introduction", label: "紹介" },
+  { value: "related", label: "関連" },
+] as const;
+
+export default async function ArticlesPage(props: PageProps<"/articles">) {
+  const searchParams = await props.searchParams;
+  const typeFilter = searchParams.type as string | undefined;
+
   const supabase = await createClient();
 
-  const { data: articles } = await supabase
+  let query = supabase
     .from("articles")
     .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
     .eq("status", "published")
     .order("published_at", { ascending: false })
     .limit(50);
+
+  if (typeFilter === "introduction") query = query.eq("article_type", "introduction");
+  else if (typeFilter === "related") query = query.neq("article_type", "introduction");
+
+  const { data: articles } = await query;
 
   return (
     <div>
@@ -31,13 +44,17 @@ export default async function ArticlesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* タイプフィルター */}
         <div className="flex flex-wrap gap-2 mb-8">
-          {Object.entries(TYPE_LABEL).map(([type, label]) => (
+          {TYPE_FILTERS.map((f) => (
             <Link
-              key={type}
-              href={`/articles?type=${type}`}
-              className="px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-full text-xs hover:border-amber-300 transition-colors"
+              key={f.label}
+              href={f.value ? `/articles?type=${f.value}` : "/articles"}
+              className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${
+                typeFilter === f.value
+                  ? "bg-amber-600 text-white"
+                  : "bg-white border border-gray-200 text-gray-600 hover:border-amber-300"
+              }`}
             >
-              {label}
+              {f.label}
             </Link>
           ))}
         </div>

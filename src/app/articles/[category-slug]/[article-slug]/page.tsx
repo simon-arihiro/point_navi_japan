@@ -4,6 +4,7 @@ import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
+import { getArticleTypeLabel } from "@/lib/articleTypes";
 import type { Metadata } from "next";
 
 export async function generateMetadata(
@@ -66,7 +67,7 @@ export default async function ArticlePage(
           <article className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-xs bg-amber-50 text-amber-700 font-medium rounded-full px-3 py-1">
-                {article.article_type}
+                {getArticleTypeLabel(article.article_type)}
               </span>
               {service && (
                 <Link

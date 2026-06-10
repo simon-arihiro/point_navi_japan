@@ -4,15 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import LogoFallback from "@/components/LogoFallback";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
-import { ARTICLE_TYPE_LABEL as TYPE_LABEL, ARTICLE_TYPE_ICON as TYPE_ICON } from "@/lib/articleTypes";
-
-const STATUS_OPTIONS = ["reviewing", "published", "rejected", "archived"] as const;
-const STATUS_LABEL: Record<string, string> = {
-  reviewing: "審査待ちに戻す",
-  published: "✓ 公開する",
-  rejected: "✕ 却下する",
-  archived: "アーカイブ",
-};
+import { getArticleTypeLabel, getArticleTypeIcon, getArticleStatusLabel, getArticleStatusBadgeClass } from "@/lib/articleTypes";
 
 export default function AdminArticleDetailPage() {
   const params = useParams();
@@ -82,7 +74,7 @@ export default function AdminArticleDetailPage() {
               />
               <div className="min-w-0">
                 <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 font-bold rounded-full px-3 py-1 mb-1">
-                  {TYPE_ICON[article.article_type] ?? "📝"} {TYPE_LABEL[article.article_type] ?? article.article_type}
+                  {getArticleTypeIcon(article.article_type)} {getArticleTypeLabel(article.article_type)}
                 </span>
                 {article.primary_service?.name && (
                   <p className="text-xs text-gray-500 truncate">{article.primary_service.name}</p>
@@ -123,16 +115,12 @@ export default function AdminArticleDetailPage() {
             <h2 className="font-bold text-gray-900 mb-4 text-sm">記事情報</h2>
             <dl className="space-y-2 text-sm">
               <div><dt className="text-gray-500 text-xs">サービス</dt><dd className="font-medium">{article.primary_service?.name ?? "—"}</dd></div>
-              <div><dt className="text-gray-500 text-xs">種別</dt><dd>{TYPE_ICON[article.article_type] ?? "📝"} {TYPE_LABEL[article.article_type] ?? article.article_type}</dd></div>
+              <div><dt className="text-gray-500 text-xs">種別</dt><dd>{getArticleTypeIcon(article.article_type)} {getArticleTypeLabel(article.article_type)}</dd></div>
               <div><dt className="text-gray-500 text-xs">AI書き直し回数</dt><dd>{article.revision_count ?? 0} 回</dd></div>
               <div><dt className="text-gray-500 text-xs">現在のステータス</dt>
                 <dd>
-                  <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${
-                    article.status === "published" ? "bg-green-100 text-green-700" :
-                    article.status === "rejected" ? "bg-red-100 text-red-700" :
-                    "bg-yellow-100 text-yellow-700"
-                  }`}>
-                    {article.status}
+                  <span className={`text-xs font-medium rounded-full px-2 py-0.5 ${getArticleStatusBadgeClass(article.status)}`}>
+                    {getArticleStatusLabel(article.status)}
                   </span>
                 </dd>
               </div>
@@ -142,24 +130,28 @@ export default function AdminArticleDetailPage() {
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <h2 className="font-bold text-gray-900 mb-4 text-sm">ステータス変更</h2>
             <div className="space-y-2">
-              {STATUS_OPTIONS.map((s) => (
-                <button
-                  key={s}
-                  onClick={() => updateStatus(s)}
-                  disabled={saving || article.status === s}
-                  className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                    article.status === s
-                      ? "bg-gray-100 text-gray-400 cursor-default"
-                      : s === "published"
-                      ? "bg-green-600 text-white hover:bg-green-700"
-                      : s === "rejected"
-                      ? "bg-red-600 text-white hover:bg-red-700"
-                      : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
-                  }`}
-                >
-                  {STATUS_LABEL[s] ?? s}
-                </button>
-              ))}
+              <button
+                onClick={() => updateStatus("published")}
+                disabled={saving || article.status === "published"}
+                className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  article.status === "published"
+                    ? "bg-gray-100 text-gray-400 cursor-default"
+                    : "bg-green-600 text-white hover:bg-green-700"
+                }`}
+              >
+                ✓ 公開する
+              </button>
+              <button
+                onClick={() => updateStatus("reviewing")}
+                disabled={saving || article.status !== "published"}
+                className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  article.status !== "published"
+                    ? "bg-gray-100 text-gray-400 cursor-default"
+                    : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                }`}
+              >
+                審査待ちに戻す
+              </button>
             </div>
           </div>
         </div>

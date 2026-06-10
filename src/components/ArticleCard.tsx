@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArticleWithService } from "@/types/database";
 import LogoFallback from "./LogoFallback";
-import { ARTICLE_TYPE_LABEL, ARTICLE_TYPE_ICON } from "@/lib/articleTypes";
+import { getArticleTypeLabel, getArticleTypeIcon } from "@/lib/articleTypes";
 
 type Props = {
   article: ArticleWithService;
@@ -16,8 +16,8 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
   const publishedDate = article.published_at
     ? new Date(article.published_at).toLocaleDateString("ja-JP")
     : "";
-  const typeLabel = ARTICLE_TYPE_LABEL[article.article_type] ?? article.article_type;
-  const typeIcon = ARTICLE_TYPE_ICON[article.article_type] ?? "📝";
+  const typeLabel = getArticleTypeLabel(article.article_type);
+  const typeIcon = getArticleTypeIcon(article.article_type);
 
   if (size === "featured") {
     return (
