@@ -21,6 +21,8 @@ export interface Service {
   description: string;
   referral_code: string | null;
   referral_link: string | null;
+  campaign_bonus: string | null;
+  campaign_expires_at: string | null;
   official_url: string;
   logo_url: string | null;
   logo_storage_path: string | null;

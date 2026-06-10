@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Service } from "@/types/database";
+import { getCampaignBadge } from "@/lib/campaign";
 
 type Props = {
   service: Service;
@@ -33,8 +34,21 @@ export default function ConversionArea({ service }: Props) {
 
   if (!service.referral_code && !service.referral_link) return null;
 
+  const campaignBadge = getCampaignBadge(service);
+
   return (
     <div className="bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200 rounded-2xl p-6">
+      {campaignBadge && service.campaign_bonus && (
+        <div
+          className={`mb-4 rounded-xl px-4 py-3 flex items-center gap-2 ${
+            campaignBadge.urgent ? "bg-orange-500 text-white" : "bg-amber-400 text-slate-900"
+          }`}
+        >
+          <span className="font-bold text-sm shrink-0">🔥 {campaignBadge.label}</span>
+          <span className="text-sm">{service.campaign_bonus}</span>
+        </div>
+      )}
+
       <h2 className="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">🎁 お得な招待情報</h2>
 
       {service.referral_code && (

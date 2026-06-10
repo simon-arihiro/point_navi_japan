@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ServiceWithRelations } from "@/types/database";
 import LogoFallback from "./LogoFallback";
+import { getCampaignBadge } from "@/lib/campaign";
 
 type Props = {
   service: ServiceWithRelations;
@@ -11,10 +12,20 @@ type Props = {
 export default function ServiceCard({ service, categorySlug, rank }: Props) {
   const cat = categorySlug ?? service.categories?.[0]?.slug ?? "all";
   const href = `/services/${cat}/${service.slug}`;
+  const badge = getCampaignBadge(service);
 
   return (
     <Link href={href} className="group block">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all h-full">
+      <div className="relative bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all h-full">
+        {badge && (
+          <span
+            className={`absolute top-3 right-3 text-xs font-bold rounded-full px-2.5 py-1 ${
+              badge.urgent ? "bg-orange-500 text-white" : "bg-amber-100 text-amber-800"
+            }`}
+          >
+            🔥 期間限定 {badge.label}
+          </span>
+        )}
         <div className="flex items-start gap-4">
           {rank !== undefined && (
             <span className="text-2xl font-black text-gray-200 w-8 shrink-0">#{rank}</span>

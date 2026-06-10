@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Category, resolveCategoryIds } from "@/lib/categories";
 import CategorySelector from "@/components/admin/CategorySelector";
+import { toDatetimeLocalValue, fromDatetimeLocalValue } from "@/lib/campaign";
 
 export default function EditServicePage() {
   const params = useParams();
@@ -21,7 +22,7 @@ export default function EditServicePage() {
     fetch(`/api/services/${id}`)
       .then((r) => r.json())
       .then(({ data }) => {
-        setForm(data);
+        setForm({ ...data, campaign_expires_at: toDatetimeLocalValue(data.campaign_expires_at) });
         setCategoryNames((data.categories ?? []).map((c: any) => c.category?.name).filter(Boolean));
         setLoading(false);
       });
@@ -56,7 +57,12 @@ export default function EditServicePage() {
     const res = await fetch(`/api/services/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, category_ids }),
+      body: JSON.stringify({
+        ...form,
+        campaign_bonus: form.campaign_bonus || null,
+        campaign_expires_at: fromDatetimeLocalValue(form.campaign_expires_at),
+        category_ids,
+      }),
     });
     if (!res.ok) {
       const d = await res.json();
@@ -116,6 +122,8 @@ export default function EditServicePage() {
           { label: "公式URL", key: "official_url", type: "url" },
           { label: "招待コード", key: "referral_code", type: "text" },
           { label: "招待リンク", key: "referral_link", type: "url" },
+          { label: "キャンペーン内容", key: "campaign_bonus", type: "text" },
+          { label: "キャンペーン終了日時", key: "campaign_expires_at", type: "datetime-local" },
           { label: "ロゴURL", key: "logo_url", type: "url" },
         ].map(({ label, key, type }) => (
           <div key={key}>
