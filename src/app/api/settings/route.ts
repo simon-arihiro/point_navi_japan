@@ -12,11 +12,11 @@ export async function GET() {
 export async function PUT(request: NextRequest) {
   const supabase = createAdminClient();
   const body = await request.json();
-  const { operation_mode, auto_generate_enabled, auto_distribution, daily_article_count, max_pending_articles, ranking_window_days } = body;
+  const { operation_mode, auto_generate_enabled, auto_distribution, daily_article_count, max_pending_articles, ranking_window_days, hide_articles_on_inactive } = body;
 
   const { data, error } = await supabase
     .from("system_settings")
-    .update({ operation_mode, auto_generate_enabled, auto_distribution, daily_article_count, max_pending_articles, ranking_window_days })
+    .update({ operation_mode, auto_generate_enabled, auto_distribution, daily_article_count, max_pending_articles, ranking_window_days, hide_articles_on_inactive })
     .eq("id", 1)
     .select()
     .single();

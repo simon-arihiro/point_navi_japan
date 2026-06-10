@@ -1,6 +1,6 @@
 # SPECIFICATION.md
 
-Version: v1.4.5
+Version: v1.4.6
 Status: 🟢 Active
 Date: 2026-06-10
 
@@ -209,7 +209,6 @@ Service是系统唯一核心资产。
 | logo_url | text | 原始Logo URL，可空 |
 | logo_storage_path | text | Supabase Storage本地副本路径 |
 | status | enum | active / inactive |
-| hide_articles_on_inactive | boolean | inactive 时是否同时隐藏已发布文章，默认 false |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
 
@@ -348,6 +347,7 @@ Service是系统唯一核心资产。
 | daily_article_count | int | 每日自动生成Service関連文章数，默认 1 |
 | max_pending_articles | int | 审核队列积压上限，超过则暂停生成，默认 10 |
 | ranking_window_days | int | Ranking统计时间窗口，默认 30 |
+| hide_articles_on_inactive | boolean | Service が inactive の場合に该 Service の公開済み記事も全体的に非表示にするか，默认 false（全Service共通のグローバル設定） |
 | updated_at | timestamptz | |
 
 ---
@@ -453,8 +453,10 @@ AI生成・常時最新
   - 入力項目：サービス名 / スラッグ / 公式URL / 招待コード / 招待リンク / ロゴURL / 説明 / カテゴリ（複数選択可・チップ入力、既存カテゴリは候補表示）/ ステータス
   - 「AI補完」ボタン：公式URLを基にAIが説明文・カテゴリ候補をフォームへ自動入力（DB書き込み・記事生成は行わない）
   - 「追加」ボタン：入力内容で Service レコードを作成し、選択中のカテゴリを `service_categories` に紐付け。紹介記事は自動生成されない
-* 每条 Service 详情页提供「立即生成文章」按钮，立即为该 Service 触发一次 Service関連 文章生成，不受 `auto_generate_enabled` / `max_pending_articles` 限制
-* 将 Service 设为 inactive 时，提示是否同时隐藏该 Service 的已发布文章（写入 `hide_articles_on_inactive`）
+* Service 編集ページ（`/admin/services/[id]`）下部の操作ボタンは 2行 × 2列・同サイズのグリッド配置：
+  - 1行目：「保存」（フォーム送信）/「削除」（Service と関連記事を全削除）
+  - 2行目：「紹介記事」（`POST /api/ai/generate-service` — Service介绍 文章を AI で再生成・常に1本のみ最新に上書き）/「関連記事」（`POST /api/ai/generate-article` — Service関連 文章を AI で新規追加生成、複数本生成可能）
+* inactive な Service の公開済み記事を非表示にするかどうかは Service ごとではなく `system_settings.hide_articles_on_inactive` でグローバルに制御（`/admin/settings` で設定）
 
 **Categories 管理：**
 

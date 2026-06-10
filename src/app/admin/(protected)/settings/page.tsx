@@ -114,6 +114,19 @@ export default function AdminSettingsPage() {
           />
         </div>
 
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="hide_articles_on_inactive"
+            checked={settings?.hide_articles_on_inactive ?? false}
+            onChange={set("hide_articles_on_inactive")}
+            className="w-4 h-4 text-red-600"
+          />
+          <label htmlFor="hide_articles_on_inactive" className="text-sm font-medium text-gray-700">
+            inactive な Service の公開済み記事を非表示にする
+          </label>
+        </div>
+
         <button
           onClick={handleSave}
           disabled={saving}

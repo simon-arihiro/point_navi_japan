@@ -25,7 +25,6 @@ export interface Service {
   logo_url: string | null;
   logo_storage_path: string | null;
   status: ServiceStatus;
-  hide_articles_on_inactive: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -130,6 +129,7 @@ export interface SystemSettings {
   daily_article_count: number;
   max_pending_articles: number;
   ranking_window_days: number;
+  hide_articles_on_inactive: boolean;
   updated_at: string;
 }
 

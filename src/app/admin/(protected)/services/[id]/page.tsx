@@ -115,45 +115,32 @@ export default function EditServicePage() {
           </select>
         </div>
 
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id="hide_articles_on_inactive"
-            checked={form.hide_articles_on_inactive ?? false}
-            onChange={(e) => setForm((prev: any) => ({ ...prev, hide_articles_on_inactive: e.target.checked }))}
-            className="w-4 h-4 text-red-600"
-          />
-          <label htmlFor="hide_articles_on_inactive" className="text-sm text-gray-700">
-            inactive 時に公開済み記事も非表示にする
-          </label>
-        </div>
-
         {error && <p className="text-red-600 text-sm">{error}</p>}
 
-        <div className="flex gap-3 pt-2">
-          <button type="submit" disabled={saving} className="flex-1 bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50">
+        <div className="grid grid-cols-2 gap-3 pt-2">
+          <button type="submit" disabled={saving} className="bg-red-600 text-white font-bold py-3 rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50">
             {saving ? "保存中..." : "保存"}
           </button>
           <button
             type="button"
-            onClick={handleRegenerateIntro}
-            className="px-4 py-3 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors"
+            onClick={handleDelete}
+            className="bg-white border border-red-200 text-red-600 font-bold py-3 rounded-xl hover:bg-red-50 transition-colors"
           >
-            紹介記事を再生成
+            削除
+          </button>
+          <button
+            type="button"
+            onClick={handleRegenerateIntro}
+            className="bg-blue-600 text-white text-sm font-medium py-3 rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            紹介記事
           </button>
           <button
             type="button"
             onClick={handleGenerateArticle}
-            className="px-4 py-3 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+            className="bg-indigo-600 text-white text-sm font-medium py-3 rounded-xl hover:bg-indigo-700 transition-colors"
           >
-            今すぐ記事生成
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            className="px-4 py-3 bg-white border border-red-200 text-red-600 text-sm font-medium rounded-xl hover:bg-red-50 transition-colors"
-          >
-            削除
+            関連記事
           </button>
         </div>
       </form>
