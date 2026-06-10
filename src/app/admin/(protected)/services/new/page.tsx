@@ -110,10 +110,8 @@ export default function NewServicePage() {
     setLoading(true);
     setError("");
 
-    // カテゴリ名 → ID解決（既存は一致させ、未存在は新規作成）
-    const category_ids = await resolveCategoryIds(categoryNames, allCategories, (newCat) =>
-      setAllCategories((prev) => [...prev, newCat])
-    );
+    // カテゴリ名 → ID解決（既存カテゴリと一致するもののみ）
+    const category_ids = resolveCategoryIds(categoryNames, allCategories);
 
     const res = await fetch("/api/services", {
       method: "POST",

@@ -1,3 +1,4 @@
+import { createAdminClient } from "@/lib/supabase/server";
 import { generateText, extractJson } from "@/lib/ai/claude";
 import { buildServiceInfoPrompt } from "@/lib/ai/prompts";
 import { errorResponse, ErrorCode } from "@/lib/errors";
@@ -10,9 +11,13 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const supabase = createAdminClient();
+    const { data: categories } = await supabase.from("categories").select("name").order("name");
+    const existingCategories = (categories ?? []).map((c) => c.name);
+
     const infoJson = await generateText(
       "あなたはウェブサイトの情報を分析するAIアシスタントです。JSONのみ返してください。",
-      buildServiceInfoPrompt(official_url)
+      buildServiceInfoPrompt(official_url, existingCategories)
     );
 
     const aiInfo = extractJson<{

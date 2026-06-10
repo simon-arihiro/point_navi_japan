@@ -50,9 +50,7 @@ export default function EditServicePage() {
     setSaving(true);
     setError("");
 
-    const category_ids = await resolveCategoryIds(categoryNames, allCategories, (newCat) =>
-      setAllCategories((prev) => [...prev, newCat])
-    );
+    const category_ids = resolveCategoryIds(categoryNames, allCategories);
 
     const res = await fetch(`/api/services/${id}`, {
       method: "PUT",

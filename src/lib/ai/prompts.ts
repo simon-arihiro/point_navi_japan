@@ -5,16 +5,21 @@ export const SYSTEM_PROMPT_BASE = `あなたは日本のポイ活・招待コー
 必須表現を自然に散りばめる：「実際に使ってみた」「正直なところ」「これは本当におすすめ」
 出力言語：日本語のみ。`;
 
-export function buildServiceInfoPrompt(officialUrl: string) {
+export function buildServiceInfoPrompt(officialUrl: string, existingCategories: string[]) {
+  const categoryList = existingCategories.length > 0 ? existingCategories.join("、") : "（登録済みカテゴリなし）";
+
   return `あなたはこのURLに直接アクセスすることはできません。URLのドメイン名やパス、サービス名から推測できる一般的な知識をもとに、サービス情報を推測してJSON形式で返してください。
 URL: ${officialUrl}
+
+既存カテゴリ一覧（categoriesはこの中からのみ選択可能）：
+${categoryList}
 
 返却するJSON形式：
 {
   "name": "サービス名（日本語、推測でよい）",
   "slug": "url-friendly-slug（英小文字・ハイフン区切り）",
   "description": "SEO meta description（150字以内・日本語）",
-  "categories": ["カテゴリ名1", "カテゴリ名2"],
+  "categories": ["既存カテゴリ一覧の中から該当するものだけを選択（複数可、なければ空配列）"],
   "tags": ["タグ1", "タグ2", "タグ3"],
   "campaign_bonus": "現在実施中のキャンペーン内容（例: 期間限定+1,000pt）。確信が持てない場合は null",
   "campaign_expires_at": "キャンペーン終了日時（YYYY-MM-DD形式）。確信が持てない場合は null",
@@ -22,7 +27,8 @@ URL: ${officialUrl}
 }
 
 注意：
-- 「アクセスできません」「わかりません」のような断り書きは一切不要です。name, slug, description, categories, tags は必ず推測で値を埋めてください。
+- 「アクセスできません」「わかりません」のような断り書きは一切不要です。name, slug, description, tags は必ず推測で値を埋めてください。
+- categories は必ず上記の「既存カテゴリ一覧」に記載されている名称と完全一致するものだけを選んでください。一覧にない新しいカテゴリ名を作成・出力することは禁止です。該当するものがなければ空配列 [] にしてください。
 - campaign_bonus, campaign_expires_at, logo_url は正確な情報に確信が持てる場合のみ値を入れ、不確かな場合は必ず null にしてください（架空の金額や日付を作らないこと）。
 - 前置きや補足説明、コードブロック記号（\`\`\`）は付けず、JSONオブジェクトのみを出力してください。`;
 }

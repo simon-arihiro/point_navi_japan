@@ -25,10 +25,12 @@ export async function POST(request: NextRequest) {
   if (svcErr || !service) return errorResponse(ErrorCode.SERVICE_NOT_FOUND, "サービスが見つかりません", 404);
 
   try {
+    const { data: existingCategories } = await supabase.from("categories").select("id, name");
+
     // AI でサービス情報補完（slug / description / categories / tags）
     const infoJson = await generateText(
       "あなたはウェブサイトの情報を分析するAIアシスタントです。JSONのみ返してください。",
-      buildServiceInfoPrompt(service.official_url)
+      buildServiceInfoPrompt(service.official_url, (existingCategories ?? []).map((c) => c.name))
     );
 
     const aiInfo = extractJson<{ name?: string; slug?: string; description?: string; categories?: string[]; tags?: string[] }>(infoJson) ?? {};
@@ -42,15 +44,10 @@ export async function POST(request: NextRequest) {
       await supabase.from("services").update(updates).eq("id", service_id);
     }
 
-    // カテゴリ・タグを自動マッチ・作成
+    // カテゴリは既存のものから一致するものだけを紐付ける（新規作成はしない）
     if (aiInfo.categories?.length) {
       for (const catName of aiInfo.categories) {
-        const slug = catName.toLowerCase().replace(/\s+/g, "-");
-        const { data: cat } = await supabase
-          .from("categories")
-          .upsert({ name: catName, slug }, { onConflict: "slug" })
-          .select()
-          .single();
+        const cat = (existingCategories ?? []).find((c) => c.name.toLowerCase() === catName.toLowerCase());
         if (cat) {
           await supabase.from("service_categories").upsert(
             { service_id, category_id: cat.id },
