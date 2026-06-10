@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
+import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 import type { Metadata } from "next";
 
 export async function generateMetadata(
@@ -89,8 +90,8 @@ export default async function ArticlePage(
             )}
 
             <div
-              className="prose prose-sm max-w-none"
-              dangerouslySetInnerHTML={{ __html: article.content }}
+              className={ARTICLE_PROSE_CLASS}
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
             />
 
             <p className="text-xs text-gray-400 mt-10 pt-6 border-t border-gray-100">

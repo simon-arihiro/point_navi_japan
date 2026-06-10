@@ -4,6 +4,7 @@ import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
 import LogoFallback from "@/components/LogoFallback";
+import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 import type { Metadata } from "next";
 
 export async function generateMetadata(
@@ -131,8 +132,8 @@ export default async function ServicePage(
             {introArticle && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <article
-                  className="prose prose-sm max-w-none"
-                  dangerouslySetInnerHTML={{ __html: introArticle.content }}
+                  className={ARTICLE_PROSE_CLASS}
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(introArticle.content) }}
                 />
               </div>
             )}

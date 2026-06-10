@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import LogoFallback from "@/components/LogoFallback";
+import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 
 const STATUS_OPTIONS = ["reviewing", "published", "rejected", "archived"] as const;
 const STATUS_LABEL: Record<string, string> = {
@@ -9,6 +11,24 @@ const STATUS_LABEL: Record<string, string> = {
   published: "✓ 公開する",
   rejected: "✕ 却下する",
   archived: "アーカイブ",
+};
+
+const TYPE_LABEL: Record<string, string> = {
+  introduction: "サービス紹介",
+  guide: "使い方ガイド",
+  faq: "よくある質問",
+  comparison: "比較",
+  campaign: "キャンペーン",
+  earnings: "収益実績",
+};
+
+const TYPE_ICON: Record<string, string> = {
+  introduction: "📄",
+  guide: "📖",
+  faq: "❓",
+  comparison: "⚖️",
+  campaign: "🎉",
+  earnings: "💰",
 };
 
 export default function AdminArticleDetailPage() {
@@ -58,21 +78,41 @@ export default function AdminArticleDetailPage() {
   if (!article) return <div className="text-red-600 text-sm">記事が見つかりません</div>;
 
   return (
-    <div className="max-w-4xl">
-      <div className="flex items-center gap-4 mb-8">
-        <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700">← 戻る</button>
-        <h1 className="text-xl font-black text-gray-900 flex-1 truncate">{article.title}</h1>
+    <div className="max-w-6xl">
+      <div className="flex items-center gap-4 mb-6">
+        <button onClick={() => router.back()} className="text-gray-500 hover:text-gray-700 shrink-0">← 戻る</button>
+        <h1 className="text-lg sm:text-xl font-black text-gray-900 flex-1 truncate">{article.title}</h1>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* 記事本文 */}
         <div className="lg:col-span-2 space-y-5">
-          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <h2 className="font-bold text-gray-900 mb-3 text-sm">記事本文（プレビュー）</h2>
-            <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap text-xs max-h-96 overflow-y-auto">
-              {article.content}
+          <article className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            {/* サービス情報ヘッダー */}
+            <div className="bg-gradient-to-r from-amber-50 to-white border-b border-gray-100 px-5 sm:px-6 py-4 flex items-center gap-4">
+              <LogoFallback
+                name={article.primary_service?.name ?? "?"}
+                logoUrl={article.primary_service?.logo_url}
+                logoStoragePath={article.primary_service?.logo_storage_path}
+                officialUrl={article.primary_service?.official_url}
+                size={48}
+              />
+              <div className="min-w-0">
+                <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 font-bold rounded-full px-3 py-1 mb-1">
+                  {TYPE_ICON[article.article_type] ?? "📝"} {TYPE_LABEL[article.article_type] ?? article.article_type}
+                </span>
+                {article.primary_service?.name && (
+                  <p className="text-xs text-gray-500 truncate">{article.primary_service.name}</p>
+                )}
+              </div>
             </div>
-          </div>
+
+            {/* 本文プレビュー */}
+            <div
+              className={`${ARTICLE_PROSE_CLASS} px-5 sm:px-8 py-6`}
+              dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
+            />
+          </article>
 
           {/* フィードバックで書き直し */}
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
@@ -95,12 +135,12 @@ export default function AdminArticleDetailPage() {
         </div>
 
         {/* 操作パネル */}
-        <div className="space-y-5">
+        <div className="space-y-5 lg:sticky lg:top-6 lg:self-start">
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <h2 className="font-bold text-gray-900 mb-4 text-sm">記事情報</h2>
             <dl className="space-y-2 text-sm">
               <div><dt className="text-gray-500 text-xs">サービス</dt><dd className="font-medium">{article.primary_service?.name ?? "—"}</dd></div>
-              <div><dt className="text-gray-500 text-xs">種別</dt><dd>{article.article_type}</dd></div>
+              <div><dt className="text-gray-500 text-xs">種別</dt><dd>{TYPE_ICON[article.article_type] ?? "📝"} {TYPE_LABEL[article.article_type] ?? article.article_type}</dd></div>
               <div><dt className="text-gray-500 text-xs">AI書き直し回数</dt><dd>{article.revision_count ?? 0} 回</dd></div>
               <div><dt className="text-gray-500 text-xs">現在のステータス</dt>
                 <dd>
