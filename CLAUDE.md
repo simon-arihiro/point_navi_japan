@@ -80,6 +80,8 @@
 
 ## DB マイグレーション
 
-- ファイル: `supabase/migrations/001_initial_schema.sql`
+- ファイル: `supabase/migrations/*.sql`（001〜004、実行済み）
 - 実行場所: Supabase SQL Editor（上記リンク）
-- 初回のみ手動実行が必要
+- **`supabase/migrations/` に新しい .sql ファイルを追加したら、必ず Supabase SQL Editor で手動実行すること（自動適用されない）**
+- 未実行のまま該当カラムを使う API を呼ぶと `Could not find the 'xxx' column of 'yyy' in the schema cache` エラーになる（`NOTIFY pgrst, 'reload schema'` では直らない＝カラム自体が存在しない）
+- `ALTER TYPE ... ADD VALUE IF NOT EXISTS` を含む migration は、その値を同一トランザクション内で使う文と分けて実行する

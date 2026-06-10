@@ -45,6 +45,12 @@
 
 ## 已知环境问题
 
+### migration 002〜004 が未実行だった（解決済み）
+- **症状**：システム設定の保存で `Could not find the 'auto_generate_enabled' column of 'system_settings' in the schema cache`
+- **原因**：`supabase/migrations/002_spec_v1_3.sql`〜`004_campaign_badge.sql` で追加されたカラム（`system_settings.auto_generate_enabled`/`max_pending_articles`/`hide_articles_on_inactive`、`articles.revision_count`、`services.campaign_bonus`/`campaign_expires_at`、`article_status`への`rejected`追加）が本番DBに存在しなかった
+- **対処**：2026/06/10、Supabase SQL Editor で 002〜004 の内容を手動実行して解決済み
+- **教訓**：今後 `supabase/migrations/` に新規ファイルを追加した場合、コードを push するだけでなく必ず Supabase SQL Editor で実行すること（CLAUDE.md の「DB マイグレーション」項参照）
+
 ### SUPABASE_SERVICE_ROLE_KEY 未设置
 - **症状**：カテゴリ管理で追加すると "permission denied for table categories" エラー
 - **原因**：Admin 写入 API（POST/PUT/DELETE）は `createAdminClient()` を使用し `SUPABASE_SERVICE_ROLE_KEY` が必要。この key が Vercel の Environment Variables に未設定だと RLS に阻まれる
