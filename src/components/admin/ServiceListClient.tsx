@@ -171,21 +171,20 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                 <p className="text-xs text-gray-400">{svc.slug}</p>
               </div>
 
-              <div className="flex flex-col items-end gap-2 shrink-0">
+              <div className="flex flex-col gap-2 shrink-0 w-24">
                 <button
                   type="button"
                   onClick={(e) => handleToggleStatus(e, svc)}
                   disabled={togglingId === svc.id}
-                  title={svc.status === "active" ? "クリックで無効化" : "クリックで有効化"}
-                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors disabled:opacity-50 ${
-                    svc.status === "active" ? "bg-green-500" : "bg-gray-300"
+                  title={svc.status === "active" ? "クリックで非公開にする" : "クリックで公開する"}
+                  className={`flex items-center justify-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold transition-colors disabled:opacity-50 ${
+                    svc.status === "active"
+                      ? "bg-green-100 text-green-700 hover:bg-green-200"
+                      : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                   }`}
                 >
-                  <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                      svc.status === "active" ? "translate-x-6" : "translate-x-1"
-                    }`}
-                  />
+                  <span className={`h-2 w-2 rounded-full shrink-0 ${svc.status === "active" ? "bg-green-500" : "bg-gray-400"}`} />
+                  {svc.status === "active" ? "公開中" : "非公開"}
                 </button>
 
                 <div className="relative">
@@ -193,7 +192,7 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                     type="button"
                     onClick={(e) => toggleMenu(e, svc.id)}
                     disabled={actionLoadingId === svc.id}
-                    className="text-xs font-medium text-indigo-600 bg-indigo-50 rounded-lg px-2.5 py-1.5 hover:bg-indigo-100 transition-colors disabled:opacity-50 whitespace-nowrap"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 transition-colors hover:bg-orange-200 disabled:opacity-50 whitespace-nowrap"
                   >
                     {actionLoadingId === svc.id ? "更新中..." : "記事生成"}
                   </button>
@@ -201,7 +200,7 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                   {menuOpenId === svc.id && (
                     <>
                       <div className="fixed inset-0 z-10" onClick={closeMenu} />
-                      <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden">
+                      <div className="absolute right-0 top-full mt-1.5 w-40 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden">
                         <button
                           type="button"
                           onClick={(e) => handleUpdateIntro(e, svc)}
