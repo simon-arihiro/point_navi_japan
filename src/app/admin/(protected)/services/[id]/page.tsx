@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { Category, resolveCategoryIds } from "@/lib/categories";
+import CategorySelector from "@/components/admin/CategorySelector";
 
 export default function EditServicePage() {
   const params = useParams();
@@ -11,24 +13,49 @@ export default function EditServicePage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState<any>(null);
+  const [allCategories, setAllCategories] = useState<Category[]>([]);
+  const [categoryNames, setCategoryNames] = useState<string[]>([]);
 
   useEffect(() => {
     fetch(`/api/services/${id}`)
       .then((r) => r.json())
-      .then(({ data }) => { setForm(data); setLoading(false); });
+      .then(({ data }) => {
+        setForm(data);
+        setCategoryNames((data.categories ?? []).map((c: any) => c.category?.name).filter(Boolean));
+        setLoading(false);
+      });
   }, [id]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((res) => res.json())
+      .then(({ data }) => setAllCategories(data ?? []));
+  }, []);
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((prev: any) => ({ ...prev, [key]: e.target.value }));
+
+  const toggleCategory = (name: string) => {
+    setCategoryNames((prev) =>
+      prev.some((c) => c.toLowerCase() === name.toLowerCase())
+        ? prev.filter((c) => c.toLowerCase() !== name.toLowerCase())
+        : [...prev, name]
+    );
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     setError("");
+
+    const category_ids = await resolveCategoryIds(categoryNames, allCategories, (newCat) =>
+      setAllCategories((prev) => [...prev, newCat])
+    );
+
     const res = await fetch(`/api/services/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
+      body: JSON.stringify({ ...form, category_ids }),
     });
     if (!res.ok) {
       const d = await res.json();
@@ -102,6 +129,8 @@ export default function EditServicePage() {
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
           />
         </div>
+
+        <CategorySelector allCategories={allCategories} selected={categoryNames} onToggle={toggleCategory} />
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">ステータス</label>

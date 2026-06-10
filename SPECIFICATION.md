@@ -1,6 +1,6 @@
 # SPECIFICATION.md
 
-Version: v1.4.6
+Version: v1.4.7
 Status: 🟢 Active
 Date: 2026-06-10
 
@@ -450,12 +450,14 @@ AI生成・常時最新
 **Service 管理：**
 
 * サービス追加フォーム（`/admin/services/new`）：
-  - 入力項目：サービス名 / スラッグ / 公式URL / 招待コード / 招待リンク / ロゴURL / 説明 / カテゴリ（複数選択可・チップ入力、既存カテゴリは候補表示）/ ステータス
-  - 「AI補完」ボタン：公式URLを基にAIが説明文・カテゴリ候補をフォームへ自動入力（DB書き込み・記事生成は行わない）
-  - 「追加」ボタン：入力内容で Service レコードを作成し、選択中のカテゴリを `service_categories` に紐付け。紹介記事は自動生成されない
-* Service 編集ページ（`/admin/services/[id]`）下部の操作ボタンは 2行 × 2列・同サイズのグリッド配置：
-  - 1行目：「保存」（フォーム送信）/「削除」（Service と関連記事を全削除）
-  - 2行目：「紹介記事」（`POST /api/ai/generate-service` — Service介绍 文章を AI で再生成・常に1本のみ最新に上書き）/「関連記事」（`POST /api/ai/generate-article` — Service関連 文章を AI で新規追加生成、複数本生成可能）
+  - 入力項目：サービス名 / スラッグ / 公式URL / 招待コード / 招待リンク / ロゴURL / 説明 / カテゴリ（既存カテゴリ一覧からのトグル選択式、F.6 参照）/ ステータス
+  - 「AI補完」ボタン：公式URLを基にAIが説明文・カテゴリ候補をフォームへ自動入力（DB書き込み・記事生成は行わない）。AI が返したカテゴリ候補は手動選択済みのカテゴリを**上書き**する
+  - 「追加」ボタン：入力内容で Service レコードを作成し、選択中のカテゴリを `service_categories` に紐付け（この時点でカテゴリが確定）。紹介記事は自動生成されない
+* Service 編集ページ（`/admin/services/[id]`）：
+  - カテゴリ欄は追加フォームと同一の選択式 UI（F.6 参照）。既存の紐付けを初期選択状態として表示し、保存時に選択内容で `service_categories` を全置換する
+  - 下部の操作ボタンは 2行 × 2列・同サイズのグリッド配置：
+    - 1行目：「保存」（フォーム送信）/「削除」（Service と関連記事を全削除）
+    - 2行目：「紹介記事」（`POST /api/ai/generate-service` — Service介绍 文章を AI で再生成・常に1本のみ最新に上書き）/「関連記事」（`POST /api/ai/generate-article` — Service関連 文章を AI で新規追加生成、複数本生成可能）
 * inactive な Service の公開済み記事を非表示にするかどうかは Service ごとではなく `system_settings.hide_articles_on_inactive` でグローバルに制御（`/admin/settings` で設定）
 
 **Categories 管理：**
@@ -899,6 +901,25 @@ Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdm
 **placeholder の指針：** モバイルで入力欄が狭くなることを考慮し、全角10文字以内に抑える。詳細な例示が必要な場合は `title` 属性または下部ヒントテキストで補足する。
 
 **参照実装：** `src/app/admin/(protected)/categories/page.tsx`
+
+---
+
+### F.6 Service カテゴリ選択 UI（トグル式マルチセレクト）
+
+**適用範囲：** Service 追加（`/admin/services/new`）・編集（`/admin/services/[id]`）ページのカテゴリ欄
+
+**問題：** 自由入力のテキストボックス／チップ入力では、既存カテゴリとの表記ゆれ（全角半角・大文字小文字）が発生しやすく、Admin が既存カテゴリ一覧を把握しづらい
+
+**実装パターン：**
+- `src/components/admin/CategorySelector.tsx`（共通コンポーネント）が、登録済み全カテゴリ＋未登録の選択中カテゴリ名をトグルボタン（チップ）として一覧表示する
+- Admin はチップをクリックして手動で複数選択／解除できる（`selected: string[]` を名前ベースで管理、大文字小文字は無視して比較）
+- AI補完（`/api/ai/autofill-service`）がカテゴリ候補を返した場合、その配列で `selected` を**丸ごと上書き**する（手動選択とのマージは行わない）
+- 「追加」/「保存」実行時に `src/lib/categories.ts` の `resolveCategoryIds()` で名前→`category_id` へ解決する：
+  - 既存カテゴリは名前一致（大文字小文字無視）させる
+  - 未存在の名前は `POST /api/categories` で新規作成し、その ID を使用する
+- 編集ページの保存（`PUT /api/services/[id]`）は `category_ids` を受け取り、`service_categories` の当該 service_id の行を**全削除→再挿入**することで全置換する
+
+**参照実装：** `src/lib/categories.ts` / `src/components/admin/CategorySelector.tsx` / `src/app/admin/(protected)/services/new/page.tsx` / `src/app/admin/(protected)/services/[id]/page.tsx`
 
 ---
 

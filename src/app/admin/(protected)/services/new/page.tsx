@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-
-type Category = { id: string; name: string; slug: string };
+import { Category, resolveCategoryIds } from "@/lib/categories";
+import CategorySelector from "@/components/admin/CategorySelector";
 
 export default function NewServicePage() {
   const router = useRouter();
@@ -24,7 +24,6 @@ export default function NewServicePage() {
 
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [categoryNames, setCategoryNames] = useState<string[]>([]);
-  const [categoryInput, setCategoryInput] = useState("");
 
   useEffect(() => {
     fetch("/api/categories")
@@ -35,22 +34,12 @@ export default function NewServicePage() {
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
 
-  const addCategory = (raw: string) => {
-    const name = raw.trim();
-    if (!name) return;
-    setCategoryNames((prev) => (prev.some((c) => c.toLowerCase() === name.toLowerCase()) ? prev : [...prev, name]));
-    setCategoryInput("");
-  };
-
-  const removeCategory = (name: string) => {
-    setCategoryNames((prev) => prev.filter((c) => c !== name));
-  };
-
-  const handleCategoryInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === ",") {
-      e.preventDefault();
-      addCategory(categoryInput);
-    }
+  const toggleCategory = (name: string) => {
+    setCategoryNames((prev) =>
+      prev.some((c) => c.toLowerCase() === name.toLowerCase())
+        ? prev.filter((c) => c.toLowerCase() !== name.toLowerCase())
+        : [...prev, name]
+    );
   };
 
   const handleAutofill = async () => {
@@ -83,16 +72,15 @@ export default function NewServicePage() {
     }));
 
     if (Array.isArray(data.categories)) {
-      setCategoryNames((prev) => {
-        const merged = [...prev];
-        for (const name of data.categories) {
-          const trimmed = String(name).trim();
-          if (trimmed && !merged.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
-            merged.push(trimmed);
-          }
+      // AI補完の結果で選択中のカテゴリを上書きする
+      const aiCategories: string[] = [];
+      for (const name of data.categories) {
+        const trimmed = String(name).trim();
+        if (trimmed && !aiCategories.some((c) => c.toLowerCase() === trimmed.toLowerCase())) {
+          aiCategories.push(trimmed);
         }
-        return merged;
-      });
+      }
+      if (aiCategories.length > 0) setCategoryNames(aiCategories);
     }
 
     setAiLoading(false);
@@ -104,24 +92,9 @@ export default function NewServicePage() {
     setError("");
 
     // カテゴリ名 → ID解決（既存は一致させ、未存在は新規作成）
-    const category_ids: string[] = [];
-    for (const name of categoryNames) {
-      const existing = allCategories.find((c) => c.name.toLowerCase() === name.toLowerCase());
-      if (existing) {
-        category_ids.push(existing.id);
-        continue;
-      }
-      const catRes = await fetch("/api/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
-      });
-      if (catRes.ok) {
-        const { data: newCat } = await catRes.json();
-        category_ids.push(newCat.id);
-        setAllCategories((prev) => [...prev, newCat]);
-      }
-    }
+    const category_ids = await resolveCategoryIds(categoryNames, allCategories, (newCat) =>
+      setAllCategories((prev) => [...prev, newCat])
+    );
 
     const res = await fetch("/api/services", {
       method: "POST",
@@ -185,43 +158,7 @@ export default function NewServicePage() {
           />
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">カテゴリ</label>
-          {categoryNames.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-2">
-              {categoryNames.map((cat) => (
-                <span
-                  key={cat}
-                  className="inline-flex items-center gap-1 bg-red-50 text-red-700 text-xs font-medium px-3 py-1.5 rounded-full"
-                >
-                  {cat}
-                  <button
-                    type="button"
-                    onClick={() => removeCategory(cat)}
-                    className="text-red-400 hover:text-red-600"
-                    aria-label={`${cat}を削除`}
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-          <input
-            type="text"
-            list="category-options"
-            value={categoryInput}
-            onChange={(e) => setCategoryInput(e.target.value)}
-            onKeyDown={handleCategoryInputKeyDown}
-            placeholder="カテゴリ名を入力してEnter（複数可・AI補完で自動入力）"
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
-          <datalist id="category-options">
-            {allCategories.map((c) => (
-              <option key={c.id} value={c.name} />
-            ))}
-          </datalist>
-        </div>
+        <CategorySelector allCategories={allCategories} selected={categoryNames} onToggle={toggleCategory} />
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">ステータス</label>

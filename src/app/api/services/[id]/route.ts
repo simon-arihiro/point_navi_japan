@@ -21,14 +21,29 @@ export async function PUT(request: NextRequest, props: RouteContext<"/api/servic
   const supabase = createAdminClient();
   const body = await request.json();
 
+  // category_ids 等は services テーブルの列ではないため update 対象から除外する
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { category_ids, categories, tags, images, id: _id, created_at, updated_at, ...updates } = body;
+
   const { data, error } = await supabase
     .from("services")
-    .update(body)
+    .update(updates)
     .eq("id", id)
     .select()
     .single();
 
   if (error || !data) return errorResponse(ErrorCode.SERVICE_NOT_FOUND, "サービスが見つかりません", 404);
+
+  if (Array.isArray(category_ids)) {
+    await supabase.from("service_categories").delete().eq("service_id", id);
+    if (category_ids.length > 0) {
+      const { error: catError } = await supabase
+        .from("service_categories")
+        .insert(category_ids.map((category_id: string) => ({ service_id: id, category_id })));
+      if (catError) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, catError.message, 500);
+    }
+  }
+
   return Response.json({ data });
 }
 
