@@ -30,7 +30,7 @@ export default function SearchPage() {
           .limit(12),
         supabase
           .from("articles")
-          .select("*, primary_service:services(name, slug)")
+          .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
           .eq("status", "published")
           .or(`title.ilike.${q},description.ilike.${q}`)
           .limit(9),

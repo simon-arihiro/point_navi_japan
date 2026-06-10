@@ -28,7 +28,7 @@ export default async function HomePage() {
         .gte("date", windowStart.toISOString().split("T")[0]),
       supabase
         .from("articles")
-        .select("*, primary_service:services(name, slug)")
+        .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
         .eq("status", "published")
         .order("published_at", { ascending: false })
         .limit(6),

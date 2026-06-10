@@ -38,7 +38,7 @@ export default async function ServicePage(
       .order("published_at", { ascending: false }),
     supabase
       .from("articles")
-      .select("*, primary_service:services(name, slug)")
+      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
       .neq("article_type", "introduction")
       .eq("status", "published")
       .order("published_at", { ascending: false })

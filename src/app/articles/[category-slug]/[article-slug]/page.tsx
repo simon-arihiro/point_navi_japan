@@ -22,7 +22,7 @@ export default async function ArticlePage(
 
   const { data: article } = await supabase
     .from("articles")
-    .select(`*, primary_service:services(*, categories:service_categories(category:categories(*)))`)
+    .select(`*, primary_service:services!articles_primary_service_id_fkey(*, categories:service_categories(category:categories(*)))`)
     .eq("slug", articleSlug)
     .eq("status", "published")
     .single();
@@ -32,7 +32,7 @@ export default async function ArticlePage(
   // 関連記事（同 Service の他記事）
   const { data: related } = await supabase
     .from("articles")
-    .select("*, primary_service:services(name, slug)")
+    .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
     .eq("primary_service_id", article.primary_service_id)
     .eq("status", "published")
     .neq("id", article.id)

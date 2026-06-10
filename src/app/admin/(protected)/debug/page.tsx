@@ -16,7 +16,7 @@ export default async function AdminDebugPage() {
 
   const embedded = await supabase
     .from("articles")
-    .select("*, primary_service:services(name, slug)")
+    .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
     .order("created_at", { ascending: false })
     .limit(50);
 

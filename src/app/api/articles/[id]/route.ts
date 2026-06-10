@@ -8,7 +8,7 @@ export async function GET(_req: NextRequest, props: RouteContext<"/api/articles/
 
   const { data, error } = await supabase
     .from("articles")
-    .select(`*, primary_service:services(*), related_services:article_services(service:services(*))`)
+    .select(`*, primary_service:services!articles_primary_service_id_fkey(*), related_services:article_services(service:services(*))`)
     .eq("id", id)
     .single();
 

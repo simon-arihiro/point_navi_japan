@@ -30,7 +30,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       supabase.from("categories").select("*").order("name"),
       supabase
         .from("articles")
-        .select("id, title, slug, article_type, published_at, primary_service:services(name, slug, categories:service_categories(category:categories(*)))")
+        .select("id, title, slug, article_type, published_at, primary_service:services!articles_primary_service_id_fkey(name, slug, categories:service_categories(category:categories(*)))")
         .eq("status", "published")
         .order("published_at", { ascending: false })
         .limit(5),

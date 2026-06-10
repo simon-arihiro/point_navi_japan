@@ -22,7 +22,7 @@ export default async function ArticlesPage() {
 
   const { data: articles } = await supabase
     .from("articles")
-    .select("*, primary_service:services(name, slug)")
+    .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
     .eq("status", "published")
     .order("published_at", { ascending: false })
     .limit(50);
