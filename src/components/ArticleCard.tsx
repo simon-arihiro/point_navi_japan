@@ -22,8 +22,8 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
   if (size === "featured") {
     return (
       <Link href={href} className="group block h-full">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:border-amber-200 transition-all h-full flex flex-col">
-          <div className="bg-gradient-to-r from-amber-50 to-white border-b border-gray-100 px-5 sm:px-6 py-4 flex items-center gap-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md hover:border-amber-200 transition-all h-full">
+          <div className="flex items-center gap-4 mb-3">
             <LogoFallback
               name={article.primary_service?.name ?? "?"}
               logoUrl={article.primary_service?.logo_url}
@@ -31,24 +31,14 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
               officialUrl={article.primary_service?.official_url}
               size={48}
             />
-            <div className="min-w-0">
-              <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 font-bold rounded-full px-3 py-1 mb-1">
-                {typeIcon} {typeLabel}
-              </span>
-              {article.primary_service?.name && (
-                <p className="text-xs text-gray-500 truncate">{article.primary_service.name}</p>
-              )}
-            </div>
-          </div>
-          <div className="p-5 sm:p-6 flex-1">
-            <h3 className="font-black text-gray-900 text-lg sm:text-xl leading-snug group-hover:text-amber-700 transition-colors line-clamp-2 mb-2">
+            <h3 className="font-black text-gray-900 text-lg sm:text-xl leading-snug group-hover:text-amber-700 transition-colors line-clamp-2 min-w-0">
               {article.title}
             </h3>
-            {article.description && (
-              <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed mb-3">{article.description}</p>
-            )}
-            {publishedDate && <p className="text-xs text-gray-400">{publishedDate}</p>}
           </div>
+          {article.description && (
+            <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed mb-3">{article.description}</p>
+          )}
+          {publishedDate && <p className="text-xs text-gray-400">{publishedDate}</p>}
         </div>
       </Link>
     );

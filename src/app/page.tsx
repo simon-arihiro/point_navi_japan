@@ -63,8 +63,6 @@ export default async function HomePage() {
     // Supabase 未接続時は空表示
   }
 
-  const [featuredArticle, ...gridArticles] = latestArticles;
-
   return (
     <div>
       {/* Hero */}
@@ -109,14 +107,9 @@ export default async function HomePage() {
 
               {latestArticles.length > 0 ? (
                 <div className="space-y-4">
-                  <ArticleCard article={featuredArticle} size="featured" />
-                  {gridArticles.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {gridArticles.map((article: any) => (
-                        <ArticleCard key={article.id} article={article} size="lg" />
-                      ))}
-                    </div>
-                  )}
+                  {latestArticles.map((article: any) => (
+                    <ArticleCard key={article.id} article={article} size="featured" />
+                  ))}
                 </div>
               ) : (
                 <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-gray-400">
