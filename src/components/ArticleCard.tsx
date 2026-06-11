@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArticleWithService } from "@/types/database";
 import LogoFallback from "./LogoFallback";
 import { getArticleTypeLabel, getArticleTypeIcon } from "@/lib/articleTypes";
+import { extractFirstImageUrl } from "@/lib/markdown";
 
 type Props = {
   article: ArticleWithService;
@@ -20,6 +21,8 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
   const typeIcon = getArticleTypeIcon(article.article_type);
 
   if (size === "featured") {
+    const thumbnailUrl = extractFirstImageUrl(article.content);
+
     return (
       <Link href={href} className="group block h-full">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md hover:border-amber-200 transition-all h-full">
@@ -35,10 +38,20 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
               {article.title}
             </h3>
           </div>
-          {article.description && (
-            <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed mb-3">{article.description}</p>
-          )}
-          {publishedDate && <p className="text-xs text-gray-400">{publishedDate}</p>}
+          <div className="flex gap-4">
+            <div className="w-28 h-28 sm:w-36 sm:h-36 shrink-0 rounded-xl bg-gray-50 overflow-hidden">
+              {thumbnailUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              {article.description && (
+                <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed mb-2">{article.description}</p>
+              )}
+              {publishedDate && <p className="text-xs text-gray-400">{publishedDate}</p>}
+            </div>
+          </div>
         </div>
       </Link>
     );

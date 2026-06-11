@@ -14,6 +14,12 @@ export function renderMarkdown(content: string): string {
   return marked.parse(content ?? "", { async: false }) as string;
 }
 
+// 記事本文（Markdown）内で最初に登場する画像のURLを抽出する（カード等のサムネイル表示用）
+export function extractFirstImageUrl(content: string): string | null {
+  const match = content?.match(/!\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/);
+  return match ? match[1] : null;
+}
+
 // 記事本文（Markdown→HTML）の見た目を統一するためのprose設定。
 // サイトの琥珀×ネイビー基調に合わせて見出し・リンク・引用の色を調整している。
 export const ARTICLE_PROSE_CLASS =
