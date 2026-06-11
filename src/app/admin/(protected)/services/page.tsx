@@ -46,6 +46,8 @@ export default async function AdminServicesPage() {
       logo_url: svc.logo_url,
       logo_storage_path: svc.logo_storage_path,
       official_url: svc.official_url,
+      referral_code: svc.referral_code,
+      referral_link: svc.referral_link,
       created_at: svc.created_at,
       categories: (svc.categories ?? [])
         .map((c) => c.category)

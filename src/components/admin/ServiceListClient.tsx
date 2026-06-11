@@ -16,6 +16,8 @@ type ServiceRow = {
   logo_url: string | null;
   logo_storage_path: string | null;
   official_url: string;
+  referral_code: string | null;
+  referral_link: string | null;
   created_at: string;
   categories: CategoryOption[];
   articleCount: number;
@@ -173,6 +175,17 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                     {c.name}
                   </span>
                 ))}
+              </div>
+            )}
+
+            {(svc.referral_code || svc.referral_link) && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {svc.referral_code && (
+                  <span className="text-xs bg-amber-50 text-amber-700 rounded-full px-2 py-0.5">招待コードあり</span>
+                )}
+                {svc.referral_link && (
+                  <span className="text-xs bg-orange-50 text-orange-700 rounded-full px-2 py-0.5">招待リンクあり</span>
+                )}
               </div>
             )}
           </Link>

@@ -54,15 +54,6 @@ export default function ServiceCard({ service, categorySlug, rank }: Props) {
             {service.description}
           </p>
         )}
-
-        <div className="mt-3 flex gap-2 flex-wrap">
-          {service.referral_code && (
-            <span className="text-xs bg-amber-50 text-amber-700 rounded-full px-2 py-0.5">招待コードあり</span>
-          )}
-          {service.referral_link && (
-            <span className="text-xs bg-orange-50 text-orange-700 rounded-full px-2 py-0.5">招待リンクあり</span>
-          )}
-        </div>
       </div>
     </Link>
   );
