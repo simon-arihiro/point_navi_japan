@@ -32,6 +32,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         .from("articles")
         .select("id, title, slug, article_type, published_at, primary_service:services!articles_primary_service_id_fkey(name, slug, categories:service_categories(category:categories(*)))")
         .eq("status", "published")
+        .neq("article_type", "introduction")
         .order("published_at", { ascending: false })
         .limit(5),
     ]);

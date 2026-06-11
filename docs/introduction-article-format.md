@@ -17,6 +17,12 @@
 - メタデータ
   - `<title>` = サービス名（`generateMetadata` で `services.name` を使用）
   - `description` = `services.description`（紹介記事生成時に自動更新）
+- 重複コンテンツ対策
+  - `articles` テーブル上は `article_type = "introduction"` の行として保存され `slug` を持つが、
+    `/articles/{category-slug}/{article-slug}` へアクセスした場合は `/services/{category-slug}/{service-slug}` へ
+    308（`permanentRedirect`）でリダイレクトする
+  - `/articles` 一覧・トップページ「最新記事」・検索結果・フッター「新着記事」など、公開側の記事一覧には
+    `article_type = "introduction"` の記事を含めない（`.neq("article_type", "introduction")`）
 
 ## 2. ページ内レイアウト（上から順）
 

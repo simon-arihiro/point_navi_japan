@@ -32,6 +32,7 @@ export default function SearchPage() {
           .from("articles")
           .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
           .eq("status", "published")
+          .neq("article_type", "introduction")
           .or(`title.ilike.${q},description.ilike.${q}`)
           .limit(9),
       ]);

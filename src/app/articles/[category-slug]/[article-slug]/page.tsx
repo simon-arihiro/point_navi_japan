@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
@@ -31,6 +31,14 @@ export default async function ArticlePage(
 
   if (!article) notFound();
 
+  // 紹介記事はサービス詳細ページに統合表示しているため、そちらへ恒久リダイレクト（重複コンテンツ防止）
+  if (article.article_type === "introduction") {
+    const targetCategorySlug = article.primary_service?.categories?.[0]?.category?.slug ?? "all";
+    const targetServiceSlug = article.primary_service?.slug;
+    if (targetServiceSlug) permanentRedirect(`/services/${targetCategorySlug}/${targetServiceSlug}`);
+    notFound();
+  }
+
   // 関連記事（同 Service の他記事）
   const { data: related } = await supabase
     .from("articles")
@@ -38,6 +46,7 @@ export default async function ArticlePage(
     .eq("primary_service_id", article.primary_service_id)
     .eq("status", "published")
     .neq("id", article.id)
+    .neq("article_type", "introduction")
     .limit(3);
 
   const publishedDate = article.published_at
