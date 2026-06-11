@@ -6,6 +6,6 @@ type Props = {
 export default function Mascot({ className = "w-8 h-8" }: Props) {
   return (
     // eslint-disable-next-line @next/next/no-img-element
-    <img src="/mascot/poinavi-logo.png" alt="" className={`${className} object-contain shrink-0`} />
+    <img src="/mascot/poinavi-logo-v2.png" alt="" className={`${className} object-contain shrink-0`} />
   );
 }
