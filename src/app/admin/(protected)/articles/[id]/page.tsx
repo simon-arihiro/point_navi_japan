@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import LogoFallback from "@/components/LogoFallback";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 import { getArticleTypeLabel, getArticleTypeIcon, getArticleStatusLabel, getArticleStatusBadgeClass } from "@/lib/articleTypes";
+import { compressImage } from "@/lib/imageCompress";
 
 export default function AdminArticleDetailPage() {
   const params = useParams();
@@ -20,6 +21,8 @@ export default function AdminArticleDetailPage() {
   const [editContent, setEditContent] = useState("");
   const [editDescription, setEditDescription] = useState("");
   const [savingContent, setSavingContent] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     fetch(`/api/articles/${id}`)
@@ -78,6 +81,43 @@ export default function AdminArticleDetailPage() {
       setIsEditing(false);
     }
     setSavingContent(false);
+  };
+
+  // 本文編集欄に画像がペーストされたらStorageにアップロードし、Markdown形式でカーソル位置に挿入する
+  const handleContentPaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = Array.from(e.clipboardData?.items ?? []);
+    const imageFile = items
+      .filter((item) => item.type.startsWith("image/"))
+      .map((item) => item.getAsFile())
+      .find((f): f is File => !!f);
+    if (!imageFile) return;
+
+    e.preventDefault();
+    setUploadingImage(true);
+    try {
+      const compressed = await compressImage(imageFile);
+      const res = await fetch(`/api/articles/${id}/upload-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: compressed.data, media_type: compressed.mediaType }),
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        const textarea = contentTextareaRef.current;
+        const start = textarea?.selectionStart ?? editContent.length;
+        const end = textarea?.selectionEnd ?? editContent.length;
+        const insertion = `![画像](${url})`;
+        setEditContent(editContent.slice(0, start) + insertion + editContent.slice(end));
+        requestAnimationFrame(() => {
+          if (!textarea) return;
+          const pos = start + insertion.length;
+          textarea.focus();
+          textarea.setSelectionRange(pos, pos);
+        });
+      }
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
@@ -154,8 +194,10 @@ export default function AdminArticleDetailPage() {
                   <label className="block text-xs font-medium text-gray-500 mb-1">本文（Markdown）</label>
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                     <textarea
+                      ref={contentTextareaRef}
                       value={editContent}
                       onChange={(e) => setEditContent(e.target.value)}
+                      onPaste={handleContentPaste}
                       rows={24}
                       className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-red-500 resize-y"
                     />
@@ -164,6 +206,9 @@ export default function AdminArticleDetailPage() {
                       <div dangerouslySetInnerHTML={{ __html: renderMarkdown(editContent) }} />
                     </div>
                   </div>
+                  <p className="text-xs text-gray-400 mt-1">
+                    {uploadingImage ? "画像をアップロード中..." : "画像をコピー&ペーストすると自動でアップロードされ、カーソル位置にMarkdown形式で挿入されます"}
+                  </p>
                 </div>
 
                 <div className="flex gap-2">
