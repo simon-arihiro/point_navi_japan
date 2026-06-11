@@ -17,11 +17,11 @@ export default function Footer({ categories = [], latestArticles = [] }: Props) 
             <div className="flex items-center gap-2 mb-4">
               <Mascot className="w-7 h-7" />
               <span className="text-white font-bold text-lg">
-                ポイ活<span className="text-amber-400">ナビ</span>
+                ポイ<span className="text-amber-400">ナビ</span>
               </span>
             </div>
             <p className="text-sm leading-relaxed">
-              日本のポイ活・招待コード情報を徹底ナビゲート。実際に使ってみた正直な感想をお届けします。
+              日本のポイ活サービスを徹底ナビゲート。実際に使ってみた正直な感想をお届けします。
             </p>
           </div>
 
@@ -66,7 +66,7 @@ export default function Footer({ categories = [], latestArticles = [] }: Props) 
         </div>
 
         <div className="border-t border-slate-800 mt-10 pt-6 text-sm text-center">
-          <p>© 2026 ポイ活ナビ. All rights reserved.</p>
+          <p>© 2026 ポイナビ. All rights reserved.</p>
           <p className="mt-1 text-xs text-slate-600">
             ※本サイトの情報は参考目的です。最新情報は各サービスの公式サイトをご確認ください。
           </p>

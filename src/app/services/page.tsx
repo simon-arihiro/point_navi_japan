@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "サービス一覧",
-  description: "ポイ活・招待コードが使える日本のサービス一覧です。",
+  description: "日本のお得なポイ活サービス一覧です。",
 };
 
 export default async function ServicesPage() {
@@ -28,7 +28,7 @@ export default async function ServicesPage() {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <h1 className="text-3xl font-black text-gray-900 mb-2">サービス一覧</h1>
-          <p className="text-gray-500 text-sm">招待コード・招待リンクが使えるポイ活サービス</p>
+          <p className="text-gray-500 text-sm">実際に使ってみたポイ活サービス</p>
         </div>
       </div>
 

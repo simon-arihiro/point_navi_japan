@@ -36,7 +36,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             onClick={() => setOpen(false)}
             className="font-bold text-white text-sm"
           >
-            ポイ活ナビ <span className="text-red-400">Admin</span>
+            ポイナビ <span className="text-red-400">Admin</span>
           </Link>
           <button
             onClick={() => setOpen(false)}
@@ -85,7 +85,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             </svg>
           </button>
           <Link href="/admin" className="font-bold text-white text-sm">
-            ポイ活ナビ <span className="text-red-400">Admin</span>
+            ポイナビ <span className="text-red-400">Admin</span>
           </Link>
         </header>
 

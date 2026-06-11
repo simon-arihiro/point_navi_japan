@@ -12,10 +12,10 @@ const notoSansJP = Noto_Sans_JP({
 
 export const metadata: Metadata = {
   title: {
-    default: "ポイ活ナビ | 日本の招待コード・ポイントサービス比較",
-    template: "%s | ポイ活ナビ",
+    default: "ポイナビ | 日本のポイ活サービス比較・体験レビュー",
+    template: "%s | ポイナビ",
   },
-  description: "日本のポイ活・招待コード情報を徹底ナビゲート。実際に使った正直な感想と招待コード・招待リンクをまとめています。",
+  description: "日本のポイ活サービスを実際に使ってみた正直な感想や活用方法をわかりやすくまとめています。",
   keywords: "ポイ活, 招待コード, 招待リンク, ポイントサービス, トリマ, Powl, モッピー",
 };
 

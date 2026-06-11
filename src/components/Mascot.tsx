@@ -2,7 +2,7 @@ type Props = {
   className?: string;
 };
 
-// ポイ活ナビのマスコット（コインキャラクター）。ヘッダー・フッター・Hero で使用。
+// ポイナビのマスコット（コインキャラクター）。ヘッダー・フッター・Hero で使用。
 export default function Mascot({ className = "w-8 h-8" }: Props) {
   return (
     <svg viewBox="0 0 32 32" className={className} xmlns="http://www.w3.org/2000/svg" aria-hidden="true">

@@ -32,7 +32,7 @@ export default function Header({ categories = [] }: Props) {
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <Mascot className="w-8 h-8" />
             <span className="text-xl font-bold text-gray-900">
-              ポイ活<span className="text-amber-600">ナビ</span>
+              ポイ<span className="text-amber-600">ナビ</span>
             </span>
           </Link>
 

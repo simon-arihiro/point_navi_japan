@@ -69,14 +69,14 @@ export default async function HomePage() {
       <section className="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 text-slate-900 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
           <div className="max-w-3xl">
-            <p className="text-amber-700 text-sm font-medium uppercase tracking-widest mb-4">日本のポイ活・招待コードをナビゲート</p>
+            <p className="text-amber-700 text-sm font-medium uppercase tracking-widest mb-4">日本のポイ活情報をナビゲート</p>
             <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
               正直なところ、<br />
               <span className="text-orange-600">これは本当におすすめ</span><br />
               のサービスだけ集めました
             </h1>
             <p className="text-slate-600 text-lg leading-relaxed mb-8">
-              実際に使ってみた体験をもとに、ポイ活サービスの招待コード・招待リンクをまとめています。
+              実際に使ってみた体験をもとに、お得なポイ活サービスをわかりやすく紹介しています。
             </p>
             <div className="flex flex-wrap gap-4">
               <Link href="/services" className="bg-slate-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-slate-800 transition-colors">
