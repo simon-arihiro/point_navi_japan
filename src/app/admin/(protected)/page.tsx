@@ -18,7 +18,6 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     { count: relatedArticles },
     { count: pendingArticles },
     { data: notifications },
-    { data: settings },
     { data: analyticsRows },
     { data: servicesList },
   ] = await Promise.all([
@@ -27,7 +26,6 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     supabase.from("articles").select("*", { count: "exact", head: true }).neq("article_type", "introduction").eq("status", "published"),
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "reviewing"),
     supabase.from("admin_notifications").select("*").eq("is_read", false).order("created_at", { ascending: false }).limit(10),
-    supabase.from("system_settings").select("auto_generate_enabled, max_pending_articles").eq("id", 1).single(),
     supabase.from("analytics_daily").select("service_id, page_views, referral_clicks, copy_code_count").gte("date", windowStart.toISOString().slice(0, 10)),
     supabase.from("services").select("id, name, slug").eq("status", "active").order("name"),
   ]);
@@ -61,9 +59,6 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     distribution_failed: "📡 配信エラー",
   };
 
-  const autoOn = settings?.auto_generate_enabled ?? true;
-  const maxPending = settings?.max_pending_articles ?? 10;
-
   return (
     <div>
       <h1 className="text-2xl font-black text-gray-900 mb-8">ダッシュボード</h1>
@@ -92,20 +87,6 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
             <p className={`text-sm mt-1 ${s.alert ? "text-yellow-600 font-medium" : "text-gray-500"}`}>{s.label}</p>
           </Link>
         ))}
-      </div>
-
-      {/* AI自動生成ステータス */}
-      <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-8 flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <p className="text-sm font-medium text-gray-700">AI自動生成</p>
-          <p className="text-xs text-gray-400 mt-0.5">審査待ち: {pendingArticles ?? 0} / {maxPending} 件</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className={`text-xs font-bold px-3 py-1 rounded-full ${autoOn ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"}`}>
-            {autoOn ? "有効" : "無効"}
-          </span>
-          <Link href="/admin/settings" className="text-xs text-gray-500 hover:text-gray-700 underline">設定変更</Link>
-        </div>
       </div>
 
       {/* サービス行動明細 */}

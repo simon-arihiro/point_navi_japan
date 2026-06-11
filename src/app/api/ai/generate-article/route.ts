@@ -47,9 +47,7 @@ export async function POST(request: NextRequest) {
 
     const timestamp = Date.now();
     const slug = `${service.slug}-${type}-${timestamp}`;
-
-    const { data: settings } = await supabase.from("system_settings").select("operation_mode").eq("id", 1).single();
-    const status = settings?.operation_mode === "auto" ? "published" : "draft";
+    const status = "reviewing";
 
     await supabase.from("articles").insert({
       primary_service_id: service_id,
@@ -57,15 +55,13 @@ export async function POST(request: NextRequest) {
       description: description.trim(),
       article_type: type,
       status,
-      published_at: status === "published" ? new Date().toISOString() : null,
+      published_at: null,
     });
 
-    if (status === "draft") {
-      await supabase.from("admin_notifications").insert({
-        type: "article_pending",
-        payload: { service_id, service_name: service.name, article_type: type },
-      });
-    }
+    await supabase.from("admin_notifications").insert({
+      type: "article_pending",
+      payload: { service_id, service_name: service.name, article_type: type },
+    });
 
     return Response.json({ ok: true, status, article_type: type });
   } catch (err) {

@@ -96,14 +96,12 @@ export async function POST(request: NextRequest) {
       .eq("article_type", "introduction")
       .single();
 
-    // operation_mode の確認
-    const { data: settings } = await supabase.from("system_settings").select("operation_mode").eq("id", 1).single();
-    const status = settings?.operation_mode === "auto" ? "published" : "draft";
+    const status = "reviewing";
 
     if (existing) {
       await supabase.from("articles").update({
         title, content: articleContent, description: description.trim(),
-        status, published_at: status === "published" ? new Date().toISOString() : null,
+        status, published_at: null,
       }).eq("id", existing.id);
     } else {
       await supabase.from("articles").insert({
@@ -113,17 +111,14 @@ export async function POST(request: NextRequest) {
         description: description.trim(),
         article_type: "introduction",
         status,
-        published_at: status === "published" ? new Date().toISOString() : null,
+        published_at: null,
       });
     }
 
-    // 通知（manual の場合）
-    if (status === "draft") {
-      await supabase.from("admin_notifications").insert({
-        type: "article_pending",
-        payload: { service_id, service_name: service.name, article_slug: articleSlug },
-      });
-    }
+    await supabase.from("admin_notifications").insert({
+      type: "article_pending",
+      payload: { service_id, service_name: service.name, article_slug: articleSlug },
+    });
 
     return Response.json({ ok: true, status });
   } catch (err) {

@@ -52,66 +52,10 @@ export default function AdminSettingsPage() {
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">運用モード</label>
-          <select
-            value={settings?.operation_mode ?? "manual"}
-            onChange={set("operation_mode")}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-          >
-            <option value="manual">MANUAL（AI生成→審査→公開）</option>
-            <option value="auto">AUTO（AI生成→自動公開）</option>
-          </select>
-          <p className="text-xs text-gray-400 mt-1">MANUAL: 管理者が承認してから公開されます</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id="auto_generate_enabled"
-            checked={settings?.auto_generate_enabled ?? true}
-            onChange={set("auto_generate_enabled")}
-            className="w-4 h-4 text-red-600"
-          />
-          <label htmlFor="auto_generate_enabled" className="text-sm font-medium text-gray-700">
-            AI自動生成を有効化（Cronによる毎日の自動記事生成）
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">審査待ち上限数</label>
-          <input
-            type="number"
-            min={1}
-            max={50}
-            value={settings?.max_pending_articles ?? 10}
-            onChange={set("max_pending_articles")}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
-          <p className="text-xs text-gray-400 mt-1">reviewing 状態の記事がこの数を超えると自動生成を一時停止</p>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <input
-            type="checkbox"
-            id="auto_distribution"
-            checked={settings?.auto_distribution ?? false}
-            onChange={set("auto_distribution")}
-            className="w-4 h-4 text-red-600"
-          />
-          <label htmlFor="auto_distribution" className="text-sm font-medium text-gray-700">
-            自動SNS配信（記事公開後に自動配信）
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">毎日の自動生成記事数</label>
-          <input
-            type="number"
-            min={0}
-            max={10}
-            value={settings?.daily_article_count ?? 1}
-            onChange={set("daily_article_count")}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
-          />
+          <div className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 text-gray-700 font-medium">
+            MANUAL（AI生成 → 管理者が確認・編集 → 公開）
+          </div>
+          <p className="text-xs text-gray-400 mt-1">AUTOモード（AIによる自動生成・自動公開・自動SNS配信）は今後のバージョンで対応予定です</p>
         </div>
 
         <div>
