@@ -66,6 +66,7 @@
 | リポジトリ | `kaunehyn5/point_navi_japan` |
 | デプロイブランチ | `main`（コード変更は必ずここに push） |
 | ダッシュボード | https://vercel.com/dashboard |
+| 本番ドメイン（予定） | `jp-point-navi.com` |
 
 ## 環境変数まとめ（Vercel Dashboard に設定する）
 
@@ -76,7 +77,7 @@
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API → service_role |
 | `CRON_SECRET` | `dd48e776ebcfe52a48251c87483f3c0e02c2cf0ad75dd5af` |
 | `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys（未取得） |
-| `NEXT_PUBLIC_SITE_URL` | Vercel デプロイ後に発行されるドメイン |
+| `NEXT_PUBLIC_SITE_URL` | `https://jp-point-navi.com`（独自ドメイン接続後。接続前は Vercel デプロイ後に発行される `*.vercel.app` ドメイン） |
 
 ## DB マイグレーション
 
