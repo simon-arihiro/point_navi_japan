@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Category } from "@/types/database";
 import Mascot from "@/components/Mascot";
@@ -13,6 +14,16 @@ export default function Header({ categories = [] }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+
+  const navLinkClass = (href: string) =>
+    `font-medium transition-colors text-sm ${isActive(href) ? "text-amber-700 font-bold" : "text-gray-600 hover:text-slate-900"}`;
+
+  const mobileNavLinkClass = (href: string) =>
+    `block px-2 py-2 text-sm transition-colors ${isActive(href) ? "text-amber-700 font-bold" : "text-gray-700 hover:text-slate-900"}`;
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -38,22 +49,22 @@ export default function Header({ categories = [] }: Props) {
 
           {/* PC Nav */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-gray-600 hover:text-slate-900 font-medium transition-colors text-sm">
+            <Link href="/" className={navLinkClass("/")}>
               ホーム
             </Link>
 
             {/* サービス一覧 + ドロップダウン */}
             <div ref={dropRef} className="relative">
-              <button
-                className="flex items-center gap-1 text-gray-600 hover:text-slate-900 font-medium transition-colors text-sm"
+              <Link
+                href="/services"
+                className={`flex items-center gap-1 ${navLinkClass("/services")}`}
                 onMouseEnter={() => setDropOpen(true)}
-                onClick={() => setDropOpen((v) => !v)}
               >
                 サービス一覧
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </Link>
               {dropOpen && (
                 <div
                   className="absolute top-full left-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-gray-100 py-2 z-50"
@@ -71,7 +82,7 @@ export default function Header({ categories = [] }: Props) {
                     <Link
                       key={cat.id}
                       href={`/services/${cat.slug}`}
-                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-slate-900"
+                      className={`block px-4 py-2 text-sm hover:bg-amber-50 hover:text-slate-900 ${pathname === `/services/${cat.slug}` ? "text-amber-700 font-bold" : "text-gray-700"}`}
                       onClick={() => setDropOpen(false)}
                     >
                       {cat.name}
@@ -81,10 +92,10 @@ export default function Header({ categories = [] }: Props) {
               )}
             </div>
 
-            <Link href="/ranking" className="text-gray-600 hover:text-slate-900 font-medium transition-colors text-sm">
+            <Link href="/ranking" className={navLinkClass("/ranking")}>
               ランキング
             </Link>
-            <Link href="/articles" className="text-gray-600 hover:text-slate-900 font-medium transition-colors text-sm">
+            <Link href="/articles" className={navLinkClass("/articles")}>
               記事
             </Link>
           </nav>
@@ -128,15 +139,20 @@ export default function Header({ categories = [] }: Props) {
         {/* スマホメニュー */}
         {menuOpen && (
           <div className="md:hidden border-t border-gray-100 py-4 space-y-1">
-            <Link href="/" className="block px-2 py-2 text-gray-700 hover:text-slate-900 text-sm" onClick={() => setMenuOpen(false)}>ホーム</Link>
-            <Link href="/services" className="block px-2 py-2 text-gray-700 hover:text-slate-900 text-sm" onClick={() => setMenuOpen(false)}>サービス一覧</Link>
+            <Link href="/" className={mobileNavLinkClass("/")} onClick={() => setMenuOpen(false)}>ホーム</Link>
+            <Link href="/services" className={mobileNavLinkClass("/services")} onClick={() => setMenuOpen(false)}>サービス一覧</Link>
             {categories.map((cat) => (
-              <Link key={cat.id} href={`/services/${cat.slug}`} className="block px-6 py-1.5 text-gray-500 hover:text-slate-900 text-xs" onClick={() => setMenuOpen(false)}>
+              <Link
+                key={cat.id}
+                href={`/services/${cat.slug}`}
+                className={`block px-6 py-1.5 text-xs transition-colors ${pathname === `/services/${cat.slug}` ? "text-amber-700 font-bold" : "text-gray-500 hover:text-slate-900"}`}
+                onClick={() => setMenuOpen(false)}
+              >
                 └ {cat.name}
               </Link>
             ))}
-            <Link href="/ranking" className="block px-2 py-2 text-gray-700 hover:text-slate-900 text-sm" onClick={() => setMenuOpen(false)}>ランキング</Link>
-            <Link href="/articles" className="block px-2 py-2 text-gray-700 hover:text-slate-900 text-sm" onClick={() => setMenuOpen(false)}>記事</Link>
+            <Link href="/ranking" className={mobileNavLinkClass("/ranking")} onClick={() => setMenuOpen(false)}>ランキング</Link>
+            <Link href="/articles" className={mobileNavLinkClass("/articles")} onClick={() => setMenuOpen(false)}>記事</Link>
           </div>
         )}
       </div>

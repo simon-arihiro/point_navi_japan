@@ -65,8 +65,8 @@ export default async function HomePage() {
   return (
     <div>
       {/* Hero */}
-      <section className="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 text-slate-900 relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative">
+      <section className="bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 text-slate-900 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 flex flex-col md:flex-row md:items-center md:justify-between gap-10">
           <div className="max-w-3xl">
             <p className="text-amber-700 text-sm font-medium uppercase tracking-widest mb-4">日本のポイ活情報をナビゲート</p>
             <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
@@ -90,7 +90,7 @@ export default async function HomePage() {
           <img
             src="/mascot/poinavi-kun.png"
             alt="ポイナビくん"
-            className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 w-72 h-auto"
+            className="hidden sm:block w-48 md:w-56 lg:w-72 h-auto shrink-0 mx-auto md:mx-0"
           />
         </div>
       </section>
@@ -117,7 +117,8 @@ export default async function HomePage() {
                 </div>
               ) : (
                 <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-gray-400">
-                  <p className="text-3xl mb-2">📝</p>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src="/mascot/poinavi-kun.png" alt="" className="w-24 h-auto mx-auto mb-2 opacity-90" />
                   <p className="text-sm">記事はまだありません</p>
                 </div>
               )}
@@ -183,7 +184,8 @@ export default async function HomePage() {
         </div>
       ) : (
         <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
-          <p className="text-4xl mb-4">🚀</p>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/mascot/poinavi-kun.png" alt="" className="w-40 h-auto mx-auto mb-4" />
           <h2 className="text-xl font-bold text-gray-900 mb-2">準備中です</h2>
           <p className="text-gray-500">管理者がサービスを追加するとここに表示されます。</p>
         </section>

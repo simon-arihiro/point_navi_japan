@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import ServiceCard from "@/components/ServiceCard";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -16,6 +16,11 @@ export async function generateMetadata(props: PageProps<"/services/[category-slu
 
 export default async function CategoryPage(props: PageProps<"/services/[category-slug]">) {
   const { "category-slug": categorySlug } = await props.params;
+
+  // カテゴリ未設定のサービス／記事へのリンクが "all" を仮のカテゴリスラッグとして使うため、
+  // 実カテゴリが存在しない "all" はサービス一覧へ誘導する（404防止）
+  if (categorySlug === "all") redirect("/services");
+
   const supabase = await createClient();
 
   const [catRes, servicesRes] = await Promise.all([
@@ -58,7 +63,8 @@ export default async function CategoryPage(props: PageProps<"/services/[category
           </div>
         ) : (
           <div className="text-center py-20 text-gray-400">
-            <p className="text-4xl mb-4">📋</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mascot/poinavi-kun.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
             <p>このカテゴリにはまだサービスがありません</p>
           </div>
         )}

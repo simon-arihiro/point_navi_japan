@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import ServiceCard from "@/components/ServiceCard";
 import ArticleCard from "@/components/ArticleCard";
@@ -48,14 +49,28 @@ export default function SearchPage() {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <h1 className="text-2xl font-black text-gray-900 mb-4">検索</h1>
-          <input
-            type="text"
-            placeholder="サービス名・キーワードで検索..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            autoFocus
-            className="w-full max-w-xl border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
-          />
+          <div className="relative w-full max-w-xl">
+            <input
+              type="text"
+              placeholder="サービス名・キーワードで検索..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              autoFocus
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                aria-label="検索キーワードをクリア"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -63,7 +78,14 @@ export default function SearchPage() {
         {loading && <p className="text-gray-400 text-sm">検索中...</p>}
 
         {!loading && query && services.length === 0 && articles.length === 0 && (
-          <p className="text-gray-400 text-sm">「{query}」の検索結果はありません</p>
+          <div className="text-center py-10 text-gray-400">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/mascot/poinavi-kun.png" alt="" className="w-28 sm:w-36 h-auto mx-auto mb-4 opacity-90" />
+            <p className="text-sm mb-4">「{query}」の検索結果はありません</p>
+            <Link href="/services" className="text-amber-700 font-medium text-sm hover:underline">
+              サービス一覧を見る →
+            </Link>
+          </div>
         )}
 
         {services.length > 0 && (
