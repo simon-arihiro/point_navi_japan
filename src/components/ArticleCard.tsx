@@ -39,7 +39,7 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
             </h3>
           </div>
           <div className="flex gap-4">
-            <div className="w-28 h-28 sm:w-36 sm:h-36 shrink-0 rounded-xl bg-gray-50 overflow-hidden">
+            <div className="w-32 sm:w-40 aspect-video shrink-0 rounded-xl bg-gray-50 overflow-hidden">
               {thumbnailUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={thumbnailUrl} alt="" className="w-full h-full object-cover" />
