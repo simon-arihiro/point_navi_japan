@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams, useSearchParams } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { Category, resolveCategoryIds } from "@/lib/categories";
 import CategorySelector from "@/components/admin/CategorySelector";
 import { toDatetimeLocalValue, fromDatetimeLocalValue } from "@/lib/campaign";
@@ -11,7 +11,6 @@ export default function EditServicePage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -23,9 +22,7 @@ export default function EditServicePage() {
   const [categoryNames, setCategoryNames] = useState<string[]>([]);
 
   // AI記事生成
-  const [genType, setGenType] = useState<"introduction" | "related">(
-    searchParams.get("ai_gen") === "related" ? "related" : "introduction"
-  );
+  const [genType, setGenType] = useState<"introduction" | "related">("related");
   const [genPrompt, setGenPrompt] = useState("");
   const [genImages, setGenImages] = useState<PendingImage[]>([]);
   const [generating, setGenerating] = useState(false);
@@ -257,7 +254,7 @@ export default function EditServicePage() {
       </form>
 
       {/* AI記事生成 */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-6">
+      <div id="ai-generate" className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-6 scroll-mt-6">
         <h2 className="font-bold text-gray-900 mb-1">AI記事生成</h2>
         <p className="text-xs text-gray-400 mb-4">
           プロンプト・参考URL・画像（コピー&ペーストで添付可能）をもとにAIが記事を作成します。生成された記事は「審査待ち」として保存されるため、内容を確認してから公開してください。

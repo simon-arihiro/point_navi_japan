@@ -39,7 +39,6 @@ export default function ServiceListClient({ services, allCategories }: Props) {
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [togglingId, setTogglingId] = useState<string | null>(null);
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -72,24 +71,11 @@ export default function ServiceListClient({ services, allCategories }: Props) {
     setTogglingId(null);
   };
 
-  const toggleMenu = (e: React.MouseEvent, id: string) => {
+  // 「AI記事生成」区画にジャンプする
+  const goToAiGenerate = (e: React.MouseEvent, svc: ServiceRow) => {
     e.preventDefault();
     e.stopPropagation();
-    setMenuOpenId((prev) => (prev === id ? null : id));
-  };
-
-  const closeMenu = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setMenuOpenId(null);
-  };
-
-  // 「AI記事生成」区画にジャンプし、記事タイプを事前選択する
-  const goToAiGenerate = (e: React.MouseEvent, svc: ServiceRow, type: "introduction" | "related") => {
-    e.preventDefault();
-    e.stopPropagation();
-    setMenuOpenId(null);
-    router.push(`/admin/services/${svc.id}?ai_gen=${type}`);
+    router.push(`/admin/services/${svc.id}#ai-generate`);
   };
 
   return (
@@ -164,37 +150,13 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                   {svc.status === "active" ? "公開中" : "非公開"}
                 </button>
 
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={(e) => toggleMenu(e, svc.id)}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 transition-colors hover:bg-orange-200 whitespace-nowrap"
-                  >
-                    記事生成
-                  </button>
-
-                  {menuOpenId === svc.id && (
-                    <>
-                      <div className="fixed inset-0 z-10" onClick={closeMenu} />
-                      <div className="absolute right-0 top-full mt-1.5 w-24 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden">
-                        <button
-                          type="button"
-                          onClick={(e) => goToAiGenerate(e, svc, "introduction")}
-                          className="block w-full text-center px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          紹介記事
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => goToAiGenerate(e, svc, "related")}
-                          className="block w-full text-center px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
-                        >
-                          関連記事
-                        </button>
-                      </div>
-                    </>
-                  )}
-                </div>
+                <button
+                  type="button"
+                  onClick={(e) => goToAiGenerate(e, svc)}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 transition-colors hover:bg-orange-200 whitespace-nowrap"
+                >
+                  記事生成
+                </button>
               </div>
             </div>
 
