@@ -15,6 +15,11 @@ export default function AdminArticleDetailPage() {
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [rewriting, setRewriting] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editContent, setEditContent] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [savingContent, setSavingContent] = useState(false);
 
   useEffect(() => {
     fetch(`/api/articles/${id}`)
@@ -49,6 +54,32 @@ export default function AdminArticleDetailPage() {
     setRewriting(false);
   };
 
+  const startEditing = () => {
+    setEditTitle(article.title ?? "");
+    setEditContent(article.content ?? "");
+    setEditDescription(article.description ?? "");
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+  };
+
+  const saveContent = async () => {
+    setSavingContent(true);
+    const res = await fetch(`/api/articles/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title: editTitle, content: editContent, description: editDescription }),
+    });
+    if (res.ok) {
+      const { data } = await res.json();
+      setArticle({ ...article, ...data });
+      setIsEditing(false);
+    }
+    setSavingContent(false);
+  };
+
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
   if (!article) return <div className="text-red-600 text-sm">記事が見つかりません</div>;
 
@@ -72,7 +103,7 @@ export default function AdminArticleDetailPage() {
                 officialUrl={article.primary_service?.official_url}
                 size={48}
               />
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <span className="inline-flex items-center gap-1 text-xs bg-amber-100 text-amber-700 font-bold rounded-full px-3 py-1 mb-1">
                   {getArticleTypeIcon(article.article_type)} {getArticleTypeLabel(article.article_type)}
                 </span>
@@ -80,13 +111,79 @@ export default function AdminArticleDetailPage() {
                   <p className="text-xs text-gray-500 truncate">{article.primary_service.name}</p>
                 )}
               </div>
+              {!isEditing && (
+                <button
+                  onClick={startEditing}
+                  className="shrink-0 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors"
+                >
+                  ✏️ 編集する
+                </button>
+              )}
             </div>
 
-            {/* 本文プレビュー */}
-            <div
-              className={`${ARTICLE_PROSE_CLASS} px-5 sm:px-8 py-6`}
-              dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
-            />
+            {!isEditing ? (
+              /* 本文プレビュー */
+              <div
+                className={`${ARTICLE_PROSE_CLASS} px-5 sm:px-8 py-6`}
+                dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
+              />
+            ) : (
+              /* 手動編集フォーム */
+              <div className="px-5 sm:px-8 py-6 space-y-4">
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">タイトル</label>
+                  <input
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">SEO description</label>
+                  <textarea
+                    value={editDescription}
+                    onChange={(e) => setEditDescription(e.target.value)}
+                    rows={2}
+                    className="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-gray-500 mb-1">本文（Markdown）</label>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+                    <textarea
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                      rows={24}
+                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-red-500 resize-y"
+                    />
+                    <div className={`${ARTICLE_PROSE_CLASS} border border-gray-100 rounded-xl px-4 py-3 overflow-y-auto max-h-[36rem]`}>
+                      <p className="text-xs text-gray-400 mb-2">プレビュー</p>
+                      <div dangerouslySetInnerHTML={{ __html: renderMarkdown(editContent) }} />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={saveContent}
+                    disabled={savingContent}
+                    className="px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors disabled:opacity-50"
+                  >
+                    {savingContent ? "保存中..." : "保存"}
+                  </button>
+                  <button
+                    onClick={cancelEditing}
+                    disabled={savingContent}
+                    className="px-5 py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  >
+                    キャンセル
+                  </button>
+                </div>
+              </div>
+            )}
           </article>
 
           {/* フィードバックで書き直し */}
