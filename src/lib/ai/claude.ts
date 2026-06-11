@@ -7,13 +7,25 @@ function getClient() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 }
 
-export async function generateText(systemPrompt: string, userPrompt: string): Promise<string> {
+export type ImageInput = {
+  mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
+  data: string; // base64（データURLのprefixなし）
+};
+
+export async function generateText(systemPrompt: string, userPrompt: string, images?: ImageInput[]): Promise<string> {
   const client = getClient();
+
+  const content: Anthropic.Messages.ContentBlockParam[] = (images ?? []).map((image) => ({
+    type: "image" as const,
+    source: { type: "base64" as const, media_type: image.mediaType, data: image.data },
+  }));
+  content.push({ type: "text", text: userPrompt });
+
   const message = await client.messages.create({
     model: "claude-opus-4-8",
     max_tokens: 4096,
     system: systemPrompt,
-    messages: [{ role: "user", content: userPrompt }],
+    messages: [{ role: "user", content }],
   });
 
   const block = message.content[0];

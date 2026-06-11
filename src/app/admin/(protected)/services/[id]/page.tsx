@@ -1,15 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { Category, resolveCategoryIds } from "@/lib/categories";
 import CategorySelector from "@/components/admin/CategorySelector";
 import { toDatetimeLocalValue, fromDatetimeLocalValue } from "@/lib/campaign";
+import PromptInputWithImages, { PendingImage } from "@/components/admin/PromptInputWithImages";
 
 export default function EditServicePage() {
   const params = useParams();
   const id = params.id as string;
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -19,6 +21,15 @@ export default function EditServicePage() {
   const [form, setForm] = useState<any>(null);
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [categoryNames, setCategoryNames] = useState<string[]>([]);
+
+  // AI記事生成
+  const [genType, setGenType] = useState<"introduction" | "related">(
+    searchParams.get("ai_gen") === "related" ? "related" : "introduction"
+  );
+  const [genPrompt, setGenPrompt] = useState("");
+  const [genImages, setGenImages] = useState<PendingImage[]>([]);
+  const [generating, setGenerating] = useState(false);
+  const [genError, setGenError] = useState("");
 
   useEffect(() => {
     fetch(`/api/services/${id}`)
@@ -134,6 +145,33 @@ export default function EditServicePage() {
     setAiLoading(false);
   };
 
+  // AI記事生成: プロンプト・参考URL・添付画像をもとに記事を生成し、審査待ちとして保存する
+  const handleGenerate = async () => {
+    setGenError("");
+    setGenerating(true);
+
+    const res = await fetch("/api/ai/generate-article", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        service_id: id,
+        article_type: genType === "introduction" ? "introduction" : undefined,
+        extra_prompt: genPrompt,
+        images: genImages.map((img) => ({ data: img.data, media_type: img.mediaType })),
+      }),
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => null);
+      setGenError(data?.error?.message ?? "AI記事生成に失敗しました");
+      setGenerating(false);
+      return;
+    }
+
+    const { article_id } = await res.json();
+    router.push(`/admin/articles/${article_id}`);
+  };
+
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
   if (!form) return <div className="text-red-600 text-sm">サービスが見つかりません</div>;
 
@@ -217,6 +255,66 @@ export default function EditServicePage() {
           </button>
         </div>
       </form>
+
+      {/* AI記事生成 */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mt-6">
+        <h2 className="font-bold text-gray-900 mb-1">AI記事生成</h2>
+        <p className="text-xs text-gray-400 mb-4">
+          プロンプト・参考URL・画像（コピー&ペーストで添付可能）をもとにAIが記事を作成します。生成された記事は「審査待ち」として保存されるため、内容を確認してから公開してください。
+        </p>
+
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">記事の種類</label>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => setGenType("introduction")}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                  genType === "introduction" ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                紹介記事
+              </button>
+              <button
+                type="button"
+                onClick={() => setGenType("related")}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                  genType === "related" ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                関連記事
+              </button>
+            </div>
+            {genType === "introduction" && (
+              <p className="text-xs text-gray-400 mt-1">既存の紹介記事がある場合は内容が上書きされます</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">プロンプト・参考情報</label>
+            <PromptInputWithImages
+              value={genPrompt}
+              onChange={setGenPrompt}
+              images={genImages}
+              onImagesChange={setGenImages}
+              placeholder={"記事に反映したい内容、参考にするキャンペーンページのURL、画像などを入力してください。\n例: このスクリーンショットは先月の収益実績です。本文の「実際の収益」セクションに挿入してください。"}
+              disabled={generating}
+            />
+          </div>
+
+          {genError && <p className="text-red-600 text-sm">{genError}</p>}
+
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={generating}
+            className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            {generating ? "生成中..." : "AIに記事生成を依頼"}
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

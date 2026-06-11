@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import LogoFallback from "@/components/LogoFallback";
 import MultiSelectFilter from "@/components/admin/MultiSelectFilter";
@@ -32,13 +33,13 @@ function formatDate(iso: string | null) {
 }
 
 export default function ServiceListClient({ services, allCategories }: Props) {
+  const router = useRouter();
   const [localServices, setLocalServices] = useState(services);
   const [status, setStatus] = useState("");
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
-  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -83,36 +84,12 @@ export default function ServiceListClient({ services, allCategories }: Props) {
     setMenuOpenId(null);
   };
 
-  const handleUpdateIntro = async (e: React.MouseEvent, svc: ServiceRow) => {
+  // 「AI記事生成」区画にジャンプし、記事タイプを事前選択する
+  const goToAiGenerate = (e: React.MouseEvent, svc: ServiceRow, type: "introduction" | "related") => {
     e.preventDefault();
     e.stopPropagation();
     setMenuOpenId(null);
-    setActionLoadingId(svc.id);
-
-    const res = await fetch("/api/ai/generate-service", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ service_id: svc.id }),
-    });
-
-    setActionLoadingId(null);
-    alert(res.ok ? `「${svc.name}」の紹介記事を更新しました` : "紹介記事の更新に失敗しました");
-  };
-
-  const handleAddRelatedArticle = async (e: React.MouseEvent, svc: ServiceRow) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setMenuOpenId(null);
-    setActionLoadingId(svc.id);
-
-    const res = await fetch("/api/ai/generate-article", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ service_id: svc.id }),
-    });
-
-    setActionLoadingId(null);
-    alert(res.ok ? `「${svc.name}」の関連記事を追加しました` : "関連記事の追加に失敗しました");
+    router.push(`/admin/services/${svc.id}?ai_gen=${type}`);
   };
 
   return (
@@ -191,10 +168,9 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                   <button
                     type="button"
                     onClick={(e) => toggleMenu(e, svc.id)}
-                    disabled={actionLoadingId === svc.id}
-                    className="flex w-full items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 transition-colors hover:bg-orange-200 disabled:opacity-50 whitespace-nowrap"
+                    className="flex w-full items-center justify-center gap-1.5 rounded-full bg-orange-100 px-3 py-1.5 text-xs font-bold text-orange-700 transition-colors hover:bg-orange-200 whitespace-nowrap"
                   >
-                    {actionLoadingId === svc.id ? "更新中..." : "記事生成"}
+                    記事生成
                   </button>
 
                   {menuOpenId === svc.id && (
@@ -203,14 +179,14 @@ export default function ServiceListClient({ services, allCategories }: Props) {
                       <div className="absolute right-0 top-full mt-1.5 w-24 bg-white rounded-xl shadow-lg border border-gray-100 z-20 overflow-hidden">
                         <button
                           type="button"
-                          onClick={(e) => handleUpdateIntro(e, svc)}
+                          onClick={(e) => goToAiGenerate(e, svc, "introduction")}
                           className="block w-full text-center px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           紹介記事
                         </button>
                         <button
                           type="button"
-                          onClick={(e) => handleAddRelatedArticle(e, svc)}
+                          onClick={(e) => goToAiGenerate(e, svc, "related")}
                           className="block w-full text-center px-3 py-2 text-xs text-gray-700 hover:bg-gray-50 transition-colors border-t border-gray-100"
                         >
                           関連記事

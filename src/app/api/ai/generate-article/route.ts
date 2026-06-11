@@ -1,10 +1,14 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { generateText } from "@/lib/ai/claude";
+import { generateText, ImageInput } from "@/lib/ai/claude";
 import {
+  buildIntroductionArticlePrompt,
   buildRelatedArticlePrompt,
   buildDescriptionPrompt,
   SYSTEM_PROMPT_BASE,
+  ExtraContext,
 } from "@/lib/ai/prompts";
+import { extractUrls, fetchWebContents } from "@/lib/ai/webContent";
+import { uploadArticleImage } from "@/lib/storage";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 import { ArticleType } from "@/types/database";
@@ -12,7 +16,7 @@ import { ArticleType } from "@/types/database";
 const ARTICLE_CYCLE: ArticleType[] = ["guide", "faq", "comparison", "campaign", "earnings"];
 
 export async function POST(request: NextRequest) {
-  const { service_id, article_type } = await request.json();
+  const { service_id, article_type, extra_prompt, images } = await request.json();
   if (!service_id) return errorResponse(ErrorCode.VALIDATION_ERROR, "service_id は必須です");
 
   const supabase = createAdminClient();
@@ -20,7 +24,7 @@ export async function POST(request: NextRequest) {
   const { data: service } = await supabase.from("services").select("*").eq("id", service_id).single();
   if (!service) return errorResponse(ErrorCode.SERVICE_NOT_FOUND, "サービスが見つかりません", 404);
 
-  // 記事タイプが未指定の場合、ローテーション選択
+  // 記事タイプが未指定の場合、関連記事の中からローテーション選択
   let type: ArticleType = article_type;
   if (!type) {
     const { data: existing } = await supabase
@@ -35,35 +39,91 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const content = await generateText(SYSTEM_PROMPT_BASE, buildRelatedArticlePrompt(service, type as any));
+    // 添付画像をStorageにアップロード（AI Vision用の入力 + 本文挿入用URLの両方に使う）
+    const visionImages: ImageInput[] = [];
+    const imageUrls: string[] = [];
+    for (const img of images ?? []) {
+      visionImages.push({ mediaType: img.media_type, data: img.data });
+      const url = await uploadArticleImage(service_id, img.data, img.media_type);
+      if (url) imageUrls.push(url);
+    }
 
-    const titleMatch = content.match(/^#\s+(.+)/m);
-    const title = titleMatch ? titleMatch[1].trim() : `${service.name}の${type}`;
+    // プロンプト内のURLからページ本文を取得
+    const urls = extractUrls(extra_prompt ?? "");
+    const webContents = await fetchWebContents(urls);
 
-    const description = await generateText(
-      "SEO meta descriptionを150字以内で生成するアシスタントです。",
-      buildDescriptionPrompt(title, content)
-    );
+    const extraContext: ExtraContext = { userPrompt: extra_prompt, webContents, imageUrls };
 
-    const timestamp = Date.now();
-    const slug = `${service.slug}-${type}-${timestamp}`;
-    const status = "reviewing";
+    let title: string;
+    let content: string;
+    let articleId: string;
 
-    await supabase.from("articles").insert({
-      primary_service_id: service_id,
-      title, slug, content,
-      description: description.trim(),
-      article_type: type,
-      status,
-      published_at: null,
-    });
+    if (type === "introduction") {
+      title = `${service.name}を実際に使ってみた感想｜メリット・デメリット・始め方まとめ`;
+      content = (await generateText(SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(service, extraContext), visionImages))
+        .replace(/^#\s+.+\n+/, "") // AIが誤ってh1タイトルを出力した場合の保険
+        .trim();
+
+      const description = await generateText(
+        "SEO meta descriptionを150字以内で生成するアシスタントです。",
+        buildDescriptionPrompt(title, content)
+      );
+
+      // 既存の introduction 記事があれば上書き
+      const { data: existing } = await supabase
+        .from("articles")
+        .select("id")
+        .eq("primary_service_id", service_id)
+        .eq("article_type", "introduction")
+        .single();
+
+      if (existing) {
+        await supabase.from("articles").update({
+          title, content, description: description.trim(),
+          status: "reviewing", published_at: null,
+        }).eq("id", existing.id);
+        articleId = existing.id;
+      } else {
+        const slug = `${service.slug ?? service_id}-introduction`;
+        const { data: inserted } = await supabase.from("articles").insert({
+          primary_service_id: service_id,
+          title, slug, content,
+          description: description.trim(),
+          article_type: "introduction",
+          status: "reviewing",
+          published_at: null,
+        }).select("id").single();
+        articleId = inserted!.id;
+      }
+    } else {
+      content = await generateText(SYSTEM_PROMPT_BASE, buildRelatedArticlePrompt(service, type as any, extraContext), visionImages);
+
+      const titleMatch = content.match(/^#\s+(.+)/m);
+      title = titleMatch ? titleMatch[1].trim() : `${service.name}の${type}`;
+
+      const description = await generateText(
+        "SEO meta descriptionを150字以内で生成するアシスタントです。",
+        buildDescriptionPrompt(title, content)
+      );
+
+      const slug = `${service.slug}-${type}-${Date.now()}`;
+      const { data: inserted } = await supabase.from("articles").insert({
+        primary_service_id: service_id,
+        title, slug, content,
+        description: description.trim(),
+        article_type: type,
+        status: "reviewing",
+        published_at: null,
+      }).select("id").single();
+      articleId = inserted!.id;
+    }
 
     await supabase.from("admin_notifications").insert({
       type: "article_pending",
       payload: { service_id, service_name: service.name, article_type: type },
     });
 
-    return Response.json({ ok: true, status, article_type: type });
+    return Response.json({ ok: true, article_id: articleId, article_type: type });
   } catch (err) {
     await supabase.from("admin_notifications").insert({
       type: "ai_failed",

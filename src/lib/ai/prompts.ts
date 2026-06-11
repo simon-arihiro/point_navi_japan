@@ -1,3 +1,34 @@
+// 「AI記事生成」で管理者が入力した参考情報（プロンプト・参考ページ・添付画像）
+export type ExtraContext = {
+  userPrompt?: string;
+  webContents?: { url: string; content: string | null }[];
+  imageUrls?: string[];
+};
+
+// 管理者からの参考情報をプロンプト冒頭に挿入するセクションを構築する（最優先指示として扱う）
+function buildExtraContextSection(extra?: ExtraContext): string {
+  if (!extra) return "";
+  const parts: string[] = [];
+
+  if (extra.userPrompt?.trim()) {
+    parts.push(`【最優先指示】管理者から以下の指示・参考情報が提供されています。記事の構成や文字数の目安は維持しつつ、内容にはこの指示を最優先で反映してください。\n${extra.userPrompt.trim()}`);
+  }
+
+  const validWebContents = (extra.webContents ?? []).filter((w) => w.content);
+  if (validWebContents.length > 0) {
+    const sections = validWebContents.map((w) => `--- ${w.url} の内容 ---\n${w.content}`).join("\n\n");
+    parts.push(`【参考ページの内容】\n${sections}`);
+  }
+
+  if (extra.imageUrls?.length) {
+    const urlList = extra.imageUrls.map((u, i) => `${i + 1}. ${u}`).join("\n");
+    parts.push(`【添付画像】上記の最優先指示の中で、各画像を本文に挿入するか・執筆の参考情報として使うのみかが説明されています。本文に挿入する場合は、Markdown形式 ![説明](画像URL) で本文中の適切な位置に挿入してください。\n画像URL一覧（添付順）：\n${urlList}`);
+  }
+
+  if (parts.length === 0) return "";
+  return `${parts.join("\n\n")}\n\n以上を踏まえて、以下の指示に従って記事を作成してください。\n\n---\n\n`;
+}
+
 export const SYSTEM_PROMPT_BASE = `あなたは日本のポイ活・招待コードサイトの個人ブロガーとして記事を書いています。
 語気：個人ブロガーの体験談風、口語的で親しみやすく温かみのある表現。
 禁止：公式宣伝語気、過度に丁寧な企業PRスタイル。
@@ -39,13 +70,13 @@ export function buildIntroductionArticlePrompt(service: {
   referral_code: string | null;
   referral_link: string | null;
   official_url: string;
-}) {
+}, extra?: ExtraContext) {
   const referralGuide =
     service.referral_code || service.referral_link
       ? "「🚀 登録方法・始め方」の最後のステップで、紹介コード・紹介リンクの使い方を自然に案内してください。"
       : "紹介コード・紹介リンクは提供されていないため、公式サイトからの通常の登録手順のみを案内してください。";
 
-  return `「${service.name}」のサービス紹介記事の本文を書いてください。
+  return `${buildExtraContextSection(extra)}「${service.name}」のサービス紹介記事の本文を書いてください。
 このサイトのすべてのサービス紹介記事は同じテンプレートで統一しています。下記の見出し（##）の文言・絵文字・順番・レベルは一字一句変えずに使ってください。タイトル（h1 / # ）は不要です。本文は「## 📝 ...」から始めてください。
 
 サービス情報：
@@ -83,7 +114,8 @@ ${service.referral_link ? `- 紹介リンク: ${service.referral_link}` : ""}
 
 export function buildRelatedArticlePrompt(
   service: { name: string; description: string },
-  articleType: "guide" | "faq" | "comparison" | "campaign" | "earnings"
+  articleType: "guide" | "faq" | "comparison" | "campaign" | "earnings",
+  extra?: ExtraContext
 ) {
   const typeGuide = {
     guide: "使い方・攻略ガイド",
@@ -93,7 +125,7 @@ export function buildRelatedArticlePrompt(
     earnings: "実際の収益・ポイント獲得実績",
   }[articleType];
 
-  return `「${service.name}」に関する「${typeGuide}」の記事を書いてください。
+  return `${buildExtraContextSection(extra)}「${service.name}」に関する「${typeGuide}」の記事を書いてください。
 
 サービス概要：${service.description}
 
