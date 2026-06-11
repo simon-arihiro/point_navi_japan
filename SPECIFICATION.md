@@ -1,8 +1,8 @@
 # SPECIFICATION.md
 
-Version: v1.7.0
+Version: v1.8.0
 Status: 🟢 Active
-Date: 2026-06-10
+Date: 2026-06-11
 
 Project Name:
 Poikatsu AI Affiliate Platform
@@ -343,13 +343,13 @@ Service是系统唯一核心资产。
 | 字段 | 类型 | 说明 |
 |------|------|------|
 | id | int | 固定值 = 1 |
-| operation_mode | enum | manual / auto |
-| auto_generate_enabled | boolean | 是否启用自动生成，默认 true |
-| auto_distribution | boolean | 文章发布后自动分发 |
-| daily_article_count | int | 每日自动生成Service関連文章数，默认 1 |
-| max_pending_articles | int | 审核队列积压上限，超过则暂停生成，默认 10 |
-| ranking_window_days | int | Ranking统计时间窗口，默认 30 |
-| hide_articles_on_inactive | boolean | Service が inactive の場合に该 Service の公開済み記事も全体的に非表示にするか，默认 false（全Service共通のグローバル設定） |
+| operation_mode | enum | manual / auto。**V1现状：仅支持 manual，列保留供未来 AUTO 模式使用**（详见 Appendix A） |
+| auto_generate_enabled | boolean | 是否启用自动生成，默认 true。**V1现状：未在 Admin UI 暴露，Cron 自动生成处于停用状态**（详见 Chapter 5「Service関連 自动生成调度」） |
+| auto_distribution | boolean | 文章发布后自动分发。**V1现状：未在 Admin UI 暴露**（社交分发为 V2 功能，详见 Appendix C） |
+| daily_article_count | int | 每日自动生成Service関連文章数，默认 1。**V1现状：未使用**（关连记事改为 Admin 手动依頼生成，详见 F.11） |
+| max_pending_articles | int | 审核队列积压上限，超过则暂停生成，默认 10。**V1现状：未使用** |
+| ranking_window_days | int | Ranking统计时间窗口，默认 30。**Admin 设置页可编辑** |
+| hide_articles_on_inactive | boolean | Service が inactive の場合に该 Service の公開済み記事も全体的に非表示にするか，默认 false（全Service共通のグローバル設定）。**Admin 设置页可编辑** |
 | updated_at | timestamptz | |
 
 ---
@@ -438,11 +438,11 @@ AI生成・常時最新
 
 **概览区：**
 
-* 已发布 Service 数（active）
-* 已发布 Article 数（Service介绍 + Service関連 分开计数）
-* 待审核文章数（一键跳转）
-* AI 生成队列状态
-* AI 自动生成开关（`auto_generate_enabled` 一键切换，显示当前积压数 / 上限）
+* 公開中 Service 数（active）
+* 公開中 Article 数（Service介绍 + Service関連 分开计数）
+* 審査待ち（reviewing）文章数（一键跳转 `/admin/articles?status=reviewing`）
+
+> **V1现状**：「AI 生成队列状态」「AI 自动生成开关」未实装（Cron 自动生成处于停用状态，详见 Chapter 5「Service関連 自动生成调度」）。AI 记事生成改为 Admin 在各 Service 编辑页手动依頼，详见 F.11
 
 **Service 行为明细表：**
 
@@ -458,9 +458,8 @@ AI生成・常時最新
   - 「追加」ボタン：入力内容で Service レコードを作成し、選択中のカテゴリを `service_categories` に紐付け（この時点でカテゴリが確定）。紹介記事は自動生成されない
 * Service 編集ページ（`/admin/services/[id]`）：
   - カテゴリ欄は追加フォームと同一の選択式 UI（F.6 参照）。既存の紐付けを初期選択状態として表示し、保存時に選択内容で `service_categories` を全置換する
-  - 下部の操作ボタンは 2行 × 2列・同サイズのグリッド配置：
-    - 1行目：「保存」（フォーム送信）/「削除」（Service と関連記事を全削除）
-    - 2行目：「紹介記事」（`POST /api/ai/generate-service` — Service介绍 文章を AI で再生成・常に1本のみ最新に上書き）/「関連記事」（`POST /api/ai/generate-article` — Service関連 文章を AI で新規追加生成、複数本生成可能）
+  - フォーム下部の操作ボタンは 2列グリッド配置：「AI補完」/「保存」、その下に全幅「削除」
+  - フォーム下部に「AI記事生成」パネルを設置（F.11 参照）：記事種別（紹介記事 / 関連記事）切り替え＋プロンプト・参考URL・画像添付欄＋「AIに記事生成を依頼」ボタン。`POST /api/ai/generate-article` を呼び出し、生成結果は `reviewing`（審査待ち）として保存され、`/admin/articles/[id]` へ遷移する
 * inactive な Service の公開済み記事を非表示にするかどうかは Service ごとではなく `system_settings.hide_articles_on_inactive` でグローバルに制御（`/admin/settings` で設定）
 
 **Categories 管理：**
@@ -476,7 +475,9 @@ AI生成・常時最新
 
 **通知中心：**
 
-顶部常驻，显示 article_pending / ai_failed / image_failed / distribution_failed 提醒
+`admin_notifications` テーブルに article_pending / ai_failed / image_failed / distribution_failed の4種別を記録する。
+
+> **V1现状**：Dashboard では `articles.status = reviewing` の件数のみをバナー表示（「📝 審査待ち記事が{N}件あります」→ `/admin/articles?status=reviewing`）。`admin_notifications` テーブル自体への書き込みは `article_pending` / `ai_failed` のみ実装済みだが、Admin UI 側での一覧表示・既読管理は未実装（V2 で対応予定）
 
 ---
 
@@ -535,30 +536,38 @@ Admin 确认/修改 description、カテゴリ等（カテゴリ可多选，也�
 
 ---
 
-### Service介绍 文章生成（手动触发）
+### Service介绍 文章生成（手动依頼）
 
-在 Service 编辑页点击「再生成紹介記事」按钮，触发 `POST /api/ai/generate-service`：
+在 Service 编辑页「AI記事生成」面板（F.11）选择「紹介記事」，输入プロンプト・参考URL・画像（任意）后点击「AIに記事生成を依頼」，触发统一端点 `POST /api/ai/generate-article`（`article_type: "introduction"`）：
 
-1. AI 解析公式URL，重新补完 description / categories / tags（覆盖已有值，新分类・标签自动创建）
-2. 生成 Service介绍 文章（introduction类型）并保存
-3. MANUAL模式：保存为 `draft` 并发送 `article_pending` 通知 / AUTO模式：直接 `published`
+1. AI 基于 Service 信息 + Admin 输入的プロンプト・参考情報・画像 生成 Service介绍 文章正文 + SEO description
+2. 已有 introduction 文章时整体覆盖更新（标题固定为模板「{Service名}を実際に使ってみた感想｜メリット・デメリット・始め方まとめ」），不存在时新建
+3. 保存为 `reviewing`（審査待ち）并发送 `article_pending` 通知，Admin 在 `/admin/articles/[id]` 确认后手动「公開する」
+
+> **注意**：本流程**不会**重新调用 AI 补完 description / categories / tags（与旧版 `generate-service` 行为不同）。如需更新这些字段，请使用「AI補完」按钮（`POST /api/ai/autofill-service`，详见上文 Service Creation Flow）后手动保存
 
 ---
 
 ### Service関連 自动生成调度（Vercel Cron）
+
+> **🔜 V1现状：未実装（停用中）**。`POST /api/cron/generate-article` 端点存在（`vercel.json` 中保留每日 JST 09:00 的 cron 配置），但当前为 no-op，直接返回 `{ ok: true, generated: 0, reason: "auto_generation_not_supported_in_this_version" }`。Service関連 文章生成现阶段改为 Admin 在各 Service 编辑页手动依頼（详见上一节 + F.11）
+
+以下为该功能未来重新启用时的设计（暂不实施）：
 
 触发频率：每日定时，数量由 `system_settings.daily_article_count` 决定（默认1篇）
 
 选取逻辑：
 
 * 仅从 status = active 的 Service 中选取
-* 加权随机（近期发文少的 Service 权重更高）
+* 加权随机（近期发文少的 Service 权重更高，详见 Chapter 8）
 * 检查该 Service 历史文章类型，优先选未覆盖角度（guide → faq → comparison → campaign → earnings 轮转）
+
+> 上述「类型轮转选择逻辑」已在手动依頼流程中实现并复用：当 Admin 依頼「関連記事」且未指定类型时，`POST /api/ai/generate-article` 会自动从该 Service 历史文章类型中选取未覆盖的角度（详见 F.11）。仅「加权随机选 Service」与「Cron 定时触发」部分尚未实装
 
 生成内容：
 
 * 日文，个人博主口语风格
-* 自动从 service_images 选取相关图片插入正文
+* 自动从 service_images 选取相关图片插入正文 / 也可由 Admin 手动添付图片（F.11）
 * 同步生成 SEO description
 
 执行前检查（两者均满足方可触发生成）：
@@ -576,34 +585,39 @@ Admin 确认/修改 description、カテゴリ等（カテゴリ可多选，也�
 
 ### Service介绍 更新机制
 
+> **🔜 V1现状：未実装**。`PUT /api/services/[id]` 保存 Service 信息变更时，不会自动触发 Service介绍 文章重新生成或归档旧文章
+
+以下为该功能未来实现时的设计（暂不实施）：
+
 Service 关键信息变更后（name / referral_code / referral_link / official_url 等），系统自动触发：
 
 1. 基于旧文章内容生成新版 Service介绍（微调更新，保留文章结构，替换变更信息）
 2. 旧文章状态 → `archived`（前台不再展示）
 3. 新文章按当前 operation_mode 处理：MANUAL → `reviewing` / AUTO → `published`
 
+> **V1现状的替代方案**：Service 信息变更后，Admin 可在编辑页「AI記事生成」面板手动依頼「紹介記事」重新生成（详见上文「Service介绍 文章生成（手动依頼）」），旧文章会被直接覆盖（非 `archived`）
+
 ---
 
 ### Article 审核状态机（MANUAL模式）
 
 ```
-AI生成 → draft ──[MANUAL: 自动]──→ reviewing（进入审核队列）
-               └──[AUTO: 直接]────→ published（跳过审核）
+AI生成（POST /api/ai/generate-article）→ reviewing（直接进入审核队列，详见 F.11）
 
-reviewing 阶段 Admin 有三个选项：
-         ┌─ ✅ 发布   → published（直接上线）
-         ├─ ✏️ 修改意见 → AI重写 → reviewing（revision_count +1，循环审核）
-         └─ ❌ 拒绝   → rejected（永久丢弃，不展示，不发布）
+/admin/articles/[id] で Admin が取れる操作：
+         ┌─ ✓ 公開する     → published（直接上线、设置 published_at）
+         ├─ ✏️ AIに書き直しを依頼 → AI重写（POST /api/ai/rewrite）→ reviewing（循环审核）
+         └─ （published時のみ）審査待ちに戻す → reviewing（撤下重新审核）
 ```
 
 **状态说明：**
-- `draft`：AI生成完毕，尚未进入审核队列
+- `draft`：保留状态值，**V1现状未使用**（AI生成的文章直接进入 `reviewing`）
 - `reviewing`：在 Admin 审核队列中等待处理
 - `published`：Admin 审核通过并发布
-- `rejected`：Admin 拒绝，文章永久丢弃，前台不展示，不可恢复
-- `archived`：已发布后由 Admin 手动归档下架
+- `rejected`：保留状态值，**🔜 V1现状：Admin UI 未提供「拒绝」操作入口，无法将文章置为此状态**（计划后续版本追加）
+- `archived`：保留状态值，**V1现状：除「審査待ちに戻す」外，无其他归档路径**（手动下架功能计划后续版本追加）
 
-**revision_count**：记录该文章被 AI 重写的累计次数，供 Admin 参考判断是否直接拒绝。
+**revision_count**：记录该文章被 AI 重写的累计次数，供 Admin 参考。**🔜 V1现状：`POST /api/ai/rewrite` 尚未对该字段执行 +1 更新**（已知差异，计划修复）。
 
 ---
 
@@ -657,17 +671,29 @@ POST /api/analytics/track
 ### AI
 
 ```
-POST /api/ai/autofill-service   # 新建Service时のAI補完プレビュー（DB書き込みなし）
-POST /api/ai/generate-service   # description/categories/tags補完 + 紹介記事生成（手动トリガー）
-POST /api/ai/generate-article
-POST /api/ai/rewrite
+POST /api/ai/autofill-service   # 新建/編集Service時のAI補完プレビュー（description/categories/campaign候補。DB書き込みなし）
+POST /api/ai/generate-article   # 紹介記事・関連記事の統一生成エンドポイント（F.11）
+POST /api/ai/rewrite            # 審査フィードバックに基づく記事書き直し
 ```
+
+`POST /api/ai/generate-article` リクエストボディ：
+
+```ts
+{
+  service_id: string;          // 必須
+  article_type?: ArticleType;  // "introduction" 指定時は紹介記事を上書き生成。未指定時は関連記事を種別ローテーションで自動選択
+  extra_prompt?: string;       // Admin が入力する自由記述プロンプト・参考URL
+  images?: { data: string; media_type: string }[]; // base64画像（コピー&ペースト添付）
+}
+```
+
+> **🔜 旧 `POST /api/ai/generate-service` は廃止・統合済み**。Service の description/categories/tags をAIで再補完したい場合は `POST /api/ai/autofill-service` を使用（Chapter 5「Service Creation Flow」参照）
 
 ### Cron
 
 ```
 POST /api/cron/aggregate        # analytics_daily 聚合
-POST /api/cron/generate-article # Service関連 自动生成
+POST /api/cron/generate-article # Service関連 自动生成（🔜 V1现状：no-op、未実装。詳見 Chapter 5）
 ```
 
 ### Distribution
@@ -719,6 +745,8 @@ score = referral_clicks × 5 + copy_code_count × 2
 
 ### Service関連 加重ランダム選択
 
+> **🔜 V1现状：未使用**。Service の選択は Admin が手動で行う（各 Service 編集ページから依頼）ため、Service 横断の加重ランダム選択は発生しない。Cron 自动生成调度を再開する際に使用予定（Chapter 5 参照）
+
 ```
 weight(service) = 1 / (recent_article_count + 1)
 ```
@@ -732,16 +760,24 @@ recent_article_count = 直近 `system_settings.ranking_window_days` 日内该 Se
 ### V1（初期リリース）
 
 * Service 管理（CRUD + カテゴリ）
-* Service介绍 自动生成
-* Service関連 自动调度生成
-* Article 审核流程
+* Service介绍 / Service関連 文章 AI生成（Admin がプロンプト・参考URL・画像で手动依頼、F.11）
+* Article 审核流程（reviewing → published / AI書き直し）
 * Analytics 事件追踪 + 每日聚合
 * Hot / Profit Ranking
-* Admin 后台（Dashboard + 通知中心）
+* Admin 后台（Dashboard + 審査待ちバナー）
 * SEO 基础（slug / description / sitemap）
+
+### V1.x（既存機能の補完・既知差异修复）
+
+* Article 审核「拒绝（rejected）」操作の Admin UI 追加
+* `POST /api/ai/rewrite` での `revision_count` 自动递增
+* `admin_notifications`（ai_failed / image_failed / distribution_failed）の Admin UI 表示・既読管理
 
 ### V2（自动化拡張）
 
+* Service関連 自动调度生成の再開（Cron + 加重ランダム選択、Chapter 5/8）
+* AUTO 运营模式対応（`operation_mode` 切り替え、AI生成 → 直接公開）
+* Service介绍 自动更新机制（Service情報変更時の自动重新生成・旧記事 archived 化）
 * Tags 管理（カテゴリと同様の UI / API、サービスへのタグ付け）
 * 社交媒体自动分发（X / Instagram / Threads）
 * 自动活动监控
@@ -758,13 +794,13 @@ recent_article_count = 直近 `system_settings.ranking_window_days` 日内该 Se
 
 ## Appendix A: Operation Mode
 
-**MANUAL**（默认）
+**MANUAL**（V1唯一对应モード）
 
-AI生成 → Draft → Admin 审核 → 发布
+AI生成 → reviewing → Admin 审核 → 发布
 
 **AUTO**
 
-AI生成 → 直接发布，Admin 无需介入
+> **🔜 V1现状：未実装**。`system_settings.operation_mode` 列・型定義は保留されているが、Admin UI から切り替える手段はなく、すべての処理は MANUAL として動作する。AUTO モード（AI生成 → 直接发布、Admin 无需介入）は今后バージョンで対応予定
 
 ---
 
@@ -1035,6 +1071,26 @@ Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdm
 - 「AI補完」ボタンはこの2項目を変更しない
 
 **参照実装：** `src/lib/campaign.ts` / `src/components/ServiceCard.tsx` / `src/components/ConversionArea.tsx` / `src/app/admin/(protected)/services/new/page.tsx` / `src/app/admin/(protected)/services/[id]/page.tsx` / `supabase/migrations/004_campaign_badge.sql`
+
+---
+
+### F.11 AI記事生成フロー（プロンプト依頼方式・統一エンドポイント）
+
+**適用範囲：** Service 編集ページ（`/admin/services/[id]`）下部の「AI記事生成」パネル、`POST /api/ai/generate-article`
+
+**背景：** 旧仕様では「紹介記事」「関連記事」を別々のボタン・別々のAPI（`generate-service` / `generate-article`）で生成する想定だったが、実装段階で「Admin がプロンプト・参考URL・画像を入力 → AIが生成 → 審査」という統一フローに簡略化した（記事生成ボタンの選択メニューも廃止）。
+
+**実装パターン：**
+- **入力UI**：`src/components/admin/PromptInputWithImages.tsx`（テキストエリア＋画像のコピー&ペースト添付に対応）。Admin は記事種別（紹介記事 / 関連記事）をトグルで選択し、自由記述のプロンプト・参考URL・画像（任意）を入力する
+- **`POST /api/ai/generate-article`** リクエスト：`{ service_id, article_type?, extra_prompt?, images? }`
+  - `images`：base64エンコードされた画像配列。`src/lib/storage.ts` の `uploadArticleImage()` で `article-images` バケット（`supabase/migrations/005_article_images_bucket.sql`）にアップロードし、公開URLを本文挿入用として、また元データを Claude Vision への入力としても使用する
+  - `extra_prompt` 内のURLは `src/lib/ai/webContent.ts` の `extractUrls()` / `fetchWebContents()` で本文を取得し、AIへの追加コンテキスト（`ExtraContext`）として渡す
+  - `article_type` が `"introduction"`：Service介绍 文章を生成し、既存の introduction 記事があれば上書き（タイトルは固定テンプレート）。**description/categories/tags のAI再補完は行わない**（F.6/Service Creation Flow の「AI補完」ボタンと役割分担）
+  - `article_type` 未指定（関連記事）：`ARTICLE_CYCLE = ["guide","faq","comparison","campaign","earnings"]` から、当該 Service の既存関連記事で未使用の種別を優先的に選択（全種別使用済みなら件数に応じて巡回）
+  - 生成結果は常に `status: "reviewing"` で保存し、`admin_notifications` に `article_pending` を記録。失敗時は `ai_failed` を記録し `AI_GENERATION_FAILED`(1005) を返す
+- **生成後**：レスポンスの `article_id` で `/admin/articles/[id]` へ遷移し、Admin が内容確認 → 「公開する」または「AIに書き直しを依頼」（`POST /api/ai/rewrite`、F.4 系の審査フロー）
+
+**参照実装：** `src/app/api/ai/generate-article/route.ts` / `src/components/admin/PromptInputWithImages.tsx` / `src/lib/ai/webContent.ts` / `src/lib/storage.ts` / `src/app/admin/(protected)/services/[id]/page.tsx` / `supabase/migrations/005_article_images_bucket.sql`
 
 ---
 
