@@ -38,7 +38,7 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
               {article.title}
             </h3>
           </div>
-          <div className="flex gap-4">
+          <div className="flex items-start gap-4">
             <div className="w-32 sm:w-40 aspect-video shrink-0 rounded-xl bg-gray-50 overflow-hidden">
               {thumbnailUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
