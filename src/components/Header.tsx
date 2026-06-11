@@ -49,8 +49,8 @@ export default function Header({ categories = [] }: Props) {
         <div className="flex justify-between items-center h-16">
           {/* ロゴ */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Mascot className="w-8 h-8" />
-            <span className="text-xl font-bold text-gray-900">
+            <Mascot className="w-11 h-11" />
+            <span className="text-2xl font-black text-gray-900">
               ポイ<span className="text-amber-600">ナビ</span>
             </span>
           </Link>

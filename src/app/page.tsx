@@ -74,7 +74,7 @@ export default async function HomePage() {
               <span className="text-orange-600">これは本当におすすめ</span><br />
               のサービスだけ集めました
             </h1>
-            <p className="text-slate-600 text-lg leading-relaxed mb-8">
+            <p className="text-slate-600 text-base leading-relaxed mb-8">
               実際に使ってみた体験をもとに、お得なポイ活サービスをわかりやすく紹介しています。
             </p>
             <div className="flex flex-wrap gap-4">
