@@ -17,7 +17,6 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     { count: introArticles },
     { count: relatedArticles },
     { count: pendingArticles },
-    { data: notifications },
     { data: analyticsRows },
     { data: servicesList },
   ] = await Promise.all([
@@ -25,7 +24,6 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("article_type", "introduction").eq("status", "published"),
     supabase.from("articles").select("*", { count: "exact", head: true }).neq("article_type", "introduction").eq("status", "published"),
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "reviewing"),
-    supabase.from("admin_notifications").select("*").eq("is_read", false).order("created_at", { ascending: false }).limit(10),
     supabase.from("analytics_daily").select("service_id, page_views, referral_clicks, copy_code_count").gte("date", windowStart.toISOString().slice(0, 10)),
     supabase.from("services").select("id, name, slug").eq("status", "active").order("name"),
   ]);
@@ -52,27 +50,19 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     { label: "審査待ち記事", value: pendingArticles ?? 0, href: "/admin/articles?status=reviewing", alert: (pendingArticles ?? 0) > 0 },
   ];
 
-  const notifTypeLabel: Record<string, string> = {
-    article_pending: "📝 審査待ち記事あり",
-    ai_failed: "⚠️ AI生成エラー",
-    image_failed: "🖼️ 画像取得エラー",
-    distribution_failed: "📡 配信エラー",
-  };
-
   return (
     <div>
       <h1 className="text-2xl font-black text-gray-900 mb-8">ダッシュボード</h1>
 
-      {/* 通知 */}
-      {(notifications ?? []).length > 0 && (
-        <div className="mb-8 space-y-2">
-          {(notifications ?? []).map((n: any) => (
-            <div key={n.id} className="bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 flex items-center justify-between">
-              <span className="text-sm text-yellow-800">{notifTypeLabel[n.type] ?? n.type}</span>
-              <span className="text-xs text-yellow-600">{new Date(n.created_at).toLocaleString("ja-JP")}</span>
-            </div>
-          ))}
-        </div>
+      {/* 通知（対応可能なものだけ表示） */}
+      {(pendingArticles ?? 0) > 0 && (
+        <Link
+          href="/admin/articles?status=reviewing"
+          className="mb-8 flex items-center justify-between bg-yellow-50 border border-yellow-200 rounded-xl px-4 py-3 hover:bg-yellow-100 transition-colors"
+        >
+          <span className="text-sm text-yellow-800 font-medium">📝 審査待ち記事が{pendingArticles}件あります</span>
+          <span className="text-xs text-yellow-600">確認する →</span>
+        </Link>
       )}
 
       {/* 統計 */}
