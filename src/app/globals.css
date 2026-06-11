@@ -6,6 +6,11 @@
   --foreground: #111827;
 }
 
+html {
+  /* sticky位置指定を壊さずに、意図しない横スクロールを防ぐ */
+  overflow-x: clip;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
