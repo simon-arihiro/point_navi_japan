@@ -2,7 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { calcHotScore, calcProfitScore } from "@/lib/ranking";
 import ArticleCard from "@/components/ArticleCard";
 import RankingListItem from "@/components/RankingListItem";
-import Mascot from "@/components/Mascot";
 import Link from "next/link";
 
 export default async function HomePage() {
@@ -87,7 +86,12 @@ export default async function HomePage() {
               </Link>
             </div>
           </div>
-          <Mascot className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 w-56 h-56 opacity-90" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/mascot/poinavi-kun.png"
+            alt="ポイナビくん"
+            className="hidden lg:block absolute right-8 top-1/2 -translate-y-1/2 w-72 h-auto"
+          />
         </div>
       </section>
 
