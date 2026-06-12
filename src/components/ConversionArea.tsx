@@ -24,11 +24,13 @@ export default function ConversionArea({ service }: Props) {
     });
   };
 
-  const handleReferralClick = async () => {
-    await fetch("/api/analytics/track", {
+  const handleReferralClick = () => {
+    // 外部リンクへの遷移で fetch が中断されないよう keepalive を指定
+    fetch("/api/analytics/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ event_type: "referral_click", service_id: service.id }),
+      keepalive: true,
     });
   };
 
