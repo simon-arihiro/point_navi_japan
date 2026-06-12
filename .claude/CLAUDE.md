@@ -70,3 +70,12 @@
 - **デスクトップ（md 以上）**：固定 `w-56` サイドバー
 - **モバイル（md 未満）**：上部ヘッダー＋ハンバーガーボタン → タップで左からスライドイン、背後に半透明オーバーレイ
 - `layout.tsx` は Server Component のまま（認証のみ担当）、UI は `<AdminShell>` に委譲
+
+---
+
+## ビジュアルアセット「図库」管理規則
+
+- ユーザーがチャットでロゴ・マスコット・バナー等の画像を提供し、サイトに採用した場合、その画像は **`public/gallery/`** に保存する（既存の `public/mascot/` とは別に、サイト全体で使う汎用ビジュアル素材置き場）
+- ファイル名は `poinavi-{用途}.png` 形式（例：`poinavi-header-banner.png`）
+- 採用前に元画像が大きい場合（数MB）は Pillow 等でリサイズ・圧縮してから保存する（ヘッダー等の小さい表示領域なら 800px 幅程度で十分）
+- 参照実装：`src/components/Header.tsx`（ロゴを `public/gallery/poinavi-header-banner.png` に置き換え済み）

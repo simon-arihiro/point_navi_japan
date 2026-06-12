@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Category } from "@/types/database";
-import Mascot from "@/components/Mascot";
 import SearchBox from "@/components/SearchBox";
 
 type Props = {
@@ -48,11 +47,9 @@ export default function Header({ categories = [] }: Props) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* ロゴ */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <Mascot className="w-12 h-12" />
-            <span className="text-3xl font-black text-gray-900">
-              ポイ<span className="text-amber-600">ナビ</span>
-            </span>
+          <Link href="/" className="flex items-center shrink-0">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/gallery/poinavi-header-banner.png" alt="ポイナビ" className="h-12 sm:h-14 w-auto object-contain" />
           </Link>
 
           {/* PC Nav */}
