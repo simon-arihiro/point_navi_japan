@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
+import TrackView from "@/components/TrackView";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 import { getArticleTypeLabel } from "@/lib/articleTypes";
 import type { Metadata } from "next";
@@ -54,15 +55,6 @@ export default async function ArticlePage(
     : "";
 
   const service = article.primary_service;
-
-  // Track article_view（クライアント側で送信するため静的に埋め込む）
-  const articleViewScript = `
-    fetch('/api/analytics/track', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({event_type:'article_view', article_id:'${article.id}', service_id:'${article.primary_service_id}'})
-    });
-  `;
 
   return (
     <div>
@@ -145,7 +137,7 @@ export default async function ArticlePage(
       </div>
 
       {/* ページビュートラッキング */}
-      <script dangerouslySetInnerHTML={{ __html: articleViewScript }} />
+      <TrackView eventType="article_view" articleId={article.id} serviceId={article.primary_service_id} />
     </div>
   );
 }

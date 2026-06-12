@@ -4,6 +4,7 @@ import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
 import LogoFallback from "@/components/LogoFallback";
+import TrackView from "@/components/TrackView";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 import type { Metadata } from "next";
 
@@ -52,15 +53,6 @@ export default async function ServicePage(
   // この Service の introduction 記事
   const introArticle = introRes.data?.find((a: any) => a.primary_service_id === service.id);
   const relatedArticles = (articlesRes.data ?? []).filter((a: any) => a.primary_service_id === service.id);
-
-  // Track service_view (クライアント側で送信するため静的に埋め込む)
-  const serviceViewScript = `
-    fetch('/api/analytics/track', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({event_type:'service_view', service_id:'${service.id}'})
-    });
-  `;
 
   return (
     <div>
@@ -175,7 +167,7 @@ export default async function ServicePage(
       </div>
 
       {/* ページビュートラッキング */}
-      <script dangerouslySetInnerHTML={{ __html: serviceViewScript }} />
+      <TrackView eventType="service_view" serviceId={service.id} />
     </div>
   );
 }
