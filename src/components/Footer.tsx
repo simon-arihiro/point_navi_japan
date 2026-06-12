@@ -10,7 +10,7 @@ type Props = {
 
 export default function Footer({ categories = [], latestArticles = [] }: Props) {
   return (
-    <footer className="bg-slate-900 text-slate-400">
+    <footer className="bg-brand-900 text-white/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
@@ -65,9 +65,9 @@ export default function Footer({ categories = [], latestArticles = [] }: Props) 
           </div>
         </div>
 
-        <div className="border-t border-slate-800 mt-10 pt-6 text-sm text-center">
+        <div className="border-t border-white/10 mt-10 pt-6 text-sm text-center">
           <p>© 2026 ポイナビ. All rights reserved.</p>
-          <p className="mt-1 text-xs text-slate-600">
+          <p className="mt-1 text-xs text-white/40">
             ※本サイトの情報は参考目的です。最新情報は各サービスの公式サイトをご確認ください。
           </p>
         </div>

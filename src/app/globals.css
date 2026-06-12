@@ -8,25 +8,27 @@
 
 /*
  * ブランドカラー（公開サイト用）
- * Header のロゴバナー画像（src/components/Header.tsx）の配色に合わせたパレット。
- * banner 画像を変更した場合は、新しい配色に近い Tailwind カラーを
- * --color-amber-*/--color-orange-* から選び、ここの参照先を差し替えるだけで
- * 全ページの配色が一括で更新される（SPECIFICATION.md F.9 参照）。
+ * Header のロゴバナー画像（public/mascot/library/poinavi-header-banner-*.png）から
+ * 背景の白色部分を除外して抽出した色相（暖色ゴールド系 ≈42°、オレンジ系 ≈27°）を、
+ * Tailwind amber/orange 各シェードの明度・彩度に適用して生成したパレット。
+ * banner 画像を変更した場合は、新しい画像から同様に色相を抽出し、
+ * 下記の値を差し替えるだけで全ページの配色が一括で更新される（SPECIFICATION.md F.9 参照）。
  */
 @theme {
-  --color-brand-50: var(--color-amber-50);
-  --color-brand-100: var(--color-amber-100);
-  --color-brand-200: var(--color-amber-200);
-  --color-brand-300: var(--color-amber-300);
-  --color-brand-400: var(--color-amber-400);
-  --color-brand-500: var(--color-amber-500);
-  --color-brand-700: var(--color-amber-700);
-  --color-brand-800: var(--color-amber-800);
+  --color-brand-50: #fff9eb;
+  --color-brand-100: #feedc7;
+  --color-brand-200: #fdda8a;
+  --color-brand-300: #fcc74d;
+  --color-brand-400: #fbb924;
+  --color-brand-500: #f5ae0b;
+  --color-brand-700: #b48009;
+  --color-brand-800: #926a0e;
+  --color-brand-900: #453103;
 
-  --color-brand-warm-50: var(--color-orange-50);
-  --color-brand-warm-100: var(--color-orange-100);
-  --color-brand-warm-500: var(--color-orange-500);
-  --color-brand-warm-600: var(--color-orange-600);
+  --color-brand-warm-50: #fff5ed;
+  --color-brand-warm-100: #ffe8d5;
+  --color-brand-warm-500: #f97d16;
+  --color-brand-warm-600: #ea710c;
 }
 
 html {
