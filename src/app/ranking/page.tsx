@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { calcHotScore, calcProfitScore } from "@/lib/ranking";
+import { getServiceStatsMap } from "@/lib/analytics";
 import ServiceCard from "@/components/ServiceCard";
 import type { Metadata } from "next";
 
@@ -15,31 +16,16 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
   const supabase = await createClient();
   const { data: settings } = await supabase.from("system_settings").select("ranking_window_days").eq("id", 1).single();
   const windowDays = settings?.ranking_window_days ?? 30;
-  const windowStart = new Date();
-  windowStart.setDate(windowStart.getDate() - windowDays);
 
-  const [servicesRes, dailyRes] = await Promise.all([
+  const [servicesRes, statsMap] = await Promise.all([
     supabase
       .from("services")
       .select(`*, categories:service_categories(category:categories(*)), tags:service_tags(tag:tags(*))`)
       .eq("status", "active"),
-    supabase
-      .from("analytics_daily")
-      .select("service_id, page_views, referral_clicks, copy_code_count")
-      .gte("date", windowStart.toISOString().split("T")[0]),
+    getServiceStatsMap(supabase, windowDays),
   ]);
 
   const services = servicesRes.data ?? [];
-  const dailyData = dailyRes.data ?? [];
-
-  const statsMap = new Map<string, { pv: number; rc: number; cc: number }>();
-  for (const row of dailyData) {
-    const s = statsMap.get(row.service_id) ?? { pv: 0, rc: 0, cc: 0 };
-    s.pv += row.page_views;
-    s.rc += row.referral_clicks;
-    s.cc += row.copy_code_count;
-    statsMap.set(row.service_id, s);
-  }
 
   const ranked = services.map((svc: any) => {
     const st = statsMap.get(svc.id) ?? { pv: 0, rc: 0, cc: 0 };
