@@ -31,6 +31,7 @@ export async function POST(request: NextRequest) {
       .from("articles")
       .select("article_type")
       .eq("primary_service_id", service_id)
+      .is("deleted_at", null)
       .neq("article_type", "introduction");
 
     const usedTypes = (existing ?? []).map((a: any) => a.article_type);
@@ -75,6 +76,7 @@ export async function POST(request: NextRequest) {
         .select("id")
         .eq("primary_service_id", service_id)
         .eq("article_type", "introduction")
+        .is("deleted_at", null)
         .single();
 
       if (existing) {

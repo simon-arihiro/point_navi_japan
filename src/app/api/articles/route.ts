@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from("articles")
     .select(`*, primary_service:services!articles_primary_service_id_fkey(*)`)
+    .is("deleted_at", null)
     .order("published_at", { ascending: false })
     .limit(limit);
 

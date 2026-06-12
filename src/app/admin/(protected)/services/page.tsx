@@ -22,10 +22,11 @@ export default async function AdminServicesPage() {
     supabase
       .from("services")
       .select(`*, categories:service_categories(category:categories(*))`)
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .returns<ServiceQueryRow[]>(),
-    supabase.from("categories").select("id, name, slug, created_at, updated_at").order("name").returns<Category[]>(),
-    supabase.from("articles").select("primary_service_id, published_at").returns<ArticleStatRow[]>(),
+    supabase.from("categories").select("id, name, slug, created_at, updated_at").is("deleted_at", null).order("name").returns<Category[]>(),
+    supabase.from("articles").select("primary_service_id, published_at").is("deleted_at", null).returns<ArticleStatRow[]>(),
   ]);
 
   const articleStats = new Map<string, { count: number; latest: string | null }>();

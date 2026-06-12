@@ -11,6 +11,7 @@ export async function GET(request: NextRequest) {
   let query = supabase
     .from("services")
     .select(`*, categories:service_categories(category:categories(*)), tags:service_tags(tag:tags(*))`)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (status) query = query.eq("status", status);

@@ -39,8 +39,8 @@ export default function AdminCategoriesPage() {
     setSaving(false);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("削除しますか？")) return;
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`「${name}」をゴミ箱に移動しますか？ゴミ箱から復元することもできます。`)) return;
     const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
     if (res.ok) {
       setItems((prev) => prev.filter((item) => item.id !== id));
@@ -90,7 +90,7 @@ export default function AdminCategoriesPage() {
                   関連サービス {item.service_categories?.[0]?.count ?? 0}件
                 </span>
                 <button
-                  onClick={() => handleDelete(item.id)}
+                  onClick={() => handleDelete(item.id, item.name)}
                   className="text-xs text-red-500 hover:text-red-700 px-2"
                 >
                   削除

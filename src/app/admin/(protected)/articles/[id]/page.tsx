@@ -14,6 +14,7 @@ export default function AdminArticleDetailPage() {
   const [article, setArticle] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [rewriting, setRewriting] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -55,6 +56,18 @@ export default function AdminArticleDetailPage() {
     setArticle(data);
     setFeedback("");
     setRewriting(false);
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(`「${article.title}」をゴミ箱に移動しますか？ゴミ箱から復元することもできます。`)) return;
+    setDeleting(true);
+    const res = await fetch(`/api/articles/${id}`, { method: "DELETE" });
+    if (res.ok) {
+      router.push("/admin/articles");
+    } else {
+      alert("削除に失敗しました");
+      setDeleting(false);
+    }
   };
 
   const startEditing = () => {
@@ -295,6 +308,16 @@ export default function AdminArticleDetailPage() {
                 審査待ちに戻す
               </button>
             </div>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="w-full bg-white border border-gray-200 text-gray-500 font-bold py-3 rounded-xl hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-colors disabled:opacity-50"
+            >
+              {deleting ? "移動中..." : "ゴミ箱に移動"}
+            </button>
           </div>
         </div>
       </div>

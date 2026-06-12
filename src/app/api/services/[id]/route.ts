@@ -51,7 +51,12 @@ export async function DELETE(_req: NextRequest, props: RouteContext<"/api/servic
   const { id } = await props.params;
   const supabase = createAdminClient();
 
-  const { error } = await supabase.from("services").delete().eq("id", id);
+  // ゴミ箱へ移動（論理削除）。関連記事も同じタイムスタンプで一緒にゴミ箱へ移動し、カスケード復元できるようにする
+  const deletedAt = new Date().toISOString();
+  const { error } = await supabase.from("services").update({ deleted_at: deletedAt }).eq("id", id);
   if (error) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500);
+
+  await supabase.from("articles").update({ deleted_at: deletedAt }).eq("primary_service_id", id);
+
   return new Response(null, { status: 204 });
 }

@@ -34,10 +34,11 @@ export default async function AdminArticlesPage() {
           categories:service_categories(category:categories(*))
         )`
       )
+      .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(100)
       .returns<ArticleQueryRow[]>(),
-    supabase.from("categories").select("id, name, slug, created_at, updated_at").order("name").returns<Category[]>(),
+    supabase.from("categories").select("id, name, slug, created_at, updated_at").is("deleted_at", null).order("name").returns<Category[]>(),
   ]);
 
   const rows = (articles ?? []).map((a) => ({
