@@ -20,24 +20,13 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  // カテゴリ・最新記事をサーバーで取得してヘッダー・フッターへ渡す
+  // カテゴリをサーバーで取得してヘッダーへ渡す
   let categories: any[] = [];
-  let latestArticles: any[] = [];
 
   try {
     const supabase = await createClient();
-    const [catsRes, articlesRes] = await Promise.all([
-      supabase.from("categories").select("*").order("name"),
-      supabase
-        .from("articles")
-        .select("id, title, slug, article_type, published_at, primary_service:services!articles_primary_service_id_fkey(name, slug, categories:service_categories(category:categories(*)))")
-        .eq("status", "published")
-        .neq("article_type", "introduction")
-        .order("published_at", { ascending: false })
-        .limit(5),
-    ]);
+    const catsRes = await supabase.from("categories").select("*").order("name");
     categories = catsRes.data ?? [];
-    latestArticles = articlesRes.data ?? [];
   } catch {
     // Supabase 未接続時は空で表示
   }
@@ -47,7 +36,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="bg-gray-50 text-gray-900 antialiased">
         <Header categories={categories} />
         <main>{children}</main>
-        <Footer categories={categories} latestArticles={latestArticles} />
+        <Footer />
       </body>
     </html>
   );
