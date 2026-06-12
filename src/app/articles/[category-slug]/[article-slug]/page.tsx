@@ -107,6 +107,14 @@ export default async function ArticlePage(
             <p className="text-xs text-gray-400 mt-10 pt-6 border-t border-gray-100">
               ※本記事の情報は参考目的です。最新情報は各サービスの公式サイトをご確認ください。
             </p>
+
+            <div className="flex items-center gap-3 mt-6 bg-brand-50 rounded-2xl p-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mascot/library/squirrel-waving-happy-sparkle.png" alt="" className="w-14 h-14 shrink-0" />
+              <p className="text-sm text-gray-700">
+                最後まで読んでくれてありがとう！気になるサービスはサイドバーからチェックしてみてね。
+              </p>
+            </div>
           </article>
 
           {/* サイドバー */}

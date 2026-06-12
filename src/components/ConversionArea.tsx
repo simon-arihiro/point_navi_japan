@@ -49,7 +49,11 @@ export default function ConversionArea({ service }: Props) {
         </div>
       )}
 
-      <h2 className="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">🎁 お得な招待情報</h2>
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <h2 className="font-bold text-gray-900 text-base flex items-center gap-2">🎁 お得な招待情報</h2>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/mascot/library/squirrel-recommend-point-bubble.png" alt="ポイナビくん" className="w-12 h-12 shrink-0" />
+      </div>
 
       {service.referral_code && (
         <div className="mb-4">

@@ -86,7 +86,9 @@ export default async function ServicePage(
           {/* メインコンテンツ */}
           <div className="lg:col-span-2 space-y-8">
             {/* Basic Info */}
-            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mascot/library/squirrel-thumbsup.png" alt="" className="hidden sm:block absolute top-3 right-3 w-12 h-12 lg:w-14 lg:h-14 pointer-events-none select-none" />
               <div className="flex items-start gap-5">
                 <LogoFallback
                   name={service.name}
