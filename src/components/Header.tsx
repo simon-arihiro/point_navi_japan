@@ -43,13 +43,16 @@ export default function Header({ categories = [] }: Props) {
   }, [pathname]);
 
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <header className="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-100 shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-16 md:h-20">
           {/* ロゴ */}
-          <Link href="/" className="flex items-center shrink-0">
+          <Link href="/" className="flex items-center gap-2 shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascot/library/poinavi-header-banner.png" alt="ポイナビ" className="h-12 sm:h-14 w-auto object-contain" />
+            <img src="/mascot/library/poinavi-squirrel-magnifier-coins.png" alt="" className="h-12 md:h-16 w-auto object-contain" />
+            <span className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900">
+              ポイ<span className="text-amber-600">ナビ</span>
+            </span>
           </Link>
 
           {/* PC Nav */}
@@ -112,7 +115,7 @@ export default function Header({ categories = [] }: Props) {
                 setSearchOpen((v) => !v);
                 setMenuOpen(false);
               }}
-              className={`p-2 rounded-full transition-colors ${searchOpen ? "text-amber-700 bg-amber-50" : "text-gray-500 hover:text-slate-900"}`}
+              className={`p-2 rounded-full transition-colors ${searchOpen ? "text-amber-700 bg-white/70" : "text-gray-500 hover:text-slate-900 hover:bg-white/50"}`}
               aria-label="検索"
               aria-expanded={searchOpen}
             >
@@ -129,7 +132,7 @@ export default function Header({ categories = [] }: Props) {
                 setSearchOpen((v) => !v);
                 setMenuOpen(false);
               }}
-              className={`p-2 rounded-full transition-colors ${searchOpen ? "text-amber-700 bg-amber-50" : "text-gray-500"}`}
+              className={`p-2 rounded-full transition-colors ${searchOpen ? "text-amber-700 bg-white/70" : "text-gray-600"}`}
               aria-label="検索"
               aria-expanded={searchOpen}
             >
