@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
       if (!e.service_id) continue;
       if (!map.has(e.service_id)) map.set(e.service_id, { page_views: 0, referral_clicks: 0, copy_code_count: 0, share_count: 0 });
       const row = map.get(e.service_id)!;
-      if (e.event_type === "page_view" || e.event_type === "service_view") row.page_views++;
+      if (e.event_type === "page_view" || e.event_type === "service_view" || e.event_type === "article_view") row.page_views++;
       if (e.event_type === "referral_click") row.referral_clicks++;
       if (e.event_type === "copy_code") row.copy_code_count++;
       if (e.event_type === "share_link") row.share_count++;

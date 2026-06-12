@@ -55,6 +55,15 @@ export default async function ArticlePage(
 
   const service = article.primary_service;
 
+  // Track article_view（クライアント側で送信するため静的に埋め込む）
+  const articleViewScript = `
+    fetch('/api/analytics/track', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({event_type:'article_view', article_id:'${article.id}', service_id:'${article.primary_service_id}'})
+    });
+  `;
+
   return (
     <div>
       {/* Breadcrumb */}
@@ -126,6 +135,9 @@ export default async function ArticlePage(
           </aside>
         </div>
       </div>
+
+      {/* ページビュートラッキング */}
+      <script dangerouslySetInnerHTML={{ __html: articleViewScript }} />
     </div>
   );
 }
