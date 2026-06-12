@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { getServiceArticleViewCounts } from "@/lib/analytics";
 import Link from "next/link";
 import type { Metadata } from "next";
 import ServiceListClient from "@/components/admin/ServiceListClient";
@@ -18,7 +19,7 @@ interface ArticleStatRow {
 export default async function AdminServicesPage() {
   const supabase = createAdminClient();
 
-  const [{ data: services }, { data: categories }, { data: articles }] = await Promise.all([
+  const [{ data: services }, { data: categories }, { data: articles }, viewCounts] = await Promise.all([
     supabase
       .from("services")
       .select(`*, categories:service_categories(category:categories(*))`)
@@ -27,6 +28,7 @@ export default async function AdminServicesPage() {
       .returns<ServiceQueryRow[]>(),
     supabase.from("categories").select("id, name, slug, created_at, updated_at").is("deleted_at", null).order("name").returns<Category[]>(),
     supabase.from("articles").select("primary_service_id, published_at").is("deleted_at", null).returns<ArticleStatRow[]>(),
+    getServiceArticleViewCounts(supabase),
   ]);
 
   const articleStats = new Map<string, { count: number; latest: string | null }>();
@@ -56,6 +58,7 @@ export default async function AdminServicesPage() {
         .map((c) => ({ id: c.id, name: c.name })),
       articleCount: stat.count,
       latestPublishedAt: stat.latest,
+      viewCount: viewCounts.get(svc.id) ?? 0,
     };
   });
 
