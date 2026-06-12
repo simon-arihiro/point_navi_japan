@@ -29,6 +29,7 @@ export interface Service {
   status: ServiceStatus;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface Category {
@@ -37,6 +38,7 @@ export interface Category {
   slug: string;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface Tag {
@@ -77,6 +79,7 @@ export interface Article {
   published_at: string | null;
   created_at: string;
   updated_at: string;
+  deleted_at: string | null;
 }
 
 export interface ArticleService {

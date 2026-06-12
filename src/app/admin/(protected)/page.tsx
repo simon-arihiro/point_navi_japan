@@ -20,12 +20,12 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     { data: analyticsRows },
     { data: servicesList },
   ] = await Promise.all([
-    supabase.from("services").select("*", { count: "exact", head: true }).eq("status", "active"),
-    supabase.from("articles").select("*", { count: "exact", head: true }).eq("article_type", "introduction").eq("status", "published"),
-    supabase.from("articles").select("*", { count: "exact", head: true }).neq("article_type", "introduction").eq("status", "published"),
-    supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "reviewing"),
+    supabase.from("services").select("*", { count: "exact", head: true }).eq("status", "active").is("deleted_at", null),
+    supabase.from("articles").select("*", { count: "exact", head: true }).eq("article_type", "introduction").eq("status", "published").is("deleted_at", null),
+    supabase.from("articles").select("*", { count: "exact", head: true }).neq("article_type", "introduction").eq("status", "published").is("deleted_at", null),
+    supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "reviewing").is("deleted_at", null),
     supabase.from("analytics_daily").select("service_id, page_views, referral_clicks, copy_code_count").gte("date", windowStart.toISOString().slice(0, 10)),
-    supabase.from("services").select("id, name, slug").eq("status", "active").order("name"),
+    supabase.from("services").select("id, name, slug").eq("status", "active").is("deleted_at", null).order("name"),
   ]);
 
   // サービス別集計

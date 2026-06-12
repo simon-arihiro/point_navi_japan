@@ -21,7 +21,8 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
 export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const supabase = createAdminClient();
-  const { error } = await supabase.from("categories").delete().eq("id", id);
+  // ゴミ箱へ移動（論理削除）
+  const { error } = await supabase.from("categories").update({ deleted_at: new Date().toISOString() }).eq("id", id);
   if (error) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500);
   return new Response(null, { status: 204 });
 }

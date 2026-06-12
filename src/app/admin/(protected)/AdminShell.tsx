@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: "/admin/services", label: "サービス" },
   { href: "/admin/articles", label: "記事" },
   { href: "/admin/categories", label: "カテゴリ" },
+  { href: "/admin/trash", label: "ゴミ箱" },
   { href: "/admin/settings", label: "設定" },
 ];
 

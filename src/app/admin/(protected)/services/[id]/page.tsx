@@ -82,7 +82,7 @@ export default function EditServicePage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm(`「${form.name}」を削除しますか？関連する記事・画像・カテゴリ紐付けもすべて削除されます。この操作は元に戻せません。`)) return;
+    if (!confirm(`「${form.name}」をゴミ箱に移動しますか？関連する記事もまとめてゴミ箱に移動されます。ゴミ箱から復元することもできます。`)) return;
     setDeleting(true);
     setError("");
     const res = await fetch(`/api/services/${id}`, { method: "DELETE" });
@@ -248,7 +248,7 @@ export default function EditServicePage() {
             disabled={deleting}
             className="w-full bg-white border border-gray-200 text-gray-500 font-bold py-3 rounded-xl hover:bg-gray-50 hover:text-red-600 hover:border-red-200 transition-colors disabled:opacity-50"
           >
-            {deleting ? "削除中..." : "削除"}
+            {deleting ? "移動中..." : "ゴミ箱に移動"}
           </button>
         </div>
       </form>
