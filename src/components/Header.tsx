@@ -21,10 +21,10 @@ export default function Header({ categories = [] }: Props) {
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
   const navLinkClass = (href: string) =>
-    `font-medium transition-colors text-sm ${isActive(href) ? "text-amber-700 font-bold" : "text-gray-600 hover:text-slate-900"}`;
+    `font-medium transition-colors text-sm ${isActive(href) ? "text-brand-700 font-bold" : "text-gray-600 hover:text-slate-900"}`;
 
   const mobileNavLinkClass = (href: string) =>
-    `block px-2 py-2 text-sm transition-colors ${isActive(href) ? "text-amber-700 font-bold" : "text-gray-700 hover:text-slate-900"}`;
+    `block px-2 py-2 text-sm transition-colors ${isActive(href) ? "text-brand-700 font-bold" : "text-gray-700 hover:text-slate-900"}`;
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -79,7 +79,7 @@ export default function Header({ categories = [] }: Props) {
                 >
                   <Link
                     href="/services"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-slate-900"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand-50 hover:text-slate-900"
                     onClick={() => setDropOpen(false)}
                   >
                     すべて表示
@@ -89,7 +89,7 @@ export default function Header({ categories = [] }: Props) {
                     <Link
                       key={cat.id}
                       href={`/services/${cat.slug}`}
-                      className={`block px-4 py-2 text-sm hover:bg-amber-50 hover:text-slate-900 ${pathname === `/services/${cat.slug}` ? "text-amber-700 font-bold" : "text-gray-700"}`}
+                      className={`block px-4 py-2 text-sm hover:bg-brand-50 hover:text-slate-900 ${pathname === `/services/${cat.slug}` ? "text-brand-700 font-bold" : "text-gray-700"}`}
                       onClick={() => setDropOpen(false)}
                     >
                       {cat.name}
@@ -114,7 +114,7 @@ export default function Header({ categories = [] }: Props) {
                 setSearchOpen((v) => !v);
                 setMenuOpen(false);
               }}
-              className={`p-2 rounded-full transition-colors ${searchOpen ? "text-amber-700 bg-amber-50" : "text-gray-500 hover:text-slate-900"}`}
+              className={`p-2 rounded-full transition-colors ${searchOpen ? "text-brand-700 bg-brand-50" : "text-gray-500 hover:text-slate-900"}`}
               aria-label="検索"
               aria-expanded={searchOpen}
             >
@@ -131,7 +131,7 @@ export default function Header({ categories = [] }: Props) {
                 setSearchOpen((v) => !v);
                 setMenuOpen(false);
               }}
-              className={`p-2 rounded-full transition-colors ${searchOpen ? "text-amber-700 bg-amber-50" : "text-gray-500"}`}
+              className={`p-2 rounded-full transition-colors ${searchOpen ? "text-brand-700 bg-brand-50" : "text-gray-500"}`}
               aria-label="検索"
               aria-expanded={searchOpen}
             >
@@ -176,7 +176,7 @@ export default function Header({ categories = [] }: Props) {
               <Link
                 key={cat.id}
                 href={`/services/${cat.slug}`}
-                className={`block px-6 py-1.5 text-xs transition-colors ${pathname === `/services/${cat.slug}` ? "text-amber-700 font-bold" : "text-gray-500 hover:text-slate-900"}`}
+                className={`block px-6 py-1.5 text-xs transition-colors ${pathname === `/services/${cat.slug}` ? "text-brand-700 font-bold" : "text-gray-500 hover:text-slate-900"}`}
                 onClick={() => setMenuOpen(false)}
               >
                 └ {cat.name}

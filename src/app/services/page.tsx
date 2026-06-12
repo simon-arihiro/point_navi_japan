@@ -42,7 +42,7 @@ export default async function ServicesPage() {
             <Link
               key={cat.id}
               href={`/services/${cat.slug}`}
-              className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-sm hover:border-amber-300 transition-colors"
+              className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-sm hover:border-brand-300 transition-colors"
             >
               {cat.name}
             </Link>

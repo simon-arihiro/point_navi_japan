@@ -25,5 +25,5 @@ export function extractFirstImageUrl(content: string): string | null {
 export const ARTICLE_PROSE_CLASS =
   "prose prose-sm sm:prose-base max-w-none prose-slate " +
   "prose-headings:font-black prose-headings:text-slate-900 " +
-  "prose-a:text-amber-700 prose-a:no-underline hover:prose-a:underline " +
-  "prose-strong:text-slate-900 prose-blockquote:border-amber-300 prose-img:rounded-xl";
+  "prose-a:text-brand-700 prose-a:no-underline hover:prose-a:underline " +
+  "prose-strong:text-slate-900 prose-blockquote:border-brand-300 prose-img:rounded-xl";

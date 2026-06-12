@@ -25,7 +25,7 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
 
     return (
       <Link href={href} className="group block h-full">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md hover:border-amber-200 transition-all h-full">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 sm:p-6 hover:shadow-md hover:border-brand-200 transition-all h-full">
           <div className="flex items-center gap-4 mb-3">
             <LogoFallback
               name={article.primary_service?.name ?? "?"}
@@ -34,7 +34,7 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
               officialUrl={article.primary_service?.official_url}
               size={48}
             />
-            <h3 className="font-black text-gray-900 text-lg sm:text-xl leading-snug group-hover:text-amber-700 transition-colors line-clamp-2 min-w-0">
+            <h3 className="font-black text-gray-900 text-lg sm:text-xl leading-snug group-hover:text-brand-700 transition-colors line-clamp-2 min-w-0">
               {article.title}
             </h3>
           </div>
@@ -60,7 +60,7 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
   if (size === "lg") {
     return (
       <Link href={href} className="group block h-full">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-amber-200 transition-all h-full">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-brand-200 transition-all h-full">
           <div className="flex items-center gap-3 mb-3">
             <LogoFallback
               name={article.primary_service?.name ?? "?"}
@@ -70,12 +70,12 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
               size={36}
             />
             <div className="min-w-0">
-              <span className="inline-flex items-center gap-1 text-xs bg-amber-50 text-amber-700 font-medium rounded-full px-3 py-1">
+              <span className="inline-flex items-center gap-1 text-xs bg-brand-50 text-brand-700 font-medium rounded-full px-3 py-1">
                 {typeIcon} {typeLabel}
               </span>
             </div>
           </div>
-          <h3 className="font-bold text-gray-900 text-base leading-snug group-hover:text-amber-700 transition-colors line-clamp-2 mb-2">
+          <h3 className="font-bold text-gray-900 text-base leading-snug group-hover:text-brand-700 transition-colors line-clamp-2 mb-2">
             {article.title}
           </h3>
           {article.description && (
@@ -91,14 +91,14 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
     <Link href={href} className="group block">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all h-full">
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs bg-amber-50 text-amber-700 font-medium rounded-full px-3 py-1">
+          <span className="text-xs bg-brand-50 text-brand-700 font-medium rounded-full px-3 py-1">
             {typeLabel}
           </span>
           {article.primary_service && (
             <span className="text-xs text-gray-500">{article.primary_service.name}</span>
           )}
         </div>
-        <h3 className="font-bold text-gray-900 text-sm leading-snug group-hover:text-amber-700 transition-colors line-clamp-2 mb-2">
+        <h3 className="font-bold text-gray-900 text-sm leading-snug group-hover:text-brand-700 transition-colors line-clamp-2 mb-2">
           {article.title}
         </h3>
         {article.description && (

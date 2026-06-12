@@ -37,11 +37,11 @@ export default function ConversionArea({ service }: Props) {
   const campaignBadge = getCampaignBadge(service);
 
   return (
-    <div className="bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200 rounded-2xl p-6">
+    <div className="bg-gradient-to-br from-brand-50 to-brand-warm-100 border border-brand-200 rounded-2xl p-6">
       {campaignBadge && service.campaign_bonus && (
         <div
           className={`mb-4 rounded-xl px-4 py-3 flex items-center gap-2 ${
-            campaignBadge.urgent ? "bg-orange-500 text-white" : "bg-amber-400 text-slate-900"
+            campaignBadge.urgent ? "bg-brand-warm-500 text-white" : "bg-brand-400 text-slate-900"
           }`}
         >
           <span className="font-bold text-sm shrink-0">🔥 {campaignBadge.label}</span>
@@ -63,7 +63,7 @@ export default function ConversionArea({ service }: Props) {
               className={`px-5 py-3 rounded-xl font-bold text-sm transition-colors ${
                 copied
                   ? "bg-green-600 text-white"
-                  : "bg-amber-400 text-slate-900 hover:bg-amber-500"
+                  : "bg-brand-400 text-slate-900 hover:bg-brand-500"
               }`}
             >
               {copied ? "コピー済み ✓" : "コピー"}

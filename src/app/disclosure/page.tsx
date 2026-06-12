@@ -23,7 +23,7 @@ export default function DisclosurePage() {
         <h2 className="text-lg font-bold text-gray-900">正直な情報提供</h2>
         <p>
           当サイトはユーザーにとって有益な情報提供を第一目的としています。
-          気になる点があれば<a href="/contact" className="text-amber-700 hover:underline">お問い合わせ</a>ください。
+          気になる点があれば<a href="/contact" className="text-brand-700 hover:underline">お問い合わせ</a>ください。
         </p>
       </div>
     </div>

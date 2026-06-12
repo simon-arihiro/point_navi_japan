@@ -1017,22 +1017,49 @@ Admin の全書き込み API（POST / PUT / DELETE）は Supabase の `createAdm
 
 **背景：** 旧デザインは `red-600` をブランド主色として Header / Hero / 全 CTA ボタン / バッジ / リンクに多用しており、画面全体が「赤一色」で圧迫感があった。落ち着いた印象にしつつ、返点・お得情報や個人ブログらしい温かみを強調する方向にリニューアルした
 
+**カラートークン（`brand-*` / `brand-warm-*`）：**
+
+公開サイトの暖色系クラスは生の `amber-*`/`orange-*` ではなく、`src/app/globals.css` の `@theme` ブロックで定義した **`brand-{50,100,200,300,400,500,700,800}`** と **`brand-warm-{50,100,500,600}`** トークンを使用する（各トークンは `var(--color-amber-*)` / `var(--color-orange-*)` を参照するエイリアス）。
+
+```css
+/* src/app/globals.css */
+@theme {
+  --color-brand-50:  var(--color-amber-50);
+  --color-brand-100: var(--color-amber-100);
+  /* ... amber-200/300/400/500/700/800 も同様 */
+
+  --color-brand-warm-50:  var(--color-orange-50);
+  --color-brand-warm-100: var(--color-orange-100);
+  /* ... orange-500/600 も同様 */
+}
+```
+
+**Header ロゴバナーを変更したら配色も追従させる：** Header のロゴバナー画像（`public/mascot/library/poinavi-header-banner-*.png`、暖色系の栗鼠＋金貨イラスト）が公開サイト全体の配色の基準。バナーを新しい画像に差し替えて配色も合わせたい場合は、
+
+1. 新バナーの主要色（背景の暖色トーン・アクセントの金/オレンジ）をサンプリングする
+2. 上記 `@theme` ブロックの `--color-brand-*` / `--color-brand-warm-*` の参照先を、新しい配色に近い `--color-amber-*` / `--color-orange-*`（または直接 hex/oklch 値）に書き換える
+
+の2手順のみでよい。各コンポーネントの `bg-brand-50` `text-brand-700` `bg-brand-warm-500` 等のクラス名は変更不要 — トークン定義を1箇所差し替えるだけで全ページの配色が連動して切り替わる。
+
+現在の参考値（`poinavi-header-banner-*.png` からサンプリング）：背景クリーム `rgb(250,235,201)`、タンの暖色 `rgb(231,195,151)` — これらは概ね `amber-50`〜`amber-200` の範囲に収まるため、現状は amber/orange のデフォルトパレットをそのままエイリアスしている。
+
 **カラーパレット：**
 | 用途 | クラス | 説明 |
 |------|--------|------|
-| ブランドアクセント（ロゴ「ナビ」、見出しラベル） | `text-amber-600` | 大きめ・bold なテキストに使用 |
-| 返点・お得・CTA系の強調（バッジ、ハイライト枠、ゴールドボタン） | `bg-amber-50`/`text-amber-700`（バッジ）、`bg-amber-400 text-slate-900 hover:bg-amber-500`（ボタン） | 「招待コードあり」「コピー」ボタン、記事タイプバッジ、引用ハイライト枠など |
-| 落ち着いたプライマリ（ナビhover、ダークボタン、フッター背景） | `hover:text-slate-900`、`bg-slate-900 text-white hover:bg-slate-800`、`bg-slate-900`（Footer） | 個人サイト・情報サイトらしい紺系トーン |
-| フォーカスリング | `focus:ring-amber-500` | フォーム入力欄共通 |
+| ブランドアクセント（ロゴ「ナビ」、見出しラベル） | `text-brand-400` | Footer ロゴ等の bold なテキストに使用 |
+| 返点・お得・CTA系の強調（バッジ、ハイライト枠、ゴールドボタン） | `bg-brand-50`/`text-brand-700`（バッジ）、`bg-brand-400 text-slate-900 hover:bg-brand-500`（ボタン） | 「招待コードあり」「コピー」ボタン、記事タイプバッジ、引用ハイライト枠など |
+| 落ち着いたプライマリ（ナビhover、ダークボタン、フッター背景） | `hover:text-slate-900`、`bg-slate-900 text-white hover:bg-slate-800`、`bg-slate-900`（Footer） | 個人サイト・情報サイトらしい紺系トーン（banner 連動対象外） |
+| フォーカスリング | `focus:ring-brand-500` | フォーム入力欄共通 |
+| 緊急・収益系の強調（urgent バッジ、Profit Ranking） | `bg-brand-warm-500 text-white`（バッジ）、`text-brand-warm-600`（ラベル） | キャンペーン urgent バッジ、Profit Ranking タブ・見出し |
 | 成功状態 | `bg-green-600`（変更なし） | 「コピー済み」など |
 
-**Hero セクション：** `bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100` のソフトな暖色グラデーション + `text-slate-900`。CTA は「ダーク（`bg-slate-900`）＋ゴールド（`bg-amber-400 text-slate-900`）」の2ボタン構成
+**Hero セクション：** `bg-gradient-to-br from-brand-50 via-brand-warm-50 to-brand-100` のソフトな暖色グラデーション + `text-slate-900`。CTA は「ダーク（`bg-slate-900`）＋ゴールド（`bg-brand-400 text-slate-900`）」の2ボタン構成
 
-**マスコット：** `src/components/Mascot.tsx`（コインキャラクターの SVG、`className` でサイズ指定）。Header ロゴ・Footer ロゴ・Hero（`lg:` 以上で右側に大きく表示）に使用。新たな装飾箇所を追加する場合もこのコンポーネントを再利用する
+**マスコット：** `src/components/Mascot.tsx`（栗鼠キャラクターの画像、`className` でサイズ指定）。Header ロゴ・Footer ロゴ・各種空状態（サービス/記事/ランキング未登録時）に使用。新たな装飾箇所を追加する場合もこのコンポーネントを再利用する
 
-**ConversionArea：** 返点訴求の中心コンポーネントとして、見出しに🎁を付け（`🎁 お得な招待情報`）、背景を `bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200`、コピー ボタンをゴールド（`bg-amber-400 text-slate-900`）にして視認性を強化
+**ConversionArea：** 返点訴求の中心コンポーネントとして、見出しに🎁を付け（`🎁 お得な招待情報`）、背景を `bg-gradient-to-br from-brand-50 to-brand-warm-100 border border-brand-200`、コピー ボタンをゴールド（`bg-brand-400 text-slate-900`）にして視認性を強化
 
-**参照実装：** `src/components/Mascot.tsx` / `src/components/Header.tsx` / `src/components/Footer.tsx` / `src/app/page.tsx` / `src/components/ConversionArea.tsx` / `src/components/ServiceCard.tsx` / `src/components/ArticleCard.tsx`
+**参照実装：** `src/app/globals.css`（`@theme` トークン定義）/ `src/components/Mascot.tsx` / `src/components/Header.tsx` / `src/components/Footer.tsx` / `src/app/page.tsx` / `src/components/ConversionArea.tsx` / `src/components/ServiceCard.tsx` / `src/components/ArticleCard.tsx`
 
 ---
 

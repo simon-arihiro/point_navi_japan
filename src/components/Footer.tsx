@@ -17,7 +17,7 @@ export default function Footer({ categories = [], latestArticles = [] }: Props) 
             <div className="flex items-center gap-2 mb-4">
               <Mascot className="w-11 h-11" />
               <span className="text-white font-black text-2xl">
-                ポイ<span className="text-amber-400">ナビ</span>
+                ポイ<span className="text-brand-400">ナビ</span>
               </span>
             </div>
             <p className="text-sm leading-relaxed">

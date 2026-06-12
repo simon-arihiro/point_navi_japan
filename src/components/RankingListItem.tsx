@@ -18,8 +18,8 @@ export default function RankingListItem({ service, categorySlug, rank }: Props) 
   const badge = getCampaignBadge(service);
 
   return (
-    <Link href={href} className="group flex items-center gap-3 py-2.5 -mx-2 px-2 rounded-xl hover:bg-amber-50/60 transition-colors">
-      <span className="text-base font-black w-6 text-center shrink-0 text-gray-300 group-hover:text-amber-500 transition-colors">
+    <Link href={href} className="group flex items-center gap-3 py-2.5 -mx-2 px-2 rounded-xl hover:bg-brand-50/60 transition-colors">
+      <span className="text-base font-black w-6 text-center shrink-0 text-gray-300 group-hover:text-brand-500 transition-colors">
         {RANK_MEDAL[rank] ?? `#${rank}`}
       </span>
       <LogoFallback
@@ -29,11 +29,11 @@ export default function RankingListItem({ service, categorySlug, rank }: Props) 
         officialUrl={service.official_url}
         size={36}
       />
-      <p className="min-w-0 flex-1 font-bold text-sm text-gray-900 truncate group-hover:text-amber-700 transition-colors">
+      <p className="min-w-0 flex-1 font-bold text-sm text-gray-900 truncate group-hover:text-brand-700 transition-colors">
         {service.name}
       </p>
       {badge && (
-        <span className={`shrink-0 text-[10px] font-bold rounded-full px-2 py-0.5 ${badge.urgent ? "bg-orange-500 text-white" : "bg-amber-100 text-amber-800"}`}>
+        <span className={`shrink-0 text-[10px] font-bold rounded-full px-2 py-0.5 ${badge.urgent ? "bg-brand-warm-500 text-white" : "bg-brand-100 text-brand-800"}`}>
           {badge.label}
         </span>
       )}

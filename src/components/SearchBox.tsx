@@ -77,7 +77,7 @@ export default function SearchBox({ autoFocus, onNavigate }: Props) {
             onChange={(e) => setQuery(e.target.value)}
             autoFocus={autoFocus}
             aria-label="検索"
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           {query && (
             <button
@@ -111,7 +111,7 @@ export default function SearchBox({ autoFocus, onNavigate }: Props) {
                     key={svc.id}
                     href={`/services/${svc.categories?.[0]?.category?.slug ?? "all"}/${svc.slug}`}
                     onClick={onNavigate}
-                    className="flex items-center gap-3 py-1.5 px-2 -mx-2 rounded-xl hover:bg-amber-50/60 transition-colors"
+                    className="flex items-center gap-3 py-1.5 px-2 -mx-2 rounded-xl hover:bg-brand-50/60 transition-colors"
                   >
                     <LogoFallback
                       name={svc.name}
@@ -136,7 +136,7 @@ export default function SearchBox({ autoFocus, onNavigate }: Props) {
                     key={a.id}
                     href={`/articles/${a.primary_service?.categories?.[0]?.category?.slug ?? "all"}/${a.slug}`}
                     onClick={onNavigate}
-                    className="block py-1.5 px-2 -mx-2 rounded-xl hover:bg-amber-50/60 transition-colors text-sm text-gray-700 line-clamp-1"
+                    className="block py-1.5 px-2 -mx-2 rounded-xl hover:bg-brand-50/60 transition-colors text-sm text-gray-700 line-clamp-1"
                   >
                     {a.title}
                   </Link>
@@ -149,7 +149,7 @@ export default function SearchBox({ autoFocus, onNavigate }: Props) {
             <button
               type="button"
               onClick={goToFullResults}
-              className="block w-full text-center text-amber-700 font-medium text-sm hover:underline pt-2 border-t border-gray-50"
+              className="block w-full text-center text-brand-700 font-medium text-sm hover:underline pt-2 border-t border-gray-50"
             >
               すべての結果を見る →
             </button>

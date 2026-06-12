@@ -60,7 +60,7 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
             </a>
             <a
               href="/ranking?type=profit"
-              className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${type === "profit" ? "bg-orange-500 text-white" : "bg-white border border-gray-200 text-gray-600"}`}
+              className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${type === "profit" ? "bg-brand-warm-500 text-white" : "bg-white border border-gray-200 text-gray-600"}`}
             >
               💰 Profit Ranking
             </a>

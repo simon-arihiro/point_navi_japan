@@ -20,7 +20,7 @@ export default function ServiceCard({ service, categorySlug, rank }: Props) {
         {badge && (
           <span
             className={`absolute top-3 right-3 text-xs font-bold rounded-full px-2.5 py-1 ${
-              badge.urgent ? "bg-orange-500 text-white" : "bg-amber-100 text-amber-800"
+              badge.urgent ? "bg-brand-warm-500 text-white" : "bg-brand-100 text-brand-800"
             }`}
           >
             🔥 期間限定 {badge.label}
@@ -38,7 +38,7 @@ export default function ServiceCard({ service, categorySlug, rank }: Props) {
             size={48}
           />
           <div className="min-w-0 flex-1">
-            <h3 className="font-bold text-gray-900 group-hover:text-amber-700 transition-colors truncate">
+            <h3 className="font-bold text-gray-900 group-hover:text-brand-700 transition-colors truncate">
               {service.name}
             </h3>
             {service.categories?.[0] && (

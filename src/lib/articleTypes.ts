@@ -11,7 +11,7 @@ export function getArticleTypeIcon(type: string): string {
 }
 
 export function getArticleTypeBadgeClass(type: string): string {
-  return type === "introduction" ? "bg-amber-50 text-amber-700" : "bg-blue-50 text-blue-700";
+  return type === "introduction" ? "bg-brand-50 text-brand-700" : "bg-blue-50 text-blue-700";
 }
 
 export function getArticleStatusLabel(status: string): string {

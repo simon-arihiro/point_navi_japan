@@ -75,7 +75,7 @@ export default async function ArticlePage(
           {/* 記事本文 */}
           <article className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-xs bg-amber-50 text-amber-700 font-medium rounded-full px-3 py-1">
+              <span className="text-xs bg-brand-50 text-brand-700 font-medium rounded-full px-3 py-1">
                 {getArticleTypeLabel(article.article_type)}
               </span>
               {service && (
@@ -94,7 +94,7 @@ export default async function ArticlePage(
             </h1>
 
             {article.description && (
-              <div className="bg-amber-50 border-l-4 border-amber-400 rounded-r-xl p-4 mb-8">
+              <div className="bg-brand-50 border-l-4 border-brand-400 rounded-r-xl p-4 mb-8">
                 <p className="text-gray-700 text-sm leading-relaxed">{article.description}</p>
               </div>
             )}

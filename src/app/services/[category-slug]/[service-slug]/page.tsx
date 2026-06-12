@@ -102,7 +102,7 @@ export default async function ServicePage(
                       <Link
                         key={c.category?.id}
                         href={`/services/${c.category?.slug}`}
-                        className="text-xs bg-gray-100 text-gray-600 rounded-full px-3 py-1 hover:bg-amber-50 hover:text-slate-900 transition-colors"
+                        className="text-xs bg-gray-100 text-gray-600 rounded-full px-3 py-1 hover:bg-brand-50 hover:text-slate-900 transition-colors"
                       >
                         {c.category?.name}
                       </Link>

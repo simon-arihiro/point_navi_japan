@@ -71,7 +71,7 @@ export default function SearchPageClient() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               autoFocus
-              className="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+              className="w-full border border-gray-200 rounded-xl px-4 py-3 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
             {query && (
               <button
@@ -97,7 +97,7 @@ export default function SearchPageClient() {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/mascot/poinavi-kun.png" alt="" className="w-28 sm:w-36 h-auto mx-auto mb-4 opacity-90" />
             <p className="text-sm mb-4">「{query}」の検索結果はありません</p>
-            <Link href="/services" className="text-amber-700 font-medium text-sm hover:underline">
+            <Link href="/services" className="text-brand-700 font-medium text-sm hover:underline">
               サービス一覧を見る →
             </Link>
           </div>
