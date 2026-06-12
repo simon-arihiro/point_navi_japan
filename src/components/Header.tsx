@@ -47,12 +47,11 @@ export default function Header({ categories = [] }: Props) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16 md:h-20">
           {/* ロゴ */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascot/library/poinavi-squirrel-magnifier-coins.png" alt="" className="h-12 md:h-16 w-auto object-contain" />
-            <span className="text-2xl sm:text-3xl md:text-4xl font-black text-gray-900">
-              ポイ<span className="text-amber-600">ナビ</span>
-            </span>
+          <Link href="/" className="flex items-center shrink-0">
+            <picture>
+              <source media="(min-width: 768px)" srcSet="/mascot/library/poinavi-logo-banner-lg.png" />
+              <img src="/mascot/library/poinavi-logo-banner-sm.png" alt="ポイナビ" className="h-12 md:h-16 w-auto object-contain" />
+            </picture>
           </Link>
 
           {/* PC Nav */}
