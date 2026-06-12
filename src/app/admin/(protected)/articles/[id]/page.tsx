@@ -271,6 +271,7 @@ export default function AdminArticleDetailPage() {
             <dl className="space-y-2 text-sm">
               <div><dt className="text-gray-500 text-xs">サービス</dt><dd className="font-medium">{article.primary_service?.name ?? "—"}</dd></div>
               <div><dt className="text-gray-500 text-xs">種別</dt><dd>{getArticleTypeIcon(article.article_type)} {getArticleTypeLabel(article.article_type)}</dd></div>
+              <div><dt className="text-gray-500 text-xs">閲覧回数</dt><dd>{(article.view_count ?? 0).toLocaleString()} 回</dd></div>
               <div><dt className="text-gray-500 text-xs">AI書き直し回数</dt><dd>{article.revision_count ?? 0} 回</dd></div>
               <div><dt className="text-gray-500 text-xs">現在のステータス</dt>
                 <dd>

@@ -22,6 +22,7 @@ type ServiceRow = {
   categories: CategoryOption[];
   articleCount: number;
   latestPublishedAt: string | null;
+  viewCount: number;
 };
 
 type Props = {
@@ -164,6 +165,7 @@ export default function ServiceListClient({ services, allCategories }: Props) {
 
             <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
               <span className="text-gray-500">記事 {svc.articleCount}件</span>
+              <span className="text-gray-500">閲覧 {svc.viewCount.toLocaleString()}回</span>
               <span className="text-gray-400">追加: {formatDate(svc.created_at)}</span>
               <span className="text-gray-400">更新: {formatDate(svc.latestPublishedAt)}</span>
             </div>

@@ -50,3 +50,35 @@ export async function getServiceStatsMap(supabase: SupabaseClient, windowDays: n
 
   return statsMap;
 }
+
+/**
+ * 記事単体の閲覧回数（article_view の総数、全期間）。
+ */
+export async function getArticleViewCount(supabase: SupabaseClient, articleId: string): Promise<number> {
+  const { count } = await supabase
+    .from("analytics_events")
+    .select("*", { count: "exact", head: true })
+    .eq("article_id", articleId)
+    .eq("event_type", "article_view");
+
+  return count ?? 0;
+}
+
+/**
+ * サービス別の閲覧回数（そのサービスに紐づく記事の article_view 総数、全期間）。
+ */
+export async function getServiceArticleViewCounts(supabase: SupabaseClient): Promise<Map<string, number>> {
+  const { data } = await supabase
+    .from("analytics_events")
+    .select("service_id")
+    .eq("event_type", "article_view")
+    .not("service_id", "is", null);
+
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    const serviceId = row.service_id as string;
+    counts.set(serviceId, (counts.get(serviceId) ?? 0) + 1);
+  }
+
+  return counts;
+}

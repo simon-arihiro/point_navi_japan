@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { getArticleViewCount } from "@/lib/analytics";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
@@ -13,7 +14,9 @@ export async function GET(_req: NextRequest, props: RouteContext<"/api/articles/
     .single();
 
   if (error || !data) return errorResponse(ErrorCode.ARTICLE_NOT_FOUND, "記事が見つかりません", 404);
-  return Response.json({ data });
+
+  const viewCount = await getArticleViewCount(supabase, id);
+  return Response.json({ data: { ...data, view_count: viewCount } });
 }
 
 export async function PUT(request: NextRequest, props: RouteContext<"/api/articles/[id]">) {
