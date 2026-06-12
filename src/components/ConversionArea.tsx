@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Service } from "@/types/database";
 import { getCampaignBadge } from "@/lib/campaign";
 
@@ -10,29 +10,58 @@ type Props = {
 
 export default function ConversionArea({ service }: Props) {
   const [copied, setCopied] = useState(false);
+  const copyTrackedRef = useRef(false);
+
+  const trackCopyCode = () => {
+    // 同一ページ内で何度コピーされても1回のみ計測する
+    if (copyTrackedRef.current) return;
+    copyTrackedRef.current = true;
+    fetch("/api/analytics/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ event_type: "copy_code", service_id: service.id }),
+      keepalive: true,
+    });
+  };
 
   const handleCopy = async () => {
     if (!service.referral_code) return;
     await navigator.clipboard.writeText(service.referral_code);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-
-    await fetch("/api/analytics/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event_type: "copy_code", service_id: service.id }),
-    });
+    trackCopyCode();
   };
 
-  const handleReferralClick = () => {
-    // 外部リンクへの遷移で fetch が中断されないよう keepalive を指定
-    fetch("/api/analytics/track", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ event_type: "referral_click", service_id: service.id }),
-      keepalive: true,
-    });
-  };
+  // 記事本文中に招待コード・招待リンクが含まれる場合も計測対象にする
+  useEffect(() => {
+    const handleDocCopy = () => {
+      if (!service.referral_code) return;
+      const selected = window.getSelection?.()?.toString().trim();
+      if (selected === service.referral_code) trackCopyCode();
+    };
+
+    const handleDocClick = (e: MouseEvent) => {
+      if (!service.referral_link) return;
+      const anchor = (e.target as HTMLElement | null)?.closest?.("a");
+      if (anchor?.getAttribute("href") === service.referral_link) {
+        // 外部リンクへの遷移で fetch が中断されないよう keepalive を指定
+        fetch("/api/analytics/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ event_type: "referral_click", service_id: service.id }),
+          keepalive: true,
+        });
+      }
+    };
+
+    document.addEventListener("copy", handleDocCopy);
+    document.addEventListener("click", handleDocClick);
+    return () => {
+      document.removeEventListener("copy", handleDocCopy);
+      document.removeEventListener("click", handleDocClick);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [service.id, service.referral_code, service.referral_link]);
 
   if (!service.referral_code && !service.referral_link) return null;
 
@@ -83,7 +112,6 @@ export default function ConversionArea({ service }: Props) {
           href={service.referral_link}
           target="_blank"
           rel="noopener noreferrer"
-          onClick={handleReferralClick}
           className="block w-full text-center bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors"
         >
           招待リンクから登録する →
