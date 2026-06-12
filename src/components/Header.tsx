@@ -45,12 +45,12 @@ export default function Header({ categories = [] }: Props) {
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16 md:h-20">
+        <div className="flex justify-between items-center h-[83px] md:h-[104px]">
           {/* ロゴ */}
           <Link href="/" className="flex items-center shrink-0">
             <picture>
               <source media="(min-width: 768px)" srcSet="/mascot/library/poinavi-header-banner-lg.png" />
-              <img src="/mascot/library/poinavi-header-banner-sm.png" alt="ポイナビ" className="h-12 md:h-16 w-auto object-contain" />
+              <img src="/mascot/library/poinavi-header-banner-sm.png" alt="ポイナビ" className="h-[62px] md:h-[83px] w-auto object-contain" />
             </picture>
           </Link>
 
