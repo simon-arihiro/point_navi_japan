@@ -77,7 +77,7 @@ export default function SearchBox({ autoFocus, onNavigate }: Props) {
             onChange={(e) => setQuery(e.target.value)}
             autoFocus={autoFocus}
             aria-label="検索"
-            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
+            className="w-full border border-gray-200 rounded-xl px-4 py-2.5 pr-10 text-base md:text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
           />
           {query && (
             <button
