@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { getServiceStatsMap } from "@/lib/analytics";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -9,39 +10,28 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
   const days = searchParams.days === "7" ? 7 : 30;
 
   const supabase = createAdminClient();
-  const windowStart = new Date();
-  windowStart.setDate(windowStart.getDate() - days);
 
   const [
     { count: activeServices },
     { count: introArticles },
     { count: relatedArticles },
     { count: pendingArticles },
-    { data: analyticsRows },
     { data: servicesList },
+    statsMap,
   ] = await Promise.all([
     supabase.from("services").select("*", { count: "exact", head: true }).eq("status", "active").is("deleted_at", null),
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("article_type", "introduction").eq("status", "published").is("deleted_at", null),
     supabase.from("articles").select("*", { count: "exact", head: true }).neq("article_type", "introduction").eq("status", "published").is("deleted_at", null),
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "reviewing").is("deleted_at", null),
-    supabase.from("analytics_daily").select("service_id, page_views, referral_clicks, copy_code_count").gte("date", windowStart.toISOString().slice(0, 10)),
     supabase.from("services").select("id, name, slug").eq("status", "active").is("deleted_at", null).order("name"),
+    getServiceStatsMap(supabase, days),
   ]);
 
   // サービス別集計
-  const serviceStats = new Map<string, { page_views: number; referral_clicks: number; copy_code_count: number }>();
-  for (const row of analyticsRows ?? []) {
-    const cur = serviceStats.get(row.service_id) ?? { page_views: 0, referral_clicks: 0, copy_code_count: 0 };
-    serviceStats.set(row.service_id, {
-      page_views: cur.page_views + row.page_views,
-      referral_clicks: cur.referral_clicks + row.referral_clicks,
-      copy_code_count: cur.copy_code_count + row.copy_code_count,
-    });
-  }
-  const servicesWithStats = (servicesList ?? []).map((s) => ({
-    ...s,
-    ...(serviceStats.get(s.id) ?? { page_views: 0, referral_clicks: 0, copy_code_count: 0 }),
-  })).sort((a, b) => (b.page_views + b.referral_clicks * 2) - (a.page_views + a.referral_clicks * 2));
+  const servicesWithStats = (servicesList ?? []).map((s) => {
+    const st = statsMap.get(s.id) ?? { pv: 0, rc: 0, cc: 0 };
+    return { ...s, page_views: st.pv, referral_clicks: st.rc, copy_code_count: st.cc };
+  }).sort((a, b) => (b.page_views + b.referral_clicks * 2) - (a.page_views + a.referral_clicks * 2));
 
   const stats = [
     { label: "公開中サービス", value: activeServices ?? 0, href: "/admin/services" },
