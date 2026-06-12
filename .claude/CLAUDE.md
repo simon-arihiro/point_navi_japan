@@ -75,7 +75,7 @@
 
 ## ビジュアルアセット「図库」管理規則
 
-- ユーザーがチャットでロゴ・マスコット・バナー等の画像を提供し、サイトに採用した場合、その画像は **`public/gallery/`** に保存する（既存の `public/mascot/` とは別に、サイト全体で使う汎用ビジュアル素材置き場）
-- ファイル名は `poinavi-{用途}.png` 形式（例：`poinavi-header-banner.png`）
+- ユーザーがチャットでロゴ・マスコット・バナー等の画像を提供し、サイトに採用した場合、その画像は **`public/mascot/library/`** に保存する（マスコット画像ライブラリ。サイト全体で使うビジュアル素材の共通置き場）
+- ファイル名は用途が分かる英語の説明的な名前（例：`poinavi-header-banner.png`、既存の `squirrel-*` / `icon-*` 系命名も参照）
 - 採用前に元画像が大きい場合（数MB）は Pillow 等でリサイズ・圧縮してから保存する（ヘッダー等の小さい表示領域なら 800px 幅程度で十分）
-- 参照実装：`src/components/Header.tsx`（ロゴを `public/gallery/poinavi-header-banner.png` に置き換え済み）
+- 参照実装：`src/components/Header.tsx`（ロゴを `public/mascot/library/poinavi-header-banner.png` に置き換え済み）

@@ -49,7 +49,7 @@ export default function Header({ categories = [] }: Props) {
           {/* ロゴ */}
           <Link href="/" className="flex items-center shrink-0">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/gallery/poinavi-header-banner.png" alt="ポイナビ" className="h-12 sm:h-14 w-auto object-contain" />
+            <img src="/mascot/library/poinavi-header-banner.png" alt="ポイナビ" className="h-12 sm:h-14 w-auto object-contain" />
           </Link>
 
           {/* PC Nav */}
