@@ -69,10 +69,10 @@ export default async function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20 flex flex-col md:flex-row md:items-center md:justify-between gap-10">
           <div className="max-w-3xl">
             <p className="text-brand-700 text-sm font-medium uppercase tracking-widest mb-4">日本のポイ活情報をナビゲート</p>
-            <h1 className="text-4xl md:text-5xl font-black leading-tight mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-6">
               正直なところ、<br />
               <span className="text-brand-warm-600">これは本当におすすめ</span><br />
-              のサービスだけ集めました
+              のサービスだけ集めた
             </h1>
             <p className="text-slate-600 text-base leading-relaxed mb-8">
               実際に使ってみた体験をもとに、お得なポイ活サービスをわかりやすく紹介しています。
