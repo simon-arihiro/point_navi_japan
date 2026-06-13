@@ -18,6 +18,8 @@ type ServiceRow = {
   official_url: string;
   referral_code: string | null;
   referral_link: string | null;
+  bonus_points: number | null;
+  bonus_amount: string | null;
   created_at: string;
   categories: CategoryOption[];
   articleCount: number;
@@ -33,6 +35,15 @@ type Props = {
 function formatDate(iso: string | null) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("ja-JP");
+}
+
+// 登録時に付与されるポイント・金額を一覧用の短い表示文字列にまとめる
+function formatBonus(points: number | null, amount: string | null) {
+  const amountText = amount?.trim() || null;
+  if (points && amountText) return `${points.toLocaleString()}pt（約${amountText}円）`;
+  if (points) return `${points.toLocaleString()}pt`;
+  if (amountText) return `約${amountText}円`;
+  return null;
 }
 
 export default function ServiceListClient({ services, allCategories }: Props) {
@@ -180,13 +191,18 @@ export default function ServiceListClient({ services, allCategories }: Props) {
               </div>
             )}
 
-            {(svc.referral_code || svc.referral_link) && (
+            {(svc.referral_code || svc.referral_link || svc.bonus_points || svc.bonus_amount) && (
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {svc.referral_code && (
                   <span className="text-xs bg-amber-50 text-amber-700 rounded-full px-2 py-0.5">招待コードあり</span>
                 )}
                 {svc.referral_link && (
                   <span className="text-xs bg-orange-50 text-orange-700 rounded-full px-2 py-0.5">招待リンクあり</span>
+                )}
+                {formatBonus(svc.bonus_points, svc.bonus_amount) && (
+                  <span className="text-xs bg-green-50 text-green-700 rounded-full px-2 py-0.5">
+                    🎁 {formatBonus(svc.bonus_points, svc.bonus_amount)}
+                  </span>
                 )}
               </div>
             )}
