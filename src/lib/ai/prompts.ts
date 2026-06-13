@@ -36,25 +36,34 @@ export const SYSTEM_PROMPT_BASE = `あなたは日本のポイ活・招待コー
 必須表現を自然に散りばめる：「実際に使ってみた」「正直なところ」「これは本当におすすめ」
 出力言語：日本語のみ。`;
 
-export function buildServiceInfoPrompt(officialUrl: string, existingCategories: string[], pageContent?: string | null) {
+export function buildServiceInfoPrompt(serviceName: string, officialUrl: string | null, existingCategories: string[], pageContent?: string | null) {
   const categoryList = existingCategories.length > 0 ? existingCategories.join("、") : "（登録済みカテゴリなし）";
 
   const sourceSection = pageContent
-    ? `以下は公式サイト（${officialUrl}）から取得したページ内容です。この内容を最優先の情報源として、できる限り正確な情報を抽出してください。\n--- ページ内容 ---\n${pageContent}\n--- ページ内容ここまで ---`
-    : `このURLには直接アクセスできなかったため、ドメイン名やパス、サービス名から推測できる一般的な知識をもとに情報を推測してください。`;
+    ? `以下は公式サイト（${officialUrl}）から取得したページ内容です。この内容を参考情報として活用してください。\n--- ページ内容 ---\n${pageContent}\n--- ページ内容ここまで ---`
+    : officialUrl
+      ? `指定された公式URL（${officialUrl}）からはページ内容を取得できませんでした。下記のWeb検索でサービス名をもとに情報を調査してください。`
+      : `公式URLは指定されていません。下記のWeb検索でサービス名をもとに公式サイトや関連情報を調査してください。`;
 
-  return `あなたはポイ活サービスの情報を調査・整理するAIアシスタントです。サービス情報を推測・抽出してJSON形式で返してください。
-URL: ${officialUrl}
+  return `あなたはポイ活サービスの情報を調査・整理するAIアシスタントです。サービス情報をWeb検索で調査し、JSON形式で返してください。
+調査対象のサービス名：「${serviceName}」
+${officialUrl ? `公式URL（参考情報。誤っている可能性もあるため、検索結果と矛盾する場合は検索結果を優先してください）: ${officialUrl}` : "公式URL：不明"}
 
 ${sourceSection}
+
+Web検索では、サービス名「${serviceName}」を中心に、以下のようなキーワードで調査してください：
+- 「${serviceName} 公式サイト」（公式URLの特定・サービス概要の確認）
+- 「${serviceName} 友達紹介 ポイント」「${serviceName} 紹介コード キャンペーン」（紹介特典・キャンペーン情報の確認）
+公式サイトのトップページに情報がなくても、紹介・キャンペーン専用ページやレビュー記事から判明することがあります。
 
 既存カテゴリ一覧（categoriesはこの中からのみ選択可能）：
 ${categoryList}
 
 返却するJSON形式：
 {
-  "name": "サービス名（日本語）",
+  "name": "サービス名（日本語、正式名称）",
   "slug": "url-friendly-slug（英小文字・ハイフン区切り）。公式URLのドメイン名やパスに含まれる、サービスを表す英語表記を最優先で使用してください（例: https://example.com/torima なら 'torima'）",
+  "official_url": "検索で特定した公式サイトのURL。確信が持てない場合は null",
   "description": "SEO meta description（150字以内・日本語）",
   "categories": ["既存カテゴリ一覧の中から該当するものだけを選択（複数可、なければ空配列）"],
   "tags": ["タグ1", "タグ2", "タグ3"],
@@ -68,8 +77,7 @@ ${categoryList}
 注意：
 - 「アクセスできません」「わかりません」のような断り書きは一切不要です。name, slug, description, tags は必ず値を埋めてください。
 - categories は必ず上記の「既存カテゴリ一覧」に記載されている名称と完全一致するものだけを選んでください。一覧にない新しいカテゴリ名を作成・出力することは禁止です。該当するものがなければ空配列 [] にしてください。
-- Web検索が利用可能な場合は、特に bonus_points, bonus_amount, campaign_bonus, campaign_expires_at の最新情報を確認するために、「サービス名 + 友達紹介」「サービス名 + 紹介コード ポイント」「サービス名 + キャンペーン」のようなキーワードで検索してください。公式サイトのトップページに情報がなくても、紹介・キャンペーン専用ページやレビュー記事から判明することがあります。
-- bonus_points, bonus_amount, campaign_bonus, campaign_expires_at, logo_url は正確な情報に確信が持てる場合のみ値を入れ、不確かな場合は必ず null にしてください（架空の値を作らないこと）。
+- official_url, bonus_points, bonus_amount, campaign_bonus, campaign_expires_at, logo_url は正確な情報に確信が持てる場合のみ値を入れ、不確かな場合は必ず null にしてください（架空の値を作らないこと）。
 - 検索結果を参照した場合も、引用・出典・脚注などは含めず、前置きや補足説明、コードブロック記号（\`\`\`）も付けず、JSONオブジェクトのみを出力してください。`;
 }
 
