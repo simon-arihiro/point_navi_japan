@@ -25,6 +25,7 @@ export default function AdminArticleDetailPage() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [generatingThumbnail, setGeneratingThumbnail] = useState(false);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [thumbnailFeedback, setThumbnailFeedback] = useState("");
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
   const thumbnailFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -136,14 +137,19 @@ export default function AdminArticleDetailPage() {
     }
   };
 
-  // サムネイルをAI（Gemini）で再生成する
+  // サムネイルをAI（Gemini）で再生成し、本文内の最初の画像も置き換える
   const handleGenerateThumbnail = async () => {
     setGeneratingThumbnail(true);
     try {
-      const res = await fetch(`/api/articles/${id}/generate-thumbnail`, { method: "POST" });
+      const res = await fetch(`/api/articles/${id}/generate-thumbnail`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ feedback: thumbnailFeedback }),
+      });
       if (res.ok) {
-        const { url } = await res.json();
-        setArticle({ ...article, featured_image_url: url });
+        const { url, content } = await res.json();
+        setArticle({ ...article, featured_image_url: url, content });
+        if (isEditing) setEditContent(content);
       } else {
         alert("サムネイル生成に失敗しました（Gemini無料枠の上限などが原因の可能性があります）");
       }
@@ -349,6 +355,13 @@ export default function AdminArticleDetailPage() {
                 <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">未設定（本文内の最初の画像を使用）</div>
               )}
             </div>
+            <textarea
+              value={thumbnailFeedback}
+              onChange={(e) => setThumbnailFeedback(e.target.value)}
+              placeholder="画像の修正指示（任意）例: もっと明るい色合いで、リスのキャラクターを入れて"
+              rows={2}
+              className="w-full border border-gray-200 rounded-xl px-3 py-2 text-xs mb-2 focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+            />
             <div className="space-y-2">
               <button
                 onClick={handleGenerateThumbnail}

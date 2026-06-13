@@ -1,4 +1,3 @@
-import { SupabaseClient } from "@supabase/supabase-js";
 import { generateImage } from "./gemini";
 import { uploadArticleImage } from "@/lib/storage";
 import { ArticleType } from "@/types/database";
@@ -29,20 +28,19 @@ export function buildThumbnailPrompt(serviceName: string, articleType: ArticleTy
 - 16:9の横長構図、シンプルな背景`;
 }
 
-// Geminiで画像を生成し、Storageに保存して記事のfeatured_image_urlを更新する。
-// 無料枠の上限などで生成に失敗した場合はnullを返す（記事生成自体は失敗させない）。
-export async function generateAndSaveThumbnail(
-  supabase: SupabaseClient,
-  articleId: string,
-  serviceId: string,
-  prompt: string
-): Promise<string | null> {
+// Geminiで画像を生成してStorageに保存し、公開URLを返す。
+// 無料枠の上限などで生成に失敗した場合はnullを返す。
+export async function generateThumbnailImage(prompt: string, serviceId: string): Promise<string | null> {
   const image = await generateImage(prompt);
   if (!image) return null;
 
-  const url = await uploadArticleImage(serviceId, image.data, image.mimeType);
-  if (!url) return null;
+  return uploadArticleImage(serviceId, image.data, image.mimeType);
+}
 
-  await supabase.from("articles").update({ featured_image_url: url }).eq("id", articleId);
-  return url;
+const FIRST_IMAGE_RE = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/;
+
+// 本文内の最初の画像リンクを新しいURLに置き換える。画像が無ければnullを返す
+export function replaceFirstImageUrl(content: string, newUrl: string): string | null {
+  if (!FIRST_IMAGE_RE.test(content)) return null;
+  return content.replace(FIRST_IMAGE_RE, (_match, alt) => `![${alt}](${newUrl})`);
 }
