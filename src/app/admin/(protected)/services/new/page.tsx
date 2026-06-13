@@ -31,12 +31,21 @@ export default function NewServicePage() {
 
   const [allCategories, setAllCategories] = useState<Category[]>([]);
   const [categoryNames, setCategoryNames] = useState<string[]>([]);
+  const [existingNames, setExistingNames] = useState<string[]>([]);
 
   useEffect(() => {
     fetch("/api/categories")
       .then((res) => res.json())
       .then(({ data }) => setAllCategories(data ?? []));
   }, []);
+
+  useEffect(() => {
+    fetch("/api/services")
+      .then((res) => res.json())
+      .then(({ data }: { data: { name: string }[] }) => setExistingNames((data ?? []).map((s) => s.name)));
+  }, []);
+
+  const isDuplicateName = form.name.trim() !== "" && existingNames.some((n) => n.trim() === form.name.trim());
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((prev) => ({ ...prev, [key]: e.target.value }));
@@ -175,6 +184,9 @@ export default function NewServicePage() {
               required={label.includes("*")}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
+            {key === "name" && isDuplicateName && (
+              <p className="text-red-600 text-xs mt-1">⚠ 同名のサービスが既に登録されています</p>
+            )}
           </div>
         ))}
 

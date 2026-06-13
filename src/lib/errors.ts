@@ -23,3 +23,5 @@ export function isSlugConflict(error: { code?: string; message?: string } | null
 }
 
 export const SLUG_CONFLICT_MESSAGE = "このスラッグは既に使用されています。別のスラッグを指定してください。";
+
+export const NAME_CONFLICT_MESSAGE = "同名のサービスが既に登録されています。";

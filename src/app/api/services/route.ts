@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { errorResponse, ErrorCode, isSlugConflict, SLUG_CONFLICT_MESSAGE } from "@/lib/errors";
+import { errorResponse, ErrorCode, isSlugConflict, SLUG_CONFLICT_MESSAGE, NAME_CONFLICT_MESSAGE } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -36,6 +36,17 @@ export async function POST(request: NextRequest) {
   const { name, slug, description, referral_code, referral_link, bonus_points, bonus_amount, campaign_bonus, campaign_expires_at, official_url, logo_url, status, category_ids } = body;
   if (!name || !slug || !official_url) {
     return errorResponse(ErrorCode.VALIDATION_ERROR, "name, slug, official_url は必須です");
+  }
+
+  // 同名サービスの重複チェック（ゴミ箱内のレコードは対象外）
+  const { data: duplicate } = await supabase
+    .from("services")
+    .select("id")
+    .is("deleted_at", null)
+    .eq("name", name.trim())
+    .maybeSingle();
+  if (duplicate) {
+    return errorResponse(ErrorCode.VALIDATION_ERROR, NAME_CONFLICT_MESSAGE);
   }
 
   const { data, error } = await supabase
