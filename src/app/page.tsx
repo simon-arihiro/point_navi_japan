@@ -53,7 +53,7 @@ export default async function HomePage() {
     <div>
       {/* Hero */}
       <section className="bg-gradient-to-br from-brand-50 via-brand-warm-50 to-brand-100 text-slate-900 overflow-hidden">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12 flex flex-col md:flex-row md:items-center md:justify-between gap-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-12 flex flex-col md:flex-row md:items-center md:justify-between gap-10">
           <div className="max-w-3xl">
             <p className="text-brand-700 text-sm font-medium uppercase tracking-widest mb-4">日本のポイ活情報をナビゲート</p>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black leading-tight mb-6">
