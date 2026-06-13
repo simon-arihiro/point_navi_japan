@@ -67,6 +67,15 @@ export default function ConversionArea({ service }: Props) {
 
   const campaignBadge = getCampaignBadge(service);
 
+  const bonusText =
+    service.bonus_points && service.bonus_amount
+      ? `🎁 今すぐ登録で${service.bonus_points.toLocaleString()}pt（約${service.bonus_amount.toLocaleString()}円）もらえる！`
+      : service.bonus_points
+      ? `🎁 今すぐ登録で${service.bonus_points.toLocaleString()}ptもらえる！`
+      : service.bonus_amount
+      ? `🎁 今すぐ登録で約${service.bonus_amount.toLocaleString()}円相当もらえる！`
+      : null;
+
   return (
     <div className="bg-gradient-to-br from-amber-50 to-orange-100 border border-amber-200 rounded-2xl p-6">
       {campaignBadge && service.campaign_bonus && (
@@ -81,6 +90,12 @@ export default function ConversionArea({ service }: Props) {
       )}
 
       <h2 className="font-bold text-gray-900 text-base mb-4 flex items-center gap-2">🎁 お得な招待情報</h2>
+
+      {bonusText && (
+        <div className="mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 text-center">
+          <p className="text-green-700 font-bold text-sm">{bonusText}</p>
+        </div>
+      )}
 
       {service.referral_code && (
         <div className="mb-4">
