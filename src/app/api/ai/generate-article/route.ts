@@ -9,6 +9,7 @@ import {
 } from "@/lib/ai/prompts";
 import { extractUrls, fetchWebContents } from "@/lib/ai/webContent";
 import { buildThumbnailPrompt, generateThumbnailImage } from "@/lib/ai/thumbnail";
+import { GeminiQuotaExceededError } from "@/lib/ai/gemini";
 import { uploadArticleImage } from "@/lib/storage";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
@@ -130,6 +131,16 @@ export async function POST(request: NextRequest) {
       }
     } catch (thumbErr) {
       console.error("thumbnail generation failed:", thumbErr);
+      await supabase.from("admin_notifications").insert({
+        type: "image_failed",
+        payload: {
+          article_id: articleId,
+          service_id,
+          service_name: service.name,
+          reason: thumbErr instanceof GeminiQuotaExceededError ? "quota_exceeded" : "error",
+          detail: String(thumbErr),
+        },
+      });
     }
 
     await supabase.from("admin_notifications").insert({

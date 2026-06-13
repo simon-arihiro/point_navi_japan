@@ -151,7 +151,8 @@ export default function AdminArticleDetailPage() {
         setArticle({ ...article, featured_image_url: url, content });
         if (isEditing) setEditContent(content);
       } else {
-        alert("サムネイル生成に失敗しました（Gemini無料枠の上限などが原因の可能性があります）");
+        const { error } = await res.json().catch(() => ({}));
+        alert(error?.message ?? "サムネイル生成に失敗しました");
       }
     } finally {
       setGeneratingThumbnail(false);

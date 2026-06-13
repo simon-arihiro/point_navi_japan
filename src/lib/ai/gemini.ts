@@ -13,6 +13,14 @@ export type GeneratedImage = {
   data: string; // base64（データURLのprefixなし）
 };
 
+// Gemini無料枠の日次リクエスト数上限に達した場合（HTTP 429）に投げるエラー
+export class GeminiQuotaExceededError extends Error {
+  constructor() {
+    super("Gemini APIの無料枠（1日あたりのリクエスト数上限）に達しました");
+    this.name = "GeminiQuotaExceededError";
+  }
+}
+
 // Gemini 2.5 Flash Image（Nano Banana）でテキストプロンプトから画像を1枚生成する
 export async function generateImage(prompt: string): Promise<GeneratedImage | null> {
   const apiKey = getApiKey();
@@ -23,6 +31,9 @@ export async function generateImage(prompt: string): Promise<GeneratedImage | nu
     body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
   });
 
+  if (res.status === 429) {
+    throw new GeminiQuotaExceededError();
+  }
   if (!res.ok) {
     throw new Error(`Gemini API error: ${res.status} ${await res.text()}`);
   }
