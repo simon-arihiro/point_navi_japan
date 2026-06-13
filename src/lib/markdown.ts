@@ -8,6 +8,29 @@ marked.use({
       return "";
     },
   },
+  extensions: [
+    // ==text== 記法を赤字太字の強調表示に変換する（招待コード記事でサービス名・招待コードを強調するため）
+    {
+      name: "highlight",
+      level: "inline",
+      start(src: string) {
+        return src.indexOf("==");
+      },
+      tokenizer(src: string) {
+        const match = /^==([^=\n]+)==/.exec(src);
+        if (!match) return undefined;
+        return {
+          type: "highlight",
+          raw: match[0],
+          text: match[1].trim(),
+          tokens: this.lexer.inlineTokens(match[1].trim()),
+        };
+      },
+      renderer(token) {
+        return `<span class="text-red-600 font-bold">${this.parser.parseInline(token.tokens ?? [])}</span>`;
+      },
+    },
+  ],
 });
 
 export function renderMarkdown(content: string): string {
