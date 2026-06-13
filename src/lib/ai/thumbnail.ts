@@ -9,6 +9,7 @@ const ARTICLE_TYPE_THEME: Record<ArticleType, string> = {
   comparison: "複数の選択肢を見比べているイメージ",
   campaign: "お得なキャンペーンやボーナスをイメージさせるイラスト",
   earnings: "ポイントやお金がどんどん貯まっていくイメージ",
+  invitation: "招待コード・プレゼントでお得な特典を受け取るイメージ",
 };
 
 // 記事のアイキャッチ画像用のGeminiプロンプトを生成する

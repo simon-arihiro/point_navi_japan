@@ -3,6 +3,7 @@ import { generateTaskText } from "@/lib/ai/router";
 import type { ImageInput } from "@/lib/ai/types";
 import {
   buildIntroductionArticlePrompt,
+  buildInvitationArticlePrompt,
   buildRelatedArticlePrompt,
   buildDescriptionPrompt,
   SYSTEM_PROMPT_BASE,
@@ -96,6 +97,46 @@ export async function POST(request: NextRequest) {
           title, slug, content,
           description: description.trim(),
           article_type: "introduction",
+          status: "reviewing",
+          published_at: null,
+        }).select("id").single();
+        articleId = inserted!.id;
+      }
+    } else if (type === "invitation") {
+      content = (await generateTaskText("article", SYSTEM_PROMPT_BASE, buildInvitationArticlePrompt(service, extraContext), visionImages)).trim();
+
+      const titleMatch = content.match(/^#\s+(.+)/m);
+      title = titleMatch ? titleMatch[1].trim() : `${service.name}の招待コード・紹介キャンペーンまとめ`;
+      content = content.replace(/^#\s+.+\n+/, "").trim();
+
+      const description = await generateTaskText(
+        "article",
+        "SEO meta descriptionを150字以内で生成するアシスタントです。",
+        buildDescriptionPrompt(title, content)
+      );
+
+      // 既存の invitation 記事があれば上書き（1サービスにつき1記事）
+      const { data: existing } = await supabase
+        .from("articles")
+        .select("id")
+        .eq("primary_service_id", service_id)
+        .eq("article_type", "invitation")
+        .is("deleted_at", null)
+        .single();
+
+      if (existing) {
+        await supabase.from("articles").update({
+          title, content, description: description.trim(),
+          status: "reviewing", published_at: null,
+        }).eq("id", existing.id);
+        articleId = existing.id;
+      } else {
+        const slug = `${service.slug ?? service_id}-invitation`;
+        const { data: inserted } = await supabase.from("articles").insert({
+          primary_service_id: service_id,
+          title, slug, content,
+          description: description.trim(),
+          article_type: "invitation",
           status: "reviewing",
           published_at: null,
         }).select("id").single();

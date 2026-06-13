@@ -11,7 +11,7 @@ type Props = {
   className?: string;
 };
 
-function getAutoColor(name: string): string {
+export function getAutoColor(name: string): string {
   const colors = [
     "#E53E3E", "#DD6B20", "#D69E2E", "#38A169",
     "#3182CE", "#805AD5", "#D53F8C", "#319795",
