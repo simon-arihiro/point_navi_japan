@@ -1,14 +1,14 @@
 import { createClient } from "@/lib/supabase/server";
-import { calcHotScore, calcProfitScore } from "@/lib/ranking";
-import { getServiceStatsMap } from "@/lib/analytics";
+import { getServiceStatsMap, getArticleViewCounts } from "@/lib/analytics";
 import ArticleCard from "@/components/ArticleCard";
 import RankingListItem from "@/components/RankingListItem";
+import ArticleRankingListItem from "@/components/ArticleRankingListItem";
 import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
 
 export default async function HomePage() {
-  let hotServices: any[] = [];
-  let profitServices: any[] = [];
+  let popularServices: any[] = [];
+  let popularArticles: any[] = [];
   let latestArticles: any[] = [];
   let categories: any[] = [];
 
@@ -17,7 +17,7 @@ export default async function HomePage() {
     const { data: settings } = await supabase.from("system_settings").select("ranking_window_days").eq("id", 1).single();
     const windowDays = settings?.ranking_window_days ?? 30;
 
-    const [servicesRes, articlesRes, categoriesRes, statsMap] = await Promise.all([
+    const [servicesRes, articlesRes, categoriesRes, statsMap, articleViewCounts] = await Promise.all([
       supabase
         .from("services")
         .select(`*, categories:service_categories(category:categories(*)), tags:service_tags(tag:tags(*))`)
@@ -27,22 +27,22 @@ export default async function HomePage() {
         .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
         .eq("status", "published")
         .neq("article_type", "introduction")
-        .order("published_at", { ascending: false })
-        .limit(7),
+        .order("published_at", { ascending: false }),
       supabase.from("categories").select("*").order("name"),
       getServiceStatsMap(supabase, windowDays),
+      getArticleViewCounts(supabase),
     ]);
 
     const services = servicesRes.data ?? [];
+    const articles = articlesRes.data ?? [];
 
-    const ranked = services.map((svc: any) => {
-      const st = statsMap.get(svc.id) ?? { pv: 0, rc: 0, cc: 0 };
-      return { ...svc, hotScore: calcHotScore(st.pv, st.rc, st.cc), profitScore: calcProfitScore(st.rc, st.cc) };
-    });
+    const rankedServices = services.map((svc: any) => ({ ...svc, pv: statsMap.get(svc.id)?.pv ?? 0 }));
+    popularServices = [...rankedServices].sort((a, b) => b.pv - a.pv).slice(0, 5);
 
-    hotServices = [...ranked].sort((a, b) => b.hotScore - a.hotScore).slice(0, 5);
-    profitServices = [...ranked].sort((a, b) => b.profitScore - a.profitScore).slice(0, 5);
-    latestArticles = articlesRes.data ?? [];
+    const rankedArticles = articles.map((a: any) => ({ ...a, pv: articleViewCounts.get(a.id) ?? 0 }));
+    popularArticles = [...rankedArticles].sort((a, b) => b.pv - a.pv).slice(0, 5);
+
+    latestArticles = articles.slice(0, 7);
     categories = categoriesRes.data ?? [];
   } catch {
     // Supabase 未接続時は空表示
@@ -113,15 +113,12 @@ export default async function HomePage() {
           <div className="space-y-6">
             <Sidebar categories={categories} />
 
-            {/* 人気ランキング */}
-            {hotServices.length > 0 && (
+            {/* 人気サービスランキング */}
+            {popularServices.length > 0 && (
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div className="mb-1">
-                  <p className="text-brand-700 text-xs font-semibold uppercase tracking-wider">人気ランキング</p>
-                  <h2 className="text-lg font-black text-gray-900">Hot Ranking 🔥</h2>
-                </div>
+                <h2 className="text-lg font-black text-gray-900 mb-1">人気サービスランキング</h2>
                 <div className="divide-y divide-gray-50">
-                  {hotServices.map((svc, i) => (
+                  {popularServices.map((svc, i) => (
                     <RankingListItem key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} rank={i + 1} />
                   ))}
                 </div>
@@ -131,20 +128,17 @@ export default async function HomePage() {
               </div>
             )}
 
-            {/* 収益性ランキング */}
-            {profitServices.length > 0 && (
+            {/* 人気記事ランキング */}
+            {popularArticles.length > 0 && (
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <div className="mb-1">
-                  <p className="text-brand-warm-600 text-xs font-semibold uppercase tracking-wider">収益性ランキング</p>
-                  <h2 className="text-lg font-black text-gray-900">Profit Ranking 💰</h2>
-                </div>
+                <h2 className="text-lg font-black text-gray-900 mb-1">人気記事ランキング</h2>
                 <div className="divide-y divide-gray-50">
-                  {profitServices.map((svc, i) => (
-                    <RankingListItem key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} rank={i + 1} />
+                  {popularArticles.map((article) => (
+                    <ArticleRankingListItem key={article.id} article={article} />
                   ))}
                 </div>
-                <Link href="/ranking?type=profit" className="block text-center text-brand-warm-600 font-medium text-sm hover:underline mt-3 pt-3 border-t border-gray-50">
-                  ランキングをすべて見る →
+                <Link href="/articles" className="block text-center text-brand-warm-600 font-medium text-sm hover:underline mt-3 pt-3 border-t border-gray-50">
+                  記事をすべて見る →
                 </Link>
               </div>
             )}

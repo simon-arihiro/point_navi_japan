@@ -65,6 +65,25 @@ export async function getArticleViewCount(supabase: SupabaseClient, articleId: s
 }
 
 /**
+ * 記事別の閲覧回数（article_id ごとの article_view 総数、全期間）。
+ */
+export async function getArticleViewCounts(supabase: SupabaseClient): Promise<Map<string, number>> {
+  const { data } = await supabase
+    .from("analytics_events")
+    .select("article_id")
+    .eq("event_type", "article_view")
+    .not("article_id", "is", null);
+
+  const counts = new Map<string, number>();
+  for (const row of data ?? []) {
+    const articleId = row.article_id as string;
+    counts.set(articleId, (counts.get(articleId) ?? 0) + 1);
+  }
+
+  return counts;
+}
+
+/**
  * サービス別の閲覧回数（そのサービスに紐づく記事の article_view 総数、全期間）。
  */
 export async function getServiceArticleViewCounts(supabase: SupabaseClient): Promise<Map<string, number>> {
