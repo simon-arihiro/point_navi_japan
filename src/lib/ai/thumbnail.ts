@@ -1,4 +1,3 @@
-import sharp from "sharp";
 import { generateTaskImage } from "./router";
 import { uploadArticleImage } from "@/lib/storage";
 import { ArticleType } from "@/types/database";
@@ -36,17 +35,12 @@ export function buildThumbnailPrompt(serviceName: string, articleType: ArticleTy
 
 // 設定されたAIプロバイダーで画像を生成してStorageに保存し、公開URLを返す。
 // 画像が生成できなかった場合はnullを返す。
-// プロバイダーによる出力サイズの違いを吸収するため、PNG・THUMBNAIL_WIDTH x THUMBNAIL_HEIGHT（16:9）に正規化する
+// アスペクト比はAIプロバイダーへのプロンプト指定（16:9）に依存し、生成結果をそのまま保存する
 export async function generateThumbnailImage(prompt: string, serviceId: string): Promise<string | null> {
   const image = await generateTaskImage(prompt);
   if (!image) return null;
 
-  const normalized = await sharp(Buffer.from(image.data, "base64"))
-    .resize(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, { fit: "cover" })
-    .png()
-    .toBuffer();
-
-  return uploadArticleImage(serviceId, normalized.toString("base64"), "image/png");
+  return uploadArticleImage(serviceId, image.data, image.mimeType);
 }
 
 const FIRST_IMAGE_RE = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/;
