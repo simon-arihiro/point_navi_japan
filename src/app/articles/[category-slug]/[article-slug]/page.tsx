@@ -3,10 +3,11 @@ import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
-import Sidebar from "@/components/Sidebar";
+import { SearchCard, CategoryCard } from "@/components/Sidebar";
 import TrackView from "@/components/TrackView";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 import { getArticleTypeLabel } from "@/lib/articleTypes";
+import { getArticleViewCountsForIds } from "@/lib/analytics";
 import type { Metadata } from "next";
 
 export async function generateMetadata(
@@ -47,15 +48,31 @@ export default async function ArticlePage(
     notFound();
   }
 
-  // 関連記事（同 Service の他記事）
-  const { data: related } = await supabase
-    .from("articles")
-    .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
-    .eq("primary_service_id", article.primary_service_id)
-    .eq("status", "published")
-    .neq("id", article.id)
-    .neq("article_type", "introduction")
-    .limit(3);
+  // 関連記事（同 Service の他記事）：紹介記事を先頭に、それ以外はPV降順で並べる
+  const RELATED_LIMIT = 3;
+  const [{ data: introArticle }, { data: relatedOthers }] = await Promise.all([
+    supabase
+      .from("articles")
+      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
+      .eq("primary_service_id", article.primary_service_id)
+      .eq("status", "published")
+      .eq("article_type", "introduction")
+      .maybeSingle(),
+    supabase
+      .from("articles")
+      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
+      .eq("primary_service_id", article.primary_service_id)
+      .eq("status", "published")
+      .neq("id", article.id)
+      .neq("article_type", "introduction"),
+  ]);
+
+  const otherIds = (relatedOthers ?? []).map((a) => a.id);
+  const viewCounts = await getArticleViewCountsForIds(supabase, otherIds);
+  const sortedOthers = [...(relatedOthers ?? [])].sort(
+    (a, b) => (viewCounts.get(b.id) ?? 0) - (viewCounts.get(a.id) ?? 0)
+  );
+  const related = [...(introArticle ? [introArticle] : []), ...sortedOthers].slice(0, RELATED_LIMIT);
 
   const publishedDate = article.published_at
     ? new Date(article.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })
@@ -127,20 +144,22 @@ export default async function ArticlePage(
 
           {/* サイドバー */}
           <aside className="space-y-6">
+            <SearchCard />
+
             {service && <ConversionArea service={service} />}
 
-            {(related ?? []).length > 0 && (
+            {related.length > 0 && (
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                 <h3 className="font-bold text-gray-900 mb-4 text-sm">関連記事</h3>
                 <div className="space-y-4">
-                  {(related ?? []).map((r: any) => (
+                  {related.map((r) => (
                     <ArticleCard key={r.id} article={r} categorySlug={categorySlug} />
                   ))}
                 </div>
               </div>
             )}
 
-            <Sidebar categories={categories} />
+            <CategoryCard categories={categories} />
           </aside>
         </div>
       </div>
