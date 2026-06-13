@@ -48,9 +48,11 @@ export default async function ArticlePage(
     notFound();
   }
 
-  // 関連記事（同 Service の他記事）：紹介記事を先頭に、それ以外はPV降順で並べる
-  const RELATED_LIMIT = 3;
-  const [{ data: introArticle }, { data: relatedOthers }] = await Promise.all([
+  // 関連記事：1番目は本サービスの紹介記事、2〜5番目は本サービスの他記事（PV降順）、
+  // 残りは他サービスの記事（紹介記事含む、PV降順）で最大10件まで埋める
+  const RELATED_LIMIT = 10;
+  const OWN_OTHERS_LIMIT = 4;
+  const [{ data: introArticle }, { data: ownOthers }, { data: otherArticles }] = await Promise.all([
     supabase
       .from("articles")
       .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
@@ -65,14 +67,27 @@ export default async function ArticlePage(
       .eq("status", "published")
       .neq("id", article.id)
       .neq("article_type", "introduction"),
+    supabase
+      .from("articles")
+      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
+      .neq("primary_service_id", article.primary_service_id)
+      .eq("status", "published")
+      .order("published_at", { ascending: false })
+      .limit(50),
   ]);
 
-  const otherIds = (relatedOthers ?? []).map((a) => a.id);
-  const viewCounts = await getArticleViewCountsForIds(supabase, otherIds);
-  const sortedOthers = [...(relatedOthers ?? [])].sort(
-    (a, b) => (viewCounts.get(b.id) ?? 0) - (viewCounts.get(a.id) ?? 0)
-  );
-  const related = [...(introArticle ? [introArticle] : []), ...sortedOthers].slice(0, RELATED_LIMIT);
+  const candidateIds = [...(ownOthers ?? []), ...(otherArticles ?? [])].map((a) => a.id);
+  const viewCounts = await getArticleViewCountsForIds(supabase, candidateIds);
+  const byPvDesc = (a: { id: string }, b: { id: string }) => (viewCounts.get(b.id) ?? 0) - (viewCounts.get(a.id) ?? 0);
+
+  const sortedOwnOthers = [...(ownOthers ?? [])].sort(byPvDesc);
+  const sortedOtherArticles = [...(otherArticles ?? [])].sort(byPvDesc);
+
+  const related = [
+    ...(introArticle ? [introArticle] : []),
+    ...sortedOwnOthers.slice(0, OWN_OTHERS_LIMIT),
+    ...sortedOtherArticles,
+  ].slice(0, RELATED_LIMIT);
 
   const publishedDate = article.published_at
     ? new Date(article.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })
