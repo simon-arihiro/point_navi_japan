@@ -179,9 +179,6 @@ export default function ServiceListClient({ services, allCategories }: Props) {
             <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
               <span className="text-gray-500">記事 {svc.articleCount}件</span>
               <span className="text-gray-500">閲覧 {svc.viewCount.toLocaleString()}回</span>
-              {formatBonus(svc.bonus_points, svc.bonus_amount) && (
-                <span className="text-gray-500">付与 {formatBonus(svc.bonus_points, svc.bonus_amount)}</span>
-              )}
               <span className="text-gray-400">追加: {formatDate(svc.created_at)}</span>
               <span className="text-gray-400">更新: {formatDate(svc.latestPublishedAt)}</span>
             </div>
@@ -196,8 +193,13 @@ export default function ServiceListClient({ services, allCategories }: Props) {
               </div>
             )}
 
-            {(svc.referral_code || svc.referral_link) && (
+            {(svc.referral_code || svc.referral_link || formatBonus(svc.bonus_points, svc.bonus_amount)) && (
               <div className="flex flex-wrap gap-1.5 mt-2">
+                {formatBonus(svc.bonus_points, svc.bonus_amount) && (
+                  <span className="text-xs bg-green-50 text-green-700 font-bold rounded-full px-2.5 py-1">
+                    🎁 {formatBonus(svc.bonus_points, svc.bonus_amount)}
+                  </span>
+                )}
                 {svc.referral_code && (
                   <span className="text-xs bg-amber-50 text-amber-700 rounded-full px-2 py-0.5">招待コードあり</span>
                 )}
