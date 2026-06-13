@@ -60,42 +60,35 @@ export default function InvitationCard({ article, categorySlug }: Props) {
   return (
     <Link href={href} className="block h-full">
       <div
-        className="relative bg-white rounded-2xl border-2 overflow-hidden h-full flex flex-col transition-transform duration-200 ease-out hover:scale-[1.04] hover:shadow-lg hover:z-10"
+        className="relative bg-white rounded-2xl border-4 overflow-hidden h-full flex flex-col transition-transform duration-200 ease-out hover:scale-[1.04] hover:shadow-lg hover:z-10"
         style={{ borderColor: hexToRgba(bgColor, 0.35) }}
       >
-        <div className="p-3 flex flex-col gap-2 flex-1">
-          {/* ヘッダー行: サービスロゴ＋名前（カラーピル）／紹介コードバッジ */}
-          <div className="flex items-center justify-between gap-2">
-            <div
-              className="inline-flex items-center gap-2 rounded-lg pl-1.5 pr-3 py-1.5 text-white min-w-0"
-              style={{ backgroundColor: bgColor }}
-            >
-              <LogoFallback
-                name={svc?.name ?? "?"}
-                logoUrl={svc?.logo_url}
-                logoStoragePath={svc?.logo_storage_path}
-                officialUrl={svc?.official_url}
-                size={28}
-                className="bg-white shrink-0"
-              />
-              <span className="font-black text-sm truncate max-w-[7rem]">{svc?.name}</span>
-            </div>
-            <div className="shrink-0 bg-amber-400 text-amber-900 text-[10px] font-bold px-2.5 py-1.5 rounded-lg flex items-center gap-1">
-              <span className="text-[8px]">■</span>紹介コード
-            </div>
+        <div className="flex flex-col gap-2 flex-1">
+          {/* ヘッダー行: サービスロゴ＋名前（金色バー・横幅いっぱい） */}
+          <div className="flex items-center gap-2.5 bg-amber-400 px-3 py-2.5 w-full">
+            <LogoFallback
+              name={svc?.name ?? "?"}
+              logoUrl={svc?.logo_url}
+              logoStoragePath={svc?.logo_storage_path}
+              officialUrl={svc?.official_url}
+              size={36}
+              className="bg-white shrink-0"
+            />
+            <span className="font-black text-base text-amber-950 truncate">{svc?.name}</span>
           </div>
 
+          <div className="px-3 flex flex-col gap-2 flex-1">
           {/* 訴求文＋マスコット */}
           <div className="flex items-center justify-between gap-2">
             <p className="font-black text-gray-900 text-xl leading-snug whitespace-nowrap">
               新規登録は<span style={{ color: bgColor }}>お得</span>！
             </p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/mascot/library/${mascot}`} alt="" className="w-16 h-16 object-contain shrink-0" />
+            <img src={`/mascot/library/${mascot}`} alt="" className="w-20 h-20 object-contain shrink-0" />
           </div>
 
           {bonusText && (
-            <p className="text-[11px] text-gray-500 leading-snug line-clamp-2">{bonusText}</p>
+            <p className="text-sm text-gray-900 font-bold leading-snug line-clamp-2">{bonusText}</p>
           )}
 
           {/* 紹介コード（一行表記） */}
@@ -117,7 +110,8 @@ export default function InvitationCard({ article, categorySlug }: Props) {
             {article.title}
           </h3>
 
-          {publishedDate && <p className="text-[11px] text-gray-400 mt-auto">{publishedDate}</p>}
+          {publishedDate && <p className="text-[11px] text-gray-400 mt-auto pb-3">{publishedDate}</p>}
+          </div>
         </div>
       </div>
     </Link>
