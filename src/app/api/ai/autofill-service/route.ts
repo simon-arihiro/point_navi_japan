@@ -7,16 +7,16 @@ import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const { official_url } = await request.json();
-  if (!official_url) {
-    return errorResponse(ErrorCode.VALIDATION_ERROR, "official_url は必須です");
+  const { name, official_url } = await request.json();
+  if (!name) {
+    return errorResponse(ErrorCode.VALIDATION_ERROR, "サービス名は必須です");
   }
 
   try {
     const supabase = createAdminClient();
     const [{ data: categories }, webContents] = await Promise.all([
       supabase.from("categories").select("name").order("name"),
-      fetchWebContents([official_url]),
+      official_url ? fetchWebContents([official_url]) : Promise.resolve([]),
     ]);
     const existingCategories = (categories ?? []).map((c) => c.name);
     const pageContent = webContents[0]?.content ?? null;
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
     const infoJson = await generateTaskText(
       "autofill",
       "あなたはウェブサイトの情報を分析するAIアシスタントです。JSONのみ返してください。",
-      buildServiceInfoPrompt(official_url, existingCategories, pageContent),
+      buildServiceInfoPrompt(name, official_url || null, existingCategories, pageContent),
       undefined,
       { search: true }
     );
@@ -32,6 +32,7 @@ export async function POST(request: NextRequest) {
     const aiInfo = extractJson<{
       name?: string;
       slug?: string;
+      official_url?: string | null;
       description?: string;
       categories?: string[];
       tags?: string[];

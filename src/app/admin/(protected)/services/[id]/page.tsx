@@ -97,10 +97,10 @@ export default function EditServicePage() {
     }
   };
 
-  // AI補完: 公式URLをもとに説明・カテゴリ・付与ポイント/金額・キャンペーン情報・ロゴURLをフォームに反映する（保存ボタンを押すまでDBは更新されない）
+  // AI補完: サービス名をもとにWeb検索で説明・カテゴリ・付与ポイント/金額・キャンペーン情報・ロゴURL・公式URLを調査しフォームに反映する（保存ボタンを押すまでDBは更新されない）
   const handleAutofill = async () => {
-    if (!form.official_url) {
-      setAiError("AI補完には公式URLが必要です");
+    if (!form.name) {
+      setAiError("AI補完にはサービス名が必要です");
       return;
     }
     setAiError("");
@@ -109,7 +109,7 @@ export default function EditServicePage() {
     const res = await fetch("/api/ai/autofill-service", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ official_url: form.official_url }),
+      body: JSON.stringify({ name: form.name, official_url: form.official_url || null }),
     });
 
     if (!res.ok) {
@@ -123,6 +123,7 @@ export default function EditServicePage() {
 
     setForm((prev: typeof form) => ({
       ...prev,
+      official_url: prev.official_url || data.official_url || prev.official_url,
       description: data.description || prev.description,
       bonus_points: data.bonus_points != null ? String(data.bonus_points) : prev.bonus_points,
       bonus_amount: data.bonus_amount || prev.bonus_amount,

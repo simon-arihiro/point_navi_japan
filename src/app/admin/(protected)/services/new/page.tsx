@@ -17,7 +17,7 @@ export default function NewServicePage() {
   const [form, setForm] = useState({
     name: "",
     slug: "",
-    official_url: "http://a.com",
+    official_url: "",
     referral_code: "",
     referral_link: "",
     bonus_points: "",
@@ -61,8 +61,8 @@ export default function NewServicePage() {
   };
 
   const handleAutofill = async () => {
-    if (!form.official_url) {
-      setAiError("AI補完には公式URLが必要です");
+    if (!form.name) {
+      setAiError("AI補完にはサービス名が必要です");
       return;
     }
     setAiError("");
@@ -71,7 +71,7 @@ export default function NewServicePage() {
     const res = await fetch("/api/ai/autofill-service", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ official_url: form.official_url }),
+      body: JSON.stringify({ name: form.name, official_url: form.official_url || null }),
     });
 
     if (!res.ok) {
@@ -86,6 +86,7 @@ export default function NewServicePage() {
     setForm((prev) => ({
       ...prev,
       slug: prev.slug || data.slug || prev.slug,
+      official_url: prev.official_url || data.official_url || prev.official_url,
       description: data.description || prev.description,
       bonus_points: data.bonus_points != null ? String(data.bonus_points) : prev.bonus_points,
       bonus_amount: data.bonus_amount || prev.bonus_amount,
@@ -205,7 +206,7 @@ export default function NewServicePage() {
         {aiError && <p className="text-amber-600 text-sm">{aiError}</p>}
 
         <p className="text-xs text-gray-500 bg-blue-50 rounded-lg px-4 py-3">
-          「AI補完」を押すと、公式URLをもとに説明文・カテゴリ・付与ポイント・付与金額・キャンペーン内容・キャンペーン終了日時・ロゴURLを自動入力します（既存の入力は上書きされます。紹介記事は生成されません）。招待コード・招待リンクはAIでは取得できないため、手動で入力してください。公式サイトのページ内容を取得できない場合はAIの一般知識をもとに推測するため、内容を確認・修正のうえ「追加」を押してください。
+          「AI補完」を押すと、サービス名をもとにAIがWeb検索を行い、説明文・カテゴリ・付与ポイント・付与金額・キャンペーン内容・キャンペーン終了日時・ロゴURLを自動入力します（既存の入力は上書きされます。紹介記事は生成されません）。スラッグ・公式URLは未入力の場合のみAIの調査結果が反映されます。招待コード・招待リンクはAIでは取得できないため、手動で入力してください。情報が見つからない場合は項目が空欄のままになるため、内容を確認・修正のうえ「追加」を押してください。
         </p>
 
         <div className="flex gap-3">
