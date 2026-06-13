@@ -9,7 +9,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { generateText } from "../src/lib/ai/claude";
-import { SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt, buildDescriptionPrompt } from "../src/lib/ai/prompts";
+import { SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt, splitContentAndDescription } from "../src/lib/ai/prompts";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -51,15 +51,11 @@ async function main() {
   for (const service of services) {
     console.log(`--- ${service.name} (${service.slug}) ---`);
     try {
-      const content = (await generateText(SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(service)))
-        .replace(/^#\s+.+\n+/, "") // AIが誤ってh1タイトルを出力した場合の保険
-        .trim();
+      const generated = splitContentAndDescription(await generateText(SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(service)));
+      const content = generated.content.replace(/^#\s+.+\n+/, "").trim(); // AIが誤ってh1タイトルを出力した場合の保険
+      const description = generated.description;
 
       const title = `${service.name}を実際に使ってみた感想｜メリット・デメリット・始め方まとめ`;
-
-      const description = (
-        await generateText("SEO meta descriptionを150字以内で生成するアシスタントです。", buildDescriptionPrompt(title, content))
-      ).trim();
 
       const { data: existing } = await supabase
         .from("articles")
