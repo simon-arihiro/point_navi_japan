@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { buildThumbnailPrompt, generateThumbnailImage, replaceFirstImageUrl } from "@/lib/ai/thumbnail";
+import { GeminiQuotaExceededError } from "@/lib/ai/gemini";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
@@ -40,6 +41,9 @@ export async function POST(request: NextRequest, props: RouteContext<"/api/artic
 
     return Response.json({ url, content: updatedContent ?? article.content });
   } catch (err) {
+    if (err instanceof GeminiQuotaExceededError) {
+      return errorResponse(ErrorCode.AI_GENERATION_FAILED, `${err.message}。日本時間の午前中頃にリセットされます`, 429);
+    }
     return errorResponse(ErrorCode.AI_GENERATION_FAILED, `サムネイル生成に失敗しました: ${String(err)}`, 500);
   }
 }

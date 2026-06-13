@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { getServiceStatsMap } from "@/lib/analytics";
 import Link from "next/link";
 import type { Metadata } from "next";
+import ImageFailedBanner from "./ImageFailedBanner";
 
 export const metadata: Metadata = { title: "ダッシュボード" };
 
@@ -16,6 +17,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     { count: introArticles },
     { count: relatedArticles },
     { count: pendingArticles },
+    { count: imageFailedCount },
     { data: servicesList },
     statsMap,
   ] = await Promise.all([
@@ -23,6 +25,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("article_type", "introduction").eq("status", "published").is("deleted_at", null),
     supabase.from("articles").select("*", { count: "exact", head: true }).neq("article_type", "introduction").eq("status", "published").is("deleted_at", null),
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "reviewing").is("deleted_at", null),
+    supabase.from("admin_notifications").select("*", { count: "exact", head: true }).eq("type", "image_failed").eq("is_read", false),
     supabase.from("services").select("id, name, slug").eq("status", "active").is("deleted_at", null).order("name"),
     getServiceStatsMap(supabase, days),
   ]);
@@ -45,6 +48,8 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
       <h1 className="text-2xl font-black text-gray-900 mb-8">ダッシュボード</h1>
 
       {/* 通知（対応可能なものだけ表示） */}
+      <ImageFailedBanner count={imageFailedCount ?? 0} />
+
       {(pendingArticles ?? 0) > 0 && (
         <Link
           href="/admin/articles?status=reviewing"
