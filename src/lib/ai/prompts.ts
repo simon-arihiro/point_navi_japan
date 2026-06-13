@@ -161,7 +161,7 @@ export function buildInvitationArticlePrompt(service: {
 このサイトのすべての招待コード記事は同じテンプレートで統一しています。下記の見出し（##）の文言・絵文字・順番・レベルは一字一句変えずに使ってください。
 
 最初の行に、以下の形式でタイトル（# ）を出力してください：
-# 【${yearMonth}】${service.name}の招待コード・紹介キャンペーンまとめ｜登録方法と特典の受け取り方を解説
+# 【${yearMonth}最新】${service.name}の招待コード・紹介特典まとめ｜登録方法と受け取り方を解説
 
 サービス情報：
 ${infoLines.map((l) => `- ${l}`).join("\n")}
