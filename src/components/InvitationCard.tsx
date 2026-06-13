@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArticleWithService } from "@/types/database";
 import LogoFallback from "./LogoFallback";
+import HighlightServiceName from "./HighlightServiceName";
 import { getAutoColor } from "@/lib/autoColor";
 
 type Props = {
@@ -118,7 +119,7 @@ export default function InvitationCard({ article, categorySlug }: Props) {
           </div>
 
           <h3 className="font-normal text-gray-900 text-sm leading-snug line-clamp-2">
-            {article.title}
+            <HighlightServiceName title={article.title} serviceName={svc?.name} />
           </h3>
 
           {publishedDate && <p className="text-[11px] text-gray-400 mt-auto pb-3">{publishedDate}</p>}

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArticleWithService } from "@/types/database";
 import LogoFallback from "./LogoFallback";
+import HighlightServiceName from "./HighlightServiceName";
 import { getArticleTypeLabel, getArticleTypeIcon } from "@/lib/articleTypes";
 import { extractFirstImageUrl } from "@/lib/markdown";
 
@@ -35,7 +36,7 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
               size={48}
             />
             <h3 className="font-black text-gray-900 text-lg sm:text-xl leading-snug group-hover:text-brand-700 transition-colors line-clamp-2 min-w-0">
-              {article.title}
+              <HighlightServiceName title={article.title} serviceName={article.primary_service?.name} />
             </h3>
           </div>
           <div className="flex items-start gap-4">
@@ -76,7 +77,7 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
             </div>
           </div>
           <h3 className="font-bold text-gray-900 text-base leading-snug group-hover:text-brand-700 transition-colors line-clamp-2 mb-2">
-            {article.title}
+            <HighlightServiceName title={article.title} serviceName={article.primary_service?.name} />
           </h3>
           {article.description && (
             <p className="text-sm text-gray-500 line-clamp-2 mb-3 leading-relaxed">{article.description}</p>
@@ -103,7 +104,7 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
           </div>
         )}
         <h3 className="font-bold text-gray-900 text-sm leading-snug group-hover:text-brand-700 transition-colors line-clamp-2 mb-2">
-          {article.title}
+          <HighlightServiceName title={article.title} serviceName={article.primary_service?.name} />
         </h3>
         {article.description && (
           <p className="text-xs text-gray-500 line-clamp-2 mb-3">{article.description}</p>

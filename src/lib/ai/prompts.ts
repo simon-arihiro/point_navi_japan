@@ -90,7 +90,7 @@ export function buildIntroductionArticlePrompt(service: {
 }, extra?: ExtraContext) {
   const referralGuide =
     service.referral_code || service.referral_link
-      ? "「🚀 登録方法・始め方」の最後のステップで、紹介コード・紹介リンクの使い方を自然に案内してください。"
+      ? `「🚀 登録方法・始め方」の最後のステップで、紹介コード・紹介リンクの使い方を自然に案内してください。${service.referral_code ? `紹介コード「${service.referral_code}」を記載する箇所は \`==${service.referral_code}==\` のように記述してください。` : ""}`
       : "紹介コード・紹介リンクは提供されていないため、公式サイトからの通常の登録手順のみを案内してください。";
 
   return `${buildExtraContextSection(extra)}「${service.name}」のサービス紹介記事の本文を書いてください。
@@ -125,6 +125,7 @@ ${service.referral_link ? `- 紹介リンク: ${service.referral_link}` : ""}
 【厳守事項】
 - 見出し（##）はテキスト・絵文字・順番をすべて上記の通りにすること
 - 箇条書きは「- 」、番号付きリストは「1. 」のように半角数字+ピリオドを使うこと
+- \`==テキスト==\` は赤字強調表示になる特別な記法です。指示された箇所以外では使用しないこと
 - 全体で2000〜3000字程度
 - 個人ブロガーの体験談として書く${DESCRIPTION_SUFFIX_INSTRUCTION}`;
 }

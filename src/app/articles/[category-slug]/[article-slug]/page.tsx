@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
+import HighlightServiceName from "@/components/HighlightServiceName";
 import { SearchCard, CategoryCard } from "@/components/Sidebar";
 import TrackView from "@/components/TrackView";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
@@ -130,7 +131,7 @@ export default async function ArticlePage(
             </div>
 
             <h1 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-6">
-              {article.title}
+              <HighlightServiceName title={article.title} serviceName={article.primary_service?.name} />
             </h1>
 
             {article.description && (

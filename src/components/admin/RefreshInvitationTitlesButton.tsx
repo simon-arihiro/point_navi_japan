@@ -16,7 +16,7 @@ export default function RefreshInvitationTitlesButton() {
       const res = await fetch("/api/articles/refresh-invitation-titles", { method: "POST" });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.error?.message ?? "更新に失敗しました");
-      setMessage(`${json.prefix} に更新しました（${json.updated}/${json.total}件）`);
+      setMessage(`${json.prefix} に更新しました（タイトル${json.updated}/${json.total}件、本文強調${json.contentUpdated}件）`);
       router.refresh();
     } catch (err) {
       setMessage(err instanceof Error ? err.message : "更新に失敗しました");
