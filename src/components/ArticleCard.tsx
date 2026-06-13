@@ -90,14 +90,18 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
   return (
     <Link href={href} className="group block">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all h-full">
-        <div className="flex items-center gap-2 mb-3">
-          <span className="text-xs bg-brand-50 text-brand-700 font-medium rounded-full px-3 py-1">
-            {typeLabel}
-          </span>
-          {article.primary_service && (
+        {article.primary_service && (
+          <div className="flex items-center gap-2 mb-3">
+            <LogoFallback
+              name={article.primary_service.name}
+              logoUrl={article.primary_service.logo_url}
+              logoStoragePath={article.primary_service.logo_storage_path}
+              officialUrl={article.primary_service.official_url}
+              size={24}
+            />
             <span className="text-xs text-gray-500">{article.primary_service.name}</span>
-          )}
-        </div>
+          </div>
+        )}
         <h3 className="font-bold text-gray-900 text-sm leading-snug group-hover:text-brand-700 transition-colors line-clamp-2 mb-2">
           {article.title}
         </h3>

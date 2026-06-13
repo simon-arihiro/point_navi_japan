@@ -14,7 +14,7 @@ export default async function ArticlesPage() {
   const [articlesRes, categoriesRes] = await Promise.all([
     supabase
       .from("articles")
-      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
+      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
       .eq("status", "published")
       .neq("article_type", "introduction")
       .order("published_at", { ascending: false })
