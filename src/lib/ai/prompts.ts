@@ -126,7 +126,7 @@ ${service.referral_link ? `- 紹介リンク: ${service.referral_link}` : ""}
 - 見出し（##）はテキスト・絵文字・順番をすべて上記の通りにすること
 - 箇条書きは「- 」、番号付きリストは「1. 」のように半角数字+ピリオドを使うこと
 - 全体で2000〜3000字程度
-- 個人ブロガーの体験談として書く`;
+- 個人ブロガーの体験談として書く${DESCRIPTION_SUFFIX_INSTRUCTION}`;
 }
 
 export function buildInvitationArticlePrompt(service: {
@@ -188,7 +188,7 @@ ${infoLines.map((l) => `- ${l}`).join("\n")}
 - 見出し（##）はテキスト・絵文字・順番をすべて上記の通りにすること
 - 箇条書きは「- 」、番号付きリストは「1. 」のように半角数字+ピリオドを使うこと
 - 全体で1500〜2200字程度
-- 個人ブロガーの体験談として書く`;
+- 個人ブロガーの体験談として書く${DESCRIPTION_SUFFIX_INSTRUCTION}`;
 }
 
 export function buildRelatedArticlePrompt(
@@ -214,7 +214,7 @@ export function buildRelatedArticlePrompt(
 - 個人ブロガーの体験談として書く
 - 実用的で読者が行動したくなる内容
 
-最初の行にタイトル（# タイトル）を含めてください。`;
+最初の行にタイトル（# タイトル）を含めてください。${DESCRIPTION_SUFFIX_INSTRUCTION}`;
 }
 
 export function buildRewritePrompt(originalContent: string, feedback: string) {
@@ -229,10 +229,17 @@ ${originalContent}
 同じMarkdown形式で書き直してください。`;
 }
 
-export function buildDescriptionPrompt(title: string, content: string) {
-  return `以下の記事のSEO meta descriptionを150字以内で生成してください。
-タイトル：${title}
-本文の冒頭：${content.substring(0, 300)}
+// 本文生成プロンプトの末尾に付与する指示。本文とSEO meta descriptionを1回のAI呼び出しでまとめて生成させる
+export const DESCRIPTION_SUFFIX_INSTRUCTION = `
 
-descriptionのみ返してください（マークダウン不要）。`;
+【SEO meta description】
+本文をすべて出力したあと、最後に区切り行 "---META_DESCRIPTION---" を出力し、その次の行にこの記事のSEO meta description（150字以内・日本語・マークダウン不要）を出力してください。`;
+
+const DESCRIPTION_DELIMITER = /\n*---META_DESCRIPTION---\n*/;
+
+// AIの出力を本文とSEO meta descriptionに分割する。区切りが見つからない場合はdescriptionを空文字で返す
+export function splitContentAndDescription(raw: string): { content: string; description: string } {
+  const parts = raw.split(DESCRIPTION_DELIMITER);
+  if (parts.length < 2) return { content: raw.trim(), description: "" };
+  return { content: parts[0].trim(), description: parts.slice(1).join("").trim() };
 }

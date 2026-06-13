@@ -5,7 +5,7 @@ import {
   buildIntroductionArticlePrompt,
   buildInvitationArticlePrompt,
   buildRelatedArticlePrompt,
-  buildDescriptionPrompt,
+  splitContentAndDescription,
   SYSTEM_PROMPT_BASE,
   ExtraContext,
 } from "@/lib/ai/prompts";
@@ -68,15 +68,11 @@ export async function POST(request: NextRequest) {
 
     if (type === "introduction") {
       title = `${service.name}を実際に使ってみた感想｜メリット・デメリット・始め方まとめ`;
-      content = (await generateTaskText("article", SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(service, extraContext), visionImages))
-        .replace(/^#\s+.+\n+/, "") // AIが誤ってh1タイトルを出力した場合の保険
-        .trim();
-
-      const description = await generateTaskText(
-        "article",
-        "SEO meta descriptionを150字以内で生成するアシスタントです。",
-        buildDescriptionPrompt(title, content)
+      const generated = splitContentAndDescription(
+        await generateTaskText("article", SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(service, extraContext), visionImages)
       );
+      content = generated.content.replace(/^#\s+.+\n+/, "").trim(); // AIが誤ってh1タイトルを出力した場合の保険
+      const description = generated.description;
 
       // 既存の introduction 記事があれば上書き
       const { data: existing } = await supabase
@@ -106,17 +102,15 @@ export async function POST(request: NextRequest) {
         articleId = inserted!.id;
       }
     } else if (type === "invitation") {
-      content = (await generateTaskText("article", SYSTEM_PROMPT_BASE, buildInvitationArticlePrompt(service, extraContext), visionImages)).trim();
+      const generated = splitContentAndDescription(
+        await generateTaskText("article", SYSTEM_PROMPT_BASE, buildInvitationArticlePrompt(service, extraContext), visionImages)
+      );
+      content = generated.content;
+      const description = generated.description;
 
       const titleMatch = content.match(/^#\s+(.+)/m);
       title = titleMatch ? titleMatch[1].trim() : `${service.name}の招待コード・紹介キャンペーンまとめ`;
       content = content.replace(/^#\s+.+\n+/, "").trim();
-
-      const description = await generateTaskText(
-        "article",
-        "SEO meta descriptionを150字以内で生成するアシスタントです。",
-        buildDescriptionPrompt(title, content)
-      );
 
       // 既存の invitation 記事があれば上書き（1サービスにつき1記事）
       const { data: existing } = await supabase
@@ -146,16 +140,14 @@ export async function POST(request: NextRequest) {
         articleId = inserted!.id;
       }
     } else {
-      content = await generateTaskText("article", SYSTEM_PROMPT_BASE, buildRelatedArticlePrompt(service, type as any, extraContext), visionImages);
+      const generated = splitContentAndDescription(
+        await generateTaskText("article", SYSTEM_PROMPT_BASE, buildRelatedArticlePrompt(service, type as any, extraContext), visionImages)
+      );
+      content = generated.content;
+      const description = generated.description;
 
       const titleMatch = content.match(/^#\s+(.+)/m);
       title = titleMatch ? titleMatch[1].trim() : `${service.name}の${type}`;
-
-      const description = await generateTaskText(
-        "article",
-        "SEO meta descriptionを150字以内で生成するアシスタントです。",
-        buildDescriptionPrompt(title, content)
-      );
 
       const slug = `${service.slug}-${type}-${Date.now()}`;
       const { data: inserted } = await supabase.from("articles").insert({
