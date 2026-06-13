@@ -27,6 +27,10 @@ export default async function AdminDebugPage() {
     .order("created_at", { ascending: false })
     .limit(10);
 
+  // ログ調査時に分かりやすいよう、created_atを日本時間(JST)の文字列に変換して併記する
+  const toJst = (iso: string) =>
+    new Date(iso).toLocaleString("ja-JP", { timeZone: "Asia/Tokyo", dateStyle: "medium", timeStyle: "medium" });
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-black text-gray-900">デバッグ: 記事データ確認</h1>
@@ -64,6 +68,7 @@ export default async function AdminDebugPage() {
               <div className="absolute top-2 right-2">
                 <CopyButton text={JSON.stringify(item, null, 2)} />
               </div>
+              <p className="text-xs font-bold text-gray-500 mb-2 pr-20">{toJst(item.created_at)} (JST)</p>
               <pre className="text-xs overflow-auto whitespace-pre-wrap pr-20">{JSON.stringify(item, null, 2)}</pre>
             </div>
           ))}
