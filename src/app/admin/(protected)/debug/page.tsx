@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import CopyButton from "@/components/admin/CopyButton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "デバッグ" };
@@ -31,14 +32,20 @@ export default async function AdminDebugPage() {
       <h1 className="text-2xl font-black text-gray-900">デバッグ: 記事データ確認</h1>
 
       <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h2 className="font-bold mb-3">articles（embedなし）</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-bold">articles（embedなし）</h2>
+          <CopyButton text={JSON.stringify({ data: raw.data, error: raw.error }, null, 2)} />
+        </div>
         <pre className="text-xs overflow-auto bg-gray-50 p-4 rounded-xl whitespace-pre-wrap">
           {JSON.stringify({ data: raw.data, error: raw.error }, null, 2)}
         </pre>
       </section>
 
       <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <h2 className="font-bold mb-3">articles（primary_service embedあり）</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-bold">articles（primary_service embedあり）</h2>
+          <CopyButton text={JSON.stringify({ data: embedded.data, error: embedded.error }, null, 2)} />
+        </div>
         <pre className="text-xs overflow-auto bg-gray-50 p-4 rounded-xl whitespace-pre-wrap">
           {JSON.stringify({ data: embedded.data, error: embedded.error }, null, 2)}
         </pre>
@@ -46,9 +53,21 @@ export default async function AdminDebugPage() {
 
       <section className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
         <h2 className="font-bold mb-3">admin_notifications（直近10件）</h2>
-        <pre className="text-xs overflow-auto bg-gray-50 p-4 rounded-xl whitespace-pre-wrap">
-          {JSON.stringify({ data: notifications.data, error: notifications.error }, null, 2)}
-        </pre>
+        {notifications.error && (
+          <pre className="text-xs overflow-auto bg-gray-50 p-4 rounded-xl whitespace-pre-wrap">
+            {JSON.stringify({ error: notifications.error }, null, 2)}
+          </pre>
+        )}
+        <div className="space-y-3">
+          {(notifications.data ?? []).map((item) => (
+            <div key={item.id} className="relative bg-gray-50 rounded-xl p-4">
+              <div className="absolute top-2 right-2">
+                <CopyButton text={JSON.stringify(item, null, 2)} />
+              </div>
+              <pre className="text-xs overflow-auto whitespace-pre-wrap pr-20">{JSON.stringify(item, null, 2)}</pre>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
