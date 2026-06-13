@@ -94,7 +94,7 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
           >
             <option value="">すべて</option>
             <option value="introduction">紹介</option>
-            <option value="invitation">招待コード</option>
+            <option value="invitation">招待</option>
             <option value="related">関連</option>
           </select>
         </div>
