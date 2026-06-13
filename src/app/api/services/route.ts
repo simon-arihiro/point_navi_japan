@@ -33,14 +33,14 @@ export async function POST(request: NextRequest) {
   const supabase = createAdminClient();
   const body = await request.json();
 
-  const { name, slug, description, referral_code, referral_link, campaign_bonus, campaign_expires_at, official_url, logo_url, status, category_ids } = body;
+  const { name, slug, description, referral_code, referral_link, bonus_points, bonus_amount, campaign_bonus, campaign_expires_at, official_url, logo_url, status, category_ids } = body;
   if (!name || !slug || !official_url) {
     return errorResponse(ErrorCode.VALIDATION_ERROR, "name, slug, official_url は必須です");
   }
 
   const { data, error } = await supabase
     .from("services")
-    .insert({ name, slug, description: description ?? "", referral_code, referral_link, campaign_bonus: campaign_bonus ?? null, campaign_expires_at: campaign_expires_at ?? null, official_url, logo_url, status: status ?? "active" })
+    .insert({ name, slug, description: description ?? "", referral_code, referral_link, bonus_points: bonus_points ?? null, bonus_amount: bonus_amount ?? null, campaign_bonus: campaign_bonus ?? null, campaign_expires_at: campaign_expires_at ?? null, official_url, logo_url, status: status ?? "active" })
     .select()
     .single();
 
