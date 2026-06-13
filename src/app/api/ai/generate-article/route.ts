@@ -8,6 +8,7 @@ import {
   ExtraContext,
 } from "@/lib/ai/prompts";
 import { extractUrls, fetchWebContents } from "@/lib/ai/webContent";
+import { buildThumbnailPrompt, generateAndSaveThumbnail } from "@/lib/ai/thumbnail";
 import { uploadArticleImage } from "@/lib/storage";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
@@ -118,6 +119,14 @@ export async function POST(request: NextRequest) {
         published_at: null,
       }).select("id").single();
       articleId = inserted!.id;
+    }
+
+    // アイキャッチ画像をAI（Gemini）で生成。無料枠の上限等で失敗しても記事生成は成功させる
+    try {
+      const thumbnailPrompt = buildThumbnailPrompt(service.name, type, title);
+      await generateAndSaveThumbnail(supabase, articleId, service_id, thumbnailPrompt);
+    } catch (thumbErr) {
+      console.error("thumbnail generation failed:", thumbErr);
     }
 
     await supabase.from("admin_notifications").insert({

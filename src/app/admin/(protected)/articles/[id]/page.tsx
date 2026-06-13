@@ -23,7 +23,10 @@ export default function AdminArticleDetailPage() {
   const [editDescription, setEditDescription] = useState("");
   const [savingContent, setSavingContent] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [generatingThumbnail, setGeneratingThumbnail] = useState(false);
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
+  const thumbnailFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch(`/api/articles/${id}`)
@@ -131,6 +134,59 @@ export default function AdminArticleDetailPage() {
     } finally {
       setUploadingImage(false);
     }
+  };
+
+  // サムネイルをAI（Gemini）で再生成する
+  const handleGenerateThumbnail = async () => {
+    setGeneratingThumbnail(true);
+    try {
+      const res = await fetch(`/api/articles/${id}/generate-thumbnail`, { method: "POST" });
+      if (res.ok) {
+        const { url } = await res.json();
+        setArticle({ ...article, featured_image_url: url });
+      } else {
+        alert("サムネイル生成に失敗しました（Gemini無料枠の上限などが原因の可能性があります）");
+      }
+    } finally {
+      setGeneratingThumbnail(false);
+    }
+  };
+
+  // サムネイル画像を手動でアップロードして差し替える
+  const handleThumbnailFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingThumbnail(true);
+    try {
+      const compressed = await compressImage(file);
+      const uploadRes = await fetch(`/api/articles/${id}/upload-image`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: compressed.data, media_type: compressed.mediaType }),
+      });
+      if (uploadRes.ok) {
+        const { url } = await uploadRes.json();
+        await fetch(`/api/articles/${id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ featured_image_url: url }),
+        });
+        setArticle({ ...article, featured_image_url: url });
+      }
+    } finally {
+      setUploadingThumbnail(false);
+      if (thumbnailFileInputRef.current) thumbnailFileInputRef.current.value = "";
+    }
+  };
+
+  // サムネイル設定を解除する（本文内の最初の画像にフォールバック）
+  const handleClearThumbnail = async () => {
+    await fetch(`/api/articles/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ featured_image_url: null }),
+    });
+    setArticle({ ...article, featured_image_url: null });
   };
 
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
@@ -281,6 +337,50 @@ export default function AdminArticleDetailPage() {
                 </dd>
               </div>
             </dl>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h2 className="font-bold text-gray-900 mb-3 text-sm">サムネイル画像</h2>
+            <div className="aspect-video bg-gray-50 rounded-xl overflow-hidden mb-3">
+              {article.featured_image_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={article.featured_image_url} alt="" className="w-full h-full object-cover" />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">未設定（本文内の最初の画像を使用）</div>
+              )}
+            </div>
+            <div className="space-y-2">
+              <button
+                onClick={handleGenerateThumbnail}
+                disabled={generatingThumbnail || uploadingThumbnail}
+                className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                {generatingThumbnail ? "生成中..." : "🎨 AIで再生成"}
+              </button>
+              <button
+                onClick={() => thumbnailFileInputRef.current?.click()}
+                disabled={generatingThumbnail || uploadingThumbnail}
+                className="w-full py-2.5 bg-white border border-gray-200 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-50 transition-colors disabled:opacity-50"
+              >
+                {uploadingThumbnail ? "アップロード中..." : "📁 画像をアップロード"}
+              </button>
+              <input
+                ref={thumbnailFileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleThumbnailFileChange}
+              />
+              {article.featured_image_url && (
+                <button
+                  onClick={handleClearThumbnail}
+                  disabled={generatingThumbnail || uploadingThumbnail}
+                  className="w-full py-2 text-gray-400 text-xs hover:text-red-600 transition-colors disabled:opacity-50"
+                >
+                  サムネイル設定を解除
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">

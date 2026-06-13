@@ -33,6 +33,7 @@
 - **Tailwind v4**: `tailwind.config.js` 不要、CSS で `@import "tailwindcss"` を使用
 - **@supabase/ssr**: `createServerClient` はサーバーコンポーネント・Route Handler 用、`createBrowserClient` はクライアントコンポーネント用
 - **ANTHROPIC_API_KEY** 未設定時は AI 生成機能のみ失敗（サイト本体は正常動作）
+- **GEMINI_API_KEY** 未設定・無料枠上限時はサムネイル自動生成のみ失敗（記事生成自体は成功し、本文内の最初の画像にフォールバック）
 
 ## 外部サービス
 
@@ -77,6 +78,7 @@
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API → service_role |
 | `CRON_SECRET` | `dd48e776ebcfe52a48251c87483f3c0e02c2cf0ad75dd5af` |
 | `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys（未取得） |
+| `GEMINI_API_KEY` | Google AI Studio (aistudio.google.com) → Get API key。記事サムネイル自動生成（`src/lib/ai/gemini.ts`）で使用。無料枠は1日あたりのモデル別リクエスト数に上限あり |
 | `NEXT_PUBLIC_SITE_URL` | `https://jp-point-navi.com`（独自ドメイン接続後。接続前は Vercel デプロイ後に発行される `*.vercel.app` ドメイン） |
 
 ## DB マイグレーション
