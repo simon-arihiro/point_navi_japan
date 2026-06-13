@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { generateText, extractJson } from "@/lib/ai/claude";
+import { generateText } from "@/lib/ai/gemini";
+import { extractJson } from "@/lib/ai/json";
 import { buildServiceInfoPrompt } from "@/lib/ai/prompts";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
