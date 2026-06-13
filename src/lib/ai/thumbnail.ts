@@ -1,6 +1,11 @@
+import sharp from "sharp";
 import { generateTaskImage } from "./router";
 import { uploadArticleImage } from "@/lib/storage";
 import { ArticleType } from "@/types/database";
+
+// 記事アイキャッチ画像の固定サイズ（16:9）。AIプロバイダーに関わらずこのサイズに統一する
+export const THUMBNAIL_WIDTH = 1280;
+export const THUMBNAIL_HEIGHT = 720;
 
 const ARTICLE_TYPE_THEME: Record<ArticleType, string> = {
   introduction: "サービスの基本的な特徴・使い方をイメージさせるイラスト",
@@ -31,11 +36,17 @@ export function buildThumbnailPrompt(serviceName: string, articleType: ArticleTy
 
 // 設定されたAIプロバイダーで画像を生成してStorageに保存し、公開URLを返す。
 // 画像が生成できなかった場合はnullを返す。
+// プロバイダーによる出力サイズの違いを吸収するため、PNG・THUMBNAIL_WIDTH x THUMBNAIL_HEIGHT（16:9）に正規化する
 export async function generateThumbnailImage(prompt: string, serviceId: string): Promise<string | null> {
   const image = await generateTaskImage(prompt);
   if (!image) return null;
 
-  return uploadArticleImage(serviceId, image.data, image.mimeType);
+  const normalized = await sharp(Buffer.from(image.data, "base64"))
+    .resize(THUMBNAIL_WIDTH, THUMBNAIL_HEIGHT, { fit: "cover" })
+    .png()
+    .toBuffer();
+
+  return uploadArticleImage(serviceId, normalized.toString("base64"), "image/png");
 }
 
 const FIRST_IMAGE_RE = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/;
