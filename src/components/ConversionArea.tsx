@@ -67,13 +67,16 @@ export default function ConversionArea({ service }: Props) {
 
   const campaignBadge = getCampaignBadge(service);
 
+  // bonus_amount は「25〜30」のような範囲表記も入力できるテキスト項目
+  const bonusAmountText = service.bonus_amount?.trim() || null;
+
   const bonusText =
-    service.bonus_points && service.bonus_amount
-      ? `🎁 今すぐ登録で${service.bonus_points.toLocaleString()}pt（約${service.bonus_amount.toLocaleString()}円）もらえる！`
+    service.bonus_points && bonusAmountText
+      ? `🎁 今すぐ登録で${service.bonus_points.toLocaleString()}pt（約${bonusAmountText}円）もらえる！`
       : service.bonus_points
       ? `🎁 今すぐ登録で${service.bonus_points.toLocaleString()}ptもらえる！`
-      : service.bonus_amount
-      ? `🎁 今すぐ登録で約${service.bonus_amount.toLocaleString()}円相当もらえる！`
+      : bonusAmountText
+      ? `🎁 今すぐ登録で約${bonusAmountText}円相当もらえる！`
       : null;
 
   return (
