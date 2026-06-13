@@ -78,6 +78,7 @@ export interface Article {
   article_type: ArticleType;
   status: ArticleStatus;
   revision_count: number;
+  featured_image_url: string | null;
   published_at: string | null;
   created_at: string;
   updated_at: string;
