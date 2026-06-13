@@ -116,7 +116,9 @@ export default async function HomePage() {
             {/* 人気サービスランキング */}
             {popularServices.length > 0 && (
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <h2 className="text-lg font-black text-gray-900 mb-1">人気サービスランキング</h2>
+                <h2 className="text-lg font-black text-gray-900 mb-1">
+                  人気サービスランキング <span className="animate-flame">🔥</span>
+                </h2>
                 <div className="divide-y divide-gray-50">
                   {popularServices.map((svc, i) => (
                     <RankingListItem key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} rank={i + 1} />
@@ -131,7 +133,9 @@ export default async function HomePage() {
             {/* 人気記事ランキング */}
             {popularArticles.length > 0 && (
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <h2 className="text-lg font-black text-gray-900 mb-1">人気記事ランキング</h2>
+                <h2 className="text-lg font-black text-gray-900 mb-1">
+                  人気記事ランキング <span className="animate-flame">🔥</span>
+                </h2>
                 <div className="divide-y divide-gray-50">
                   {popularArticles.map((article) => (
                     <ArticleRankingListItem key={article.id} article={article} />
