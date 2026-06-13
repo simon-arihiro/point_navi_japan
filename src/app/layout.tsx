@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import SiteChrome from "@/components/SiteChrome";
 import { createClient } from "@/lib/supabase/server";
 
 const notoSansJP = Noto_Sans_JP({
@@ -34,9 +33,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="ja" className={notoSansJP.className}>
       <body className="bg-gray-50 text-gray-900 antialiased">
-        <Header categories={categories} />
-        <main>{children}</main>
-        <Footer />
+        <SiteChrome categories={categories}>{children}</SiteChrome>
       </body>
     </html>
   );
