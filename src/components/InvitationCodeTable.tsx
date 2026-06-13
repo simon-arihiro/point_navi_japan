@@ -31,7 +31,7 @@ export default function InvitationCodeTable({ rows }: { rows: Row[] }) {
   };
 
   return (
-    <div className="mb-8">
+    <div className="mb-8 bg-gray-50 border border-gray-200 rounded-2xl p-3 sm:p-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
         {visible.map((row) => (
           <div
