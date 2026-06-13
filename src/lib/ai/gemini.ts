@@ -31,7 +31,10 @@ export async function generateImage(prompt: string): Promise<GeneratedImage | nu
   const res = await fetch(`${GEMINI_API_BASE}/${IMAGE_MODEL}:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { imageConfig: { aspectRatio: "16:9" } },
+    }),
   });
 
   if (res.status === 429) {
