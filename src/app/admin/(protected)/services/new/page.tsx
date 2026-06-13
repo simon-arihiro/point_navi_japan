@@ -85,7 +85,7 @@ export default function NewServicePage() {
 
     setForm((prev) => ({
       ...prev,
-      slug: prev.slug || data.slug || prev.slug,
+      slug: slugTouched ? prev.slug : (data.slug || prev.slug),
       official_url: prev.official_url || data.official_url || prev.official_url,
       description: data.description || prev.description,
       bonus_points: data.bonus_points != null ? String(data.bonus_points) : prev.bonus_points,
@@ -94,6 +94,7 @@ export default function NewServicePage() {
       campaign_expires_at: data.campaign_expires_at ? toDatetimeLocalValue(data.campaign_expires_at) : prev.campaign_expires_at,
       logo_url: data.logo_url || prev.logo_url,
     }));
+    if (!slugTouched && data.slug) setSlugTouched(true);
 
     if (Array.isArray(data.categories)) {
       // AI補完の結果で選択中のカテゴリを上書きする

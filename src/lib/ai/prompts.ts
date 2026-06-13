@@ -62,7 +62,7 @@ ${categoryList}
 返却するJSON形式：
 {
   "name": "サービス名（日本語、正式名称）",
-  "slug": "url-friendly-slug（英小文字・ハイフン区切り）。公式URLのドメイン名やパスに含まれる、サービスを表す英語表記を最優先で使用してください（例: https://example.com/torima なら 'torima'）",
+  "slug": "url-friendly-slug（英小文字・ハイフン区切り）。公式URL（指定されたもの、または検索で見つけたもの）のドメイン名やパスに含まれる、サービスを表す英語表記を最優先で使用してください（例: https://example.com/torima なら 'torima'）。該当する英語表記が見つからない場合は、サービス名のローマ字表記を使用してください",
   "official_url": "検索で特定した公式サイトのURL。確信が持てない場合は null",
   "description": "SEO meta description（150字以内・日本語）",
   "categories": ["既存カテゴリ一覧の中から該当するものだけを選択（複数可、なければ空配列）"],
