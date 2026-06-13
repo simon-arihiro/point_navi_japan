@@ -23,7 +23,6 @@ export default function Footer() {
             <ul className="space-y-2 text-sm">
               <li><Link href="/privacy" className="hover:text-white transition-colors">プライバシーポリシー</Link></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">お問い合わせ</Link></li>
-              <li><Link href="/disclosure" className="hover:text-white transition-colors">アフィリエイト収益開示</Link></li>
             </ul>
           </div>
         </div>
