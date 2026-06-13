@@ -70,7 +70,7 @@ export default function EditServicePage() {
         campaign_bonus: form.campaign_bonus || null,
         campaign_expires_at: fromDatetimeLocalValue(form.campaign_expires_at),
         bonus_points: form.bonus_points === "" || form.bonus_points == null ? null : Number(form.bonus_points),
-        bonus_amount: form.bonus_amount === "" || form.bonus_amount == null ? null : Number(form.bonus_amount),
+        bonus_amount: form.bonus_amount === "" || form.bonus_amount == null ? null : form.bonus_amount,
         category_ids,
       }),
     });
@@ -189,17 +189,18 @@ export default function EditServicePage() {
           { label: "招待コード", key: "referral_code", type: "text" },
           { label: "招待リンク", key: "referral_link", type: "url" },
           { label: "付与ポイント", key: "bonus_points", type: "number" },
-          { label: "付与金額", key: "bonus_amount", type: "text" },
+          { label: "付与金額", key: "bonus_amount", type: "text", placeholder: "例: 25〜30（「約」「円」は自動表示）" },
           { label: "キャンペーン内容", key: "campaign_bonus", type: "text" },
           { label: "キャンペーン終了日時", key: "campaign_expires_at", type: "datetime-local" },
           { label: "ロゴURL", key: "logo_url", type: "url" },
-        ].map(({ label, key, type }) => (
+        ].map(({ label, key, type, placeholder }) => (
           <div key={key}>
             <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
             <input
               type={type}
               value={form[key] ?? ""}
               onChange={set(key)}
+              placeholder={placeholder}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500"
             />
           </div>

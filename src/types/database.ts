@@ -29,7 +29,7 @@ export interface Service {
   referral_code: string | null;
   referral_link: string | null;
   bonus_points: number | null;
-  bonus_amount: number | null;
+  bonus_amount: string | null;
   campaign_bonus: string | null;
   campaign_expires_at: string | null;
   official_url: string;
