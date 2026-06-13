@@ -67,6 +67,15 @@ export default function ConversionArea({ service }: Props) {
 
   const campaignBadge = getCampaignBadge(service);
 
+  const bonusText =
+    service.bonus_points && service.bonus_amount
+      ? `🎁 今すぐ登録で${service.bonus_points.toLocaleString()}pt（約${service.bonus_amount.toLocaleString()}円）もらえる！`
+      : service.bonus_points
+      ? `🎁 今すぐ登録で${service.bonus_points.toLocaleString()}ptもらえる！`
+      : service.bonus_amount
+      ? `🎁 今すぐ登録で約${service.bonus_amount.toLocaleString()}円相当もらえる！`
+      : null;
+
   return (
     <div className="bg-gradient-to-br from-brand-50 to-brand-warm-100 border border-brand-200 rounded-2xl p-6">
       {campaignBadge && service.campaign_bonus && (
@@ -85,6 +94,12 @@ export default function ConversionArea({ service }: Props) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/mascot/library/squirrel-recommend-point-bubble.png" alt="ポイナビくん" className="w-12 h-12 shrink-0" />
       </div>
+
+      {bonusText && (
+        <div className="mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 text-center">
+          <p className="text-green-700 font-bold text-sm">{bonusText}</p>
+        </div>
+      )}
 
       {service.referral_code && (
         <div className="mb-4">
