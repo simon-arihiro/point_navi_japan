@@ -88,7 +88,7 @@ export default function InvitationCard({ article, categorySlug }: Props) {
           </div>
 
           {bonusText && (
-            <p className="text-sm text-gray-900 font-bold leading-snug line-clamp-2">{bonusText}</p>
+            <p className="text-base text-red-600 font-black leading-snug line-clamp-2">{bonusText}</p>
           )}
 
           {/* 紹介コード（一行表記） */}
