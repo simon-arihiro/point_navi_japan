@@ -14,6 +14,13 @@ export type DistributionStatus = "pending" | "success" | "failed";
 export type NotificationType = "article_pending" | "ai_failed" | "image_failed" | "distribution_failed";
 export type OperationMode = "manual" | "auto";
 
+// AI機能（タスク）の種類: AI補完 / AI画像生成 / AI記事生成（書き直し含む）
+export type AiTaskId = "autofill" | "image" | "article";
+// 接続済みのAIプロバイダー
+export type AiProviderId = "gemini" | "claude";
+// タスクごとの優先順位付きプロバイダー一覧
+export type AiProviderSettings = Record<AiTaskId, AiProviderId[]>;
+
 export interface Service {
   id: string;
   name: string;
@@ -138,6 +145,8 @@ export interface SystemSettings {
   max_pending_articles: number;
   ranking_window_days: number;
   hide_articles_on_inactive: boolean;
+  ai_multi_provider_enabled: boolean;
+  ai_provider_settings: AiProviderSettings;
   updated_at: string;
 }
 
