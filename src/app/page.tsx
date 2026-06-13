@@ -26,7 +26,6 @@ export default async function HomePage() {
         .from("articles")
         .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
         .eq("status", "published")
-        .neq("article_type", "introduction")
         .order("published_at", { ascending: false }),
       supabase.from("categories").select("*").order("name"),
       getServiceStatsMap(supabase, windowDays),
@@ -39,10 +38,12 @@ export default async function HomePage() {
     const rankedServices = services.map((svc: any) => ({ ...svc, pv: statsMap.get(svc.id)?.pv ?? 0 }));
     popularServices = [...rankedServices].sort((a, b) => b.pv - a.pv).slice(0, 5);
 
+    // 人気記事ランキングは紹介記事も含めた全記事のpvで集計する
     const rankedArticles = articles.map((a: any) => ({ ...a, pv: articleViewCounts.get(a.id) ?? 0 }));
     popularArticles = [...rankedArticles].sort((a, b) => b.pv - a.pv).slice(0, 5);
 
-    latestArticles = articles.slice(0, 7);
+    // 最新記事フィードはサービス詳細に統合表示される紹介記事を除く
+    latestArticles = articles.filter((a: any) => a.article_type !== "introduction").slice(0, 7);
     categories = categoriesRes.data ?? [];
   } catch {
     // Supabase 未接続時は空表示
