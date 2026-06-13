@@ -51,8 +51,6 @@ export default async function AdminServicesPage() {
       official_url: svc.official_url,
       referral_code: svc.referral_code,
       referral_link: svc.referral_link,
-      bonus_points: svc.bonus_points,
-      bonus_amount: svc.bonus_amount,
       created_at: svc.created_at,
       categories: (svc.categories ?? [])
         .map((c) => c.category)

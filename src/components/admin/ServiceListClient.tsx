@@ -18,8 +18,6 @@ type ServiceRow = {
   official_url: string;
   referral_code: string | null;
   referral_link: string | null;
-  bonus_points: number | null;
-  bonus_amount: string | null;
   created_at: string;
   categories: CategoryOption[];
   articleCount: number;
@@ -37,15 +35,6 @@ function formatDate(iso: string | null) {
   return new Date(iso).toLocaleDateString("ja-JP");
 }
 
-// 登録時に付与されるポイント・金額を一覧用の短い表示文字列にまとめる
-function formatBonus(points: number | null, amount: string | null) {
-  const amountText = amount?.trim() || null;
-  if (points && amountText) return `${points.toLocaleString()}pt（約${amountText}円）`;
-  if (points) return `${points.toLocaleString()}pt`;
-  if (amountText) return `約${amountText}円`;
-  return null;
-}
-
 export default function ServiceListClient({ services, allCategories }: Props) {
   const router = useRouter();
   const [localServices, setLocalServices] = useState(services);
@@ -56,12 +45,14 @@ export default function ServiceListClient({ services, allCategories }: Props) {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return localServices.filter((s) => {
-      if (status && s.status !== status) return false;
-      if (categoryIds.length > 0 && !s.categories.some((c) => categoryIds.includes(c.id))) return false;
-      if (q && !s.name.toLowerCase().includes(q) && !s.slug.toLowerCase().includes(q)) return false;
-      return true;
-    });
+    return localServices
+      .filter((s) => {
+        if (status && s.status !== status) return false;
+        if (categoryIds.length > 0 && !s.categories.some((c) => categoryIds.includes(c.id))) return false;
+        if (q && !s.name.toLowerCase().includes(q) && !s.slug.toLowerCase().includes(q)) return false;
+        return true;
+      })
+      .sort((a, b) => (a.status === "inactive" ? 1 : 0) - (b.status === "inactive" ? 1 : 0));
   }, [localServices, status, categoryIds, query]);
 
   // ステータスの有効/無効をワンクリックで切り替え
@@ -191,18 +182,13 @@ export default function ServiceListClient({ services, allCategories }: Props) {
               </div>
             )}
 
-            {(svc.referral_code || svc.referral_link || svc.bonus_points || svc.bonus_amount) && (
+            {(svc.referral_code || svc.referral_link) && (
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {svc.referral_code && (
                   <span className="text-xs bg-amber-50 text-amber-700 rounded-full px-2 py-0.5">招待コードあり</span>
                 )}
                 {svc.referral_link && (
                   <span className="text-xs bg-orange-50 text-orange-700 rounded-full px-2 py-0.5">招待リンクあり</span>
-                )}
-                {formatBonus(svc.bonus_points, svc.bonus_amount) && (
-                  <span className="text-xs bg-green-50 text-green-700 rounded-full px-2 py-0.5">
-                    🎁 {formatBonus(svc.bonus_points, svc.bonus_amount)}
-                  </span>
                 )}
               </div>
             )}
