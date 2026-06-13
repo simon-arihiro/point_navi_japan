@@ -46,7 +46,7 @@ export default function InvitationCard({ article, categorySlug }: Props) {
   const bgColor = svc ? getAutoColor(svc.name) : "#888888";
 
   const bonusAmountText = svc?.bonus_amount?.trim() || null;
-  const highlight = "text-base text-red-600 font-black";
+  const highlight = "text-xl text-red-600 font-black";
   const bonusContent =
     svc?.bonus_points && bonusAmountText
       ? <>今すぐ登録で<span className={highlight}>{svc.bonus_points.toLocaleString()}pt（約{bonusAmountText}円）</span>もらえる！</>
