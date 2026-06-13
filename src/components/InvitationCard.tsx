@@ -46,13 +46,14 @@ export default function InvitationCard({ article, categorySlug }: Props) {
   const bgColor = svc ? getAutoColor(svc.name) : "#888888";
 
   const bonusAmountText = svc?.bonus_amount?.trim() || null;
-  const bonusText =
+  const highlight = "text-base text-red-600 font-black";
+  const bonusContent =
     svc?.bonus_points && bonusAmountText
-      ? `今すぐ登録で${svc.bonus_points.toLocaleString()}pt（約${bonusAmountText}円）もらえる！`
+      ? <>今すぐ登録で<span className={highlight}>{svc.bonus_points.toLocaleString()}pt（約{bonusAmountText}円）</span>もらえる！</>
       : svc?.bonus_points
-      ? `今すぐ登録で${svc.bonus_points.toLocaleString()}ptもらえる！`
+      ? <>今すぐ登録で<span className={highlight}>{svc.bonus_points.toLocaleString()}pt</span>もらえる！</>
       : bonusAmountText
-      ? `今すぐ登録で約${bonusAmountText}円相当もらえる！`
+      ? <>今すぐ登録で<span className={highlight}>約{bonusAmountText}円相当</span>もらえる！</>
       : svc?.campaign_bonus || null;
 
   const mascot = pickMascot(svc?.id ?? article.id);
@@ -87,8 +88,8 @@ export default function InvitationCard({ article, categorySlug }: Props) {
             <img src={`/mascot/library/${mascot}`} alt="" className="w-20 h-20 object-contain shrink-0" />
           </div>
 
-          {bonusText && (
-            <p className="text-base text-red-600 font-black leading-snug line-clamp-2">{bonusText}</p>
+          {bonusContent && (
+            <p className="text-sm text-gray-900 font-bold leading-snug line-clamp-2">{bonusContent}</p>
           )}
 
           {/* 紹介コード（一行表記） */}
