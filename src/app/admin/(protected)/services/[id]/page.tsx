@@ -189,7 +189,7 @@ export default function EditServicePage() {
           { label: "招待コード", key: "referral_code", type: "text" },
           { label: "招待リンク", key: "referral_link", type: "url" },
           { label: "付与ポイント", key: "bonus_points", type: "number" },
-          { label: "付与金額", key: "bonus_amount", type: "number" },
+          { label: "付与金額", key: "bonus_amount", type: "text" },
           { label: "キャンペーン内容", key: "campaign_bonus", type: "text" },
           { label: "キャンペーン終了日時", key: "campaign_expires_at", type: "datetime-local" },
           { label: "ロゴURL", key: "logo_url", type: "url" },

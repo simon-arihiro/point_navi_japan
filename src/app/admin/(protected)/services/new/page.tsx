@@ -156,7 +156,7 @@ export default function NewServicePage() {
           { label: "招待コード", key: "referral_code", type: "text", placeholder: "例: ABC123" },
           { label: "招待リンク", key: "referral_link", type: "url", placeholder: "https://..." },
           { label: "付与ポイント", key: "bonus_points", type: "number", placeholder: "例: 500" },
-          { label: "付与金額", key: "bonus_amount", type: "number", placeholder: "例: 500" },
+          { label: "付与金額", key: "bonus_amount", type: "text", placeholder: "例: 500" },
           { label: "キャンペーン内容", key: "campaign_bonus", type: "text", placeholder: "例: 期間限定+1,000pt" },
           { label: "キャンペーン終了日時", key: "campaign_expires_at", type: "datetime-local", placeholder: "" },
           { label: "ロゴURL", key: "logo_url", type: "url", placeholder: "https://..." },
