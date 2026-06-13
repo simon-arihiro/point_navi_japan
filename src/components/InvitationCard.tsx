@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArticleWithService } from "@/types/database";
-import LogoFallback, { getAutoColor } from "./LogoFallback";
+import LogoFallback from "./LogoFallback";
+import { getAutoColor } from "@/lib/autoColor";
 
 type Props = {
   article: ArticleWithService;

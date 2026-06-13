@@ -4,7 +4,7 @@
 
 export function getArticleTypeLabel(type: string): string {
   if (type === "introduction") return "紹介";
-  if (type === "invitation") return "招待コード";
+  if (type === "invitation") return "招待";
   return "関連";
 }
 

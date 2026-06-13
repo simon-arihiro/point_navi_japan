@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { getAutoColor } from "@/lib/autoColor";
 
 type Props = {
   name: string;
@@ -10,16 +11,6 @@ type Props = {
   size?: number;
   className?: string;
 };
-
-export function getAutoColor(name: string): string {
-  const colors = [
-    "#E53E3E", "#DD6B20", "#D69E2E", "#38A169",
-    "#3182CE", "#805AD5", "#D53F8C", "#319795",
-  ];
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  return colors[Math.abs(hash) % colors.length];
-}
 
 function getFaviconUrl(officialUrl?: string): string | null {
   if (!officialUrl) return null;

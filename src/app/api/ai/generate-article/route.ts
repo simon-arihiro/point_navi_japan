@@ -10,7 +10,7 @@ import {
   ExtraContext,
 } from "@/lib/ai/prompts";
 import { extractUrls, fetchWebContents } from "@/lib/ai/webContent";
-import { buildThumbnailPrompt, generateThumbnailImage } from "@/lib/ai/thumbnail";
+import { buildThumbnailPrompt, generateThumbnailImage, replaceFirstImageUrl } from "@/lib/ai/thumbnail";
 import { GeminiQuotaExceededError } from "@/lib/ai/gemini";
 import { uploadArticleImage } from "@/lib/storage";
 import { errorResponse, ErrorCode } from "@/lib/errors";
@@ -166,12 +166,13 @@ export async function POST(request: NextRequest) {
       articleId = inserted!.id;
     }
 
-    // アイキャッチ画像をAI（Gemini）で生成。無料枠の上限等で失敗しても記事生成は成功させる
+    // アイキャッチ画像をAI（Gemini）で生成し、本文の先頭にも挿入する。無料枠の上限等で失敗しても記事生成は成功させる
     try {
       const thumbnailPrompt = buildThumbnailPrompt(service.name, type, title);
       const thumbnailUrl = await generateThumbnailImage(thumbnailPrompt, service_id);
       if (thumbnailUrl) {
-        await supabase.from("articles").update({ featured_image_url: thumbnailUrl }).eq("id", articleId);
+        const updatedContent = replaceFirstImageUrl(content, thumbnailUrl) ?? `![${title}](${thumbnailUrl})\n\n${content}`;
+        await supabase.from("articles").update({ featured_image_url: thumbnailUrl, content: updatedContent }).eq("id", articleId);
       }
     } catch (thumbErr) {
       console.error("thumbnail generation failed:", thumbErr);
