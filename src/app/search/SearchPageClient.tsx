@@ -95,7 +95,7 @@ export default function SearchPageClient() {
         {!loading && query && services.length === 0 && articles.length === 0 && (
           <div className="text-center py-10 text-gray-400">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascot/poinavi-kun.png" alt="" className="w-28 sm:w-36 h-auto mx-auto mb-4 opacity-90" />
+            <img src="/mascot/library/squirrel-empty-square.png" alt="" className="w-28 sm:w-36 h-auto mx-auto mb-4 opacity-90" />
             <p className="text-sm mb-4">「{query}」の検索結果はありません</p>
             <Link href="/services" className="text-brand-700 font-medium text-sm hover:underline">
               サービス一覧を見る →
