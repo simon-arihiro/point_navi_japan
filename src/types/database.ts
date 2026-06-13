@@ -128,6 +128,15 @@ export interface DistributionLog {
   created_at: string;
 }
 
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
+
 export interface AdminNotification {
   id: string;
   type: NotificationType;

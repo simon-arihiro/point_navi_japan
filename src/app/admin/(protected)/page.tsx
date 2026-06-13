@@ -18,6 +18,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     { count: relatedArticles },
     { count: pendingArticles },
     { count: imageFailedCount },
+    { count: unreadContactCount },
     { data: servicesList },
     statsMap,
   ] = await Promise.all([
@@ -26,6 +27,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     supabase.from("articles").select("*", { count: "exact", head: true }).neq("article_type", "introduction").eq("status", "published").is("deleted_at", null),
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "reviewing").is("deleted_at", null),
     supabase.from("admin_notifications").select("*", { count: "exact", head: true }).eq("type", "image_failed").eq("is_read", false),
+    supabase.from("contact_messages").select("*", { count: "exact", head: true }).eq("is_read", false),
     supabase.from("services").select("id, name, slug").eq("status", "active").is("deleted_at", null).order("name"),
     getServiceStatsMap(supabase, days),
   ]);
@@ -57,6 +59,16 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
         >
           <span className="text-sm text-yellow-800 font-medium">📝 審査待ち記事が{pendingArticles}件あります</span>
           <span className="text-xs text-yellow-600">確認する →</span>
+        </Link>
+      )}
+
+      {(unreadContactCount ?? 0) > 0 && (
+        <Link
+          href="/admin/contact"
+          className="mb-8 flex items-center justify-between bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 hover:bg-blue-100 transition-colors"
+        >
+          <span className="text-sm text-blue-800 font-medium">✉️ 未読のお問い合わせが{unreadContactCount}件あります</span>
+          <span className="text-xs text-blue-600">確認する →</span>
         </Link>
       )}
 
