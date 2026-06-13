@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import CopyButton from "@/components/admin/CopyButton";
 
 export default function AdminContactPage() {
   const [items, setItems] = useState<any[]>([]);
@@ -46,6 +47,7 @@ export default function AdminContactPage() {
                   <span className="text-xs text-gray-400 whitespace-nowrap">
                     {new Date(item.created_at).toLocaleString("ja-JP")}
                   </span>
+                  <CopyButton text={item.email} />
                   <button
                     onClick={() => handleToggleRead(item.id, !item.is_read)}
                     className="text-xs text-brand-700 hover:underline whitespace-nowrap"
