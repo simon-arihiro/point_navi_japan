@@ -1,5 +1,6 @@
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const IMAGE_MODEL = "gemini-2.5-flash-image";
+const TEXT_MODEL = "gemini-2.5-flash";
 
 function getApiKey(): string {
   if (!process.env.GEMINI_API_KEY) {
@@ -46,4 +47,31 @@ export async function generateImage(prompt: string): Promise<GeneratedImage | nu
     }
   }
   return null;
+}
+
+// Gemini 2.5 Flashでテキストを生成する
+export async function generateText(systemPrompt: string, userPrompt: string): Promise<string> {
+  const apiKey = getApiKey();
+
+  const res = await fetch(`${GEMINI_API_BASE}/${TEXT_MODEL}:generateContent?key=${apiKey}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [{ text: userPrompt }] }],
+    }),
+  });
+
+  if (res.status === 429) {
+    throw new GeminiQuotaExceededError();
+  }
+  if (!res.ok) {
+    throw new Error(`Gemini API error: ${res.status} ${await res.text()}`);
+  }
+
+  const json = await res.json();
+  const parts = json?.candidates?.[0]?.content?.parts ?? [];
+  const text = parts.map((part: { text?: string }) => part.text ?? "").join("");
+  if (!text) throw new Error("Gemini APIからテキストが返されませんでした");
+  return text;
 }
