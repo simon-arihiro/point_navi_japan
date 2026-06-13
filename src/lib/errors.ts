@@ -16,3 +16,10 @@ export type ErrorCodeValue = (typeof ErrorCode)[keyof typeof ErrorCode];
 export function errorResponse(code: ErrorCodeValue, message: string, status = 400) {
   return Response.json({ error: { code, message } }, { status });
 }
+
+// slugのユニーク制約違反（PostgreSQL: 23505）かどうかを判定する
+export function isSlugConflict(error: { code?: string; message?: string } | null): boolean {
+  return error?.code === "23505" && !!error.message?.includes("slug");
+}
+
+export const SLUG_CONFLICT_MESSAGE = "このスラッグは既に使用されています。別のスラッグを指定してください。";
