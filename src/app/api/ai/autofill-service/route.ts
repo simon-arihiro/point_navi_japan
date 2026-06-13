@@ -24,7 +24,9 @@ export async function POST(request: NextRequest) {
     const infoJson = await generateTaskText(
       "autofill",
       "あなたはウェブサイトの情報を分析するAIアシスタントです。JSONのみ返してください。",
-      buildServiceInfoPrompt(official_url, existingCategories, pageContent)
+      buildServiceInfoPrompt(official_url, existingCategories, pageContent),
+      undefined,
+      { search: true }
     );
 
     const aiInfo = extractJson<{

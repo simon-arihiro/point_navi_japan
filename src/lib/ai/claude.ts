@@ -1,5 +1,5 @@
 import Anthropic from "@anthropic-ai/sdk";
-import type { ImageInput } from "./types";
+import type { GenerateTextOptions, ImageInput } from "./types";
 
 export type { ImageInput } from "./types";
 
@@ -10,7 +10,7 @@ function getClient() {
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 }
 
-export async function generateText(systemPrompt: string, userPrompt: string, images?: ImageInput[]): Promise<string> {
+export async function generateText(systemPrompt: string, userPrompt: string, images?: ImageInput[], options?: GenerateTextOptions): Promise<string> {
   const client = getClient();
 
   const content: Anthropic.Messages.ContentBlockParam[] = (images ?? []).map((image) => ({
@@ -24,9 +24,10 @@ export async function generateText(systemPrompt: string, userPrompt: string, ima
     max_tokens: 4096,
     system: systemPrompt,
     messages: [{ role: "user", content }],
+    ...(options?.search ? { tools: [{ type: "web_search_20250305" as const, name: "web_search" as const, max_uses: 5 }] } : {}),
   });
 
-  const block = message.content[0];
-  if (block.type !== "text") throw new Error("Unexpected response type from Claude");
-  return block.text;
+  const textBlocks = message.content.filter((block): block is Anthropic.Messages.TextBlock => block.type === "text");
+  if (textBlocks.length === 0) throw new Error("Unexpected response type from Claude");
+  return textBlocks.map((block) => block.text).join("\n");
 }

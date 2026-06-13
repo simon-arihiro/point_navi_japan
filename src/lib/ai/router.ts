@@ -2,7 +2,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { generateText as claudeGenerateText } from "./claude";
 import { generateText as geminiGenerateText, generateImage as geminiGenerateImage, GeneratedImage } from "./gemini";
 import { DEFAULT_AI_PROVIDER_SETTINGS, providersForTask } from "./providers";
-import type { ImageInput } from "./types";
+import type { GenerateTextOptions, ImageInput } from "./types";
 import type { AiProviderId, AiProviderSettings, AiTaskId } from "@/types/database";
 
 // system_settingsからAIプロバイダー設定を取得する。マイグレーション未実行・未設定時はデフォルト値を返す
@@ -40,7 +40,8 @@ export async function generateTaskText(
   task: AiTaskId,
   systemPrompt: string,
   userPrompt: string,
-  images?: ImageInput[]
+  images?: ImageInput[],
+  options?: GenerateTextOptions
 ): Promise<string> {
   const { multiEnabled, settings } = await getAiProviderSettings();
   const order = resolveOrder(task, settings, multiEnabled);
@@ -49,8 +50,8 @@ export async function generateTaskText(
   for (const provider of order) {
     try {
       return provider === "gemini"
-        ? await geminiGenerateText(systemPrompt, userPrompt, images)
-        : await claudeGenerateText(systemPrompt, userPrompt, images);
+        ? await geminiGenerateText(systemPrompt, userPrompt, images, options)
+        : await claudeGenerateText(systemPrompt, userPrompt, images, options);
     } catch (err) {
       lastErr = err;
     }
