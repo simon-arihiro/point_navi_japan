@@ -18,6 +18,16 @@ const POSITIVE_MASCOTS = [
   "squirrel-excited-run-sparkle.png",
   "squirrel-waving-happy-sparkle.png",
   "squirrel-trophy-stars-happy.png",
+  "squirrel-greeting-wave-sparkle.png",
+  "squirrel-greeting-sit-smile.png",
+  "squirrel-points-coin-sparkle.png",
+  "squirrel-coin-hold.png",
+  "squirrel-thumbsup.png",
+  "squirrel-ranking-trophy-confetti-wink.png",
+  "squirrel-ranking-trophy-wink.png",
+  "squirrel-recommend-point-bubble.png",
+  "squirrel-welcome-wave-leaves.png",
+  "squirrel-pointhunt-coin.png",
 ];
 
 function pickMascot(seed: string) {
@@ -66,16 +76,16 @@ export default function InvitationCard({ article, categorySlug }: Props) {
       >
         <div className="flex flex-col gap-2 flex-1">
           {/* ヘッダー行: サービスロゴ＋名前（金色バー・横幅いっぱい） */}
-          <div className="flex items-center gap-2.5 bg-amber-400 px-3 py-2.5 w-full">
+          <div className="flex items-center gap-2.5 bg-amber-400 px-3 py-3 w-full">
             <LogoFallback
               name={svc?.name ?? "?"}
               logoUrl={svc?.logo_url}
               logoStoragePath={svc?.logo_storage_path}
               officialUrl={svc?.official_url}
-              size={36}
+              size={40}
               className="bg-white shrink-0"
             />
-            <span className="font-black text-base text-amber-950 truncate">{svc?.name}</span>
+            <span className="font-black text-xl text-amber-950 truncate">{svc?.name}</span>
           </div>
 
           <div className="px-3 flex flex-col gap-2 flex-1">
@@ -107,7 +117,7 @@ export default function InvitationCard({ article, categorySlug }: Props) {
             )}
           </div>
 
-          <h3 className="font-black text-gray-900 text-sm leading-snug line-clamp-2">
+          <h3 className="font-normal text-gray-900 text-sm leading-snug line-clamp-2">
             {article.title}
           </h3>
 
