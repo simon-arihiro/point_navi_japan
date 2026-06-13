@@ -1,4 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
+import type { ImageInput } from "./types";
+
+export type { ImageInput } from "./types";
 
 function getClient() {
   if (!process.env.ANTHROPIC_API_KEY) {
@@ -6,11 +9,6 @@ function getClient() {
   }
   return new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 }
-
-export type ImageInput = {
-  mediaType: "image/jpeg" | "image/png" | "image/gif" | "image/webp";
-  data: string; // base64（データURLのprefixなし）
-};
 
 export async function generateText(systemPrompt: string, userPrompt: string, images?: ImageInput[]): Promise<string> {
   const client = getClient();

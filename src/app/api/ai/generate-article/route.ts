@@ -1,5 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { generateText, ImageInput } from "@/lib/ai/claude";
+import { generateTaskText } from "@/lib/ai/router";
+import type { ImageInput } from "@/lib/ai/types";
 import {
   buildIntroductionArticlePrompt,
   buildRelatedArticlePrompt,
@@ -63,11 +64,12 @@ export async function POST(request: NextRequest) {
 
     if (type === "introduction") {
       title = `${service.name}を実際に使ってみた感想｜メリット・デメリット・始め方まとめ`;
-      content = (await generateText(SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(service, extraContext), visionImages))
+      content = (await generateTaskText("article", SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(service, extraContext), visionImages))
         .replace(/^#\s+.+\n+/, "") // AIが誤ってh1タイトルを出力した場合の保険
         .trim();
 
-      const description = await generateText(
+      const description = await generateTaskText(
+        "article",
         "SEO meta descriptionを150字以内で生成するアシスタントです。",
         buildDescriptionPrompt(title, content)
       );
@@ -100,12 +102,13 @@ export async function POST(request: NextRequest) {
         articleId = inserted!.id;
       }
     } else {
-      content = await generateText(SYSTEM_PROMPT_BASE, buildRelatedArticlePrompt(service, type as any, extraContext), visionImages);
+      content = await generateTaskText("article", SYSTEM_PROMPT_BASE, buildRelatedArticlePrompt(service, type as any, extraContext), visionImages);
 
       const titleMatch = content.match(/^#\s+(.+)/m);
       title = titleMatch ? titleMatch[1].trim() : `${service.name}の${type}`;
 
-      const description = await generateText(
+      const description = await generateTaskText(
+        "article",
         "SEO meta descriptionを150字以内で生成するアシスタントです。",
         buildDescriptionPrompt(title, content)
       );

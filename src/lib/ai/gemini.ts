@@ -1,3 +1,5 @@
+import type { ImageInput } from "./types";
+
 const GEMINI_API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const IMAGE_MODEL = "gemini-2.5-flash-image";
 const TEXT_MODEL = "gemini-2.5-flash";
@@ -49,16 +51,21 @@ export async function generateImage(prompt: string): Promise<GeneratedImage | nu
   return null;
 }
 
-// Gemini 2.5 Flashでテキストを生成する
-export async function generateText(systemPrompt: string, userPrompt: string): Promise<string> {
+// Gemini 2.5 Flashでテキストを生成する（画像入力も可）
+export async function generateText(systemPrompt: string, userPrompt: string, images?: ImageInput[]): Promise<string> {
   const apiKey = getApiKey();
+
+  const requestParts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = (images ?? []).map((image) => ({
+    inlineData: { mimeType: image.mediaType, data: image.data },
+  }));
+  requestParts.push({ text: userPrompt });
 
   const res = await fetch(`${GEMINI_API_BASE}/${TEXT_MODEL}:generateContent?key=${apiKey}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       systemInstruction: { parts: [{ text: systemPrompt }] },
-      contents: [{ parts: [{ text: userPrompt }] }],
+      contents: [{ parts: requestParts }],
     }),
   });
 

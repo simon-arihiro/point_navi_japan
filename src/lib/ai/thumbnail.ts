@@ -1,4 +1,4 @@
-import { generateImage } from "./gemini";
+import { generateTaskImage } from "./router";
 import { uploadArticleImage } from "@/lib/storage";
 import { ArticleType } from "@/types/database";
 
@@ -28,10 +28,10 @@ export function buildThumbnailPrompt(serviceName: string, articleType: ArticleTy
 - 16:9の横長構図、シンプルな背景`;
 }
 
-// Geminiで画像を生成してStorageに保存し、公開URLを返す。
-// 無料枠の上限などで生成に失敗した場合はnullを返す。
+// 設定されたAIプロバイダーで画像を生成してStorageに保存し、公開URLを返す。
+// 画像が生成できなかった場合はnullを返す。
 export async function generateThumbnailImage(prompt: string, serviceId: string): Promise<string | null> {
-  const image = await generateImage(prompt);
+  const image = await generateTaskImage(prompt);
   if (!image) return null;
 
   return uploadArticleImage(serviceId, image.data, image.mimeType);

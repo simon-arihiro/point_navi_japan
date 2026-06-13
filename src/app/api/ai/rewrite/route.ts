@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { generateText } from "@/lib/ai/claude";
+import { generateTaskText } from "@/lib/ai/router";
 import { buildRewritePrompt, SYSTEM_PROMPT_BASE } from "@/lib/ai/prompts";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   if (!article) return errorResponse(ErrorCode.ARTICLE_NOT_FOUND, "記事が見つかりません", 404);
 
   try {
-    const newContent = await generateText(SYSTEM_PROMPT_BASE, buildRewritePrompt(article.content, feedback));
+    const newContent = await generateTaskText("article", SYSTEM_PROMPT_BASE, buildRewritePrompt(article.content, feedback));
     const titleMatch = newContent.match(/^#\s+(.+)/m);
     const title = titleMatch ? titleMatch[1].trim() : article.title;
 
