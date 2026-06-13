@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       const description = generated.description;
 
       const titleMatch = content.match(/^#\s+(.+)/m);
-      title = titleMatch ? titleMatch[1].trim() : `${service.name}の招待コード・紹介キャンペーンまとめ`;
+      title = titleMatch ? titleMatch[1].trim() : `${service.name}の招待コード・紹介特典まとめ`;
       content = content.replace(/^#\s+.+\n+/, "").trim();
 
       // 既存の invitation 記事があれば上書き（1サービスにつき1記事）
