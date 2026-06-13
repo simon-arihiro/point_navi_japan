@@ -26,6 +26,14 @@ function pickMascot(seed: string) {
   return POSITIVE_MASCOTS[hash % POSITIVE_MASCOTS.length];
 }
 
+// HEXカラーに透明度を付けてrgba化する（淡い背景・枠線に使用）
+function hexToRgba(hex: string, alpha: number) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 // 招待コード一覧ページ用の統一テンプレートカード
 // 色付きヘッダー（サービス名＋ロゴ）＋訴求文＋招待コード/リンク＋記事タイトル＋公開日 を同じレイアウトで表示する
 export default function InvitationCard({ article, categorySlug }: Props) {
@@ -50,60 +58,70 @@ export default function InvitationCard({ article, categorySlug }: Props) {
   const mascot = pickMascot(svc?.id ?? article.id);
 
   return (
-    <Link href={href} className="group block h-full">
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:border-brand-200 transition-all h-full flex flex-col relative">
+    <Link href={href} className="block h-full">
+      <div
+        className="relative bg-white rounded-2xl border-2 overflow-hidden h-full flex flex-col transition-transform duration-200 ease-out hover:scale-[1.04] hover:shadow-lg hover:z-10"
+        style={{ borderColor: hexToRgba(bgColor, 0.35) }}
+      >
         {/* 右上バッジ */}
-        <div className="absolute top-0 right-0 bg-slate-800 text-white text-[10px] font-bold px-2.5 py-1 rounded-bl-lg z-10 flex items-center gap-1">
-          <span className="text-[8px]">■</span>ポイントサイト紹介コード
+        <div
+          className="absolute top-0 right-0 text-white text-[10px] font-bold px-2.5 py-1 rounded-bl-lg z-10 flex items-center gap-1"
+          style={{ backgroundColor: bgColor }}
+        >
+          <span className="text-[8px]">■</span>紹介コード
         </div>
 
-        <div className="p-4 pt-9" style={{ backgroundColor: bgColor }}>
-          {/* サービスロゴ＋名前 */}
-          <div className="flex items-center gap-2.5 mb-3">
+        <div className="p-3 pt-4 flex flex-col gap-2 flex-1">
+          {/* サービスロゴ＋名前（カラーピル） */}
+          <div
+            className="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 self-start text-white"
+            style={{ backgroundColor: bgColor }}
+          >
             <LogoFallback
               name={svc?.name ?? "?"}
               logoUrl={svc?.logo_url}
               logoStoragePath={svc?.logo_storage_path}
               officialUrl={svc?.official_url}
-              size={40}
+              size={20}
               className="bg-white shrink-0"
             />
-            <span className="text-white font-black text-lg truncate">{svc?.name}</span>
+            <span className="font-black text-xs truncate max-w-[8rem]">{svc?.name}</span>
           </div>
 
           {/* 訴求文＋マスコット */}
-          <div className="flex items-center justify-between gap-2 mb-3">
-            <p className="font-black text-white text-2xl leading-tight">
-              新規登録は<br />お得！
+          <div className="flex items-center justify-between gap-2">
+            <p className="font-black text-gray-900 text-base leading-snug">
+              新規登録は<br />
+              <span style={{ color: bgColor }}>お得</span>！
             </p>
-            <div className="flex flex-col items-center gap-1 shrink-0 w-20">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={`/mascot/library/${mascot}`} alt="" className="w-16 h-16 object-contain" />
-              {bonusText && (
-                <p className="text-white text-[11px] text-center leading-snug font-bold">{bonusText}</p>
-              )}
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={`/mascot/library/${mascot}`} alt="" className="w-12 h-12 object-contain shrink-0" />
           </div>
 
+          {bonusText && (
+            <p className="text-[11px] text-gray-500 leading-snug line-clamp-2">{bonusText}</p>
+          )}
+
           {/* 紹介コード（一行表記） */}
-          <div className="bg-white/95 rounded-lg px-3 py-2 text-center">
+          <div
+            className="rounded-lg px-2.5 py-1.5 text-center"
+            style={{ backgroundColor: hexToRgba(bgColor, 0.1) }}
+          >
             {svc?.referral_code ? (
-              <p className="text-sm font-bold text-gray-800">
+              <p className="text-xs font-bold text-gray-800 truncate">
                 紹介コード <span className="text-gray-400">⇒</span>{" "}
                 <span className="font-mono tracking-wider text-gray-900">{svc.referral_code}</span>
               </p>
             ) : (
-              <p className="text-sm font-bold text-gray-700">招待リンクから登録でお得！</p>
+              <p className="text-xs font-bold text-gray-700">招待リンクから登録でお得！</p>
             )}
           </div>
-        </div>
 
-        <div className="p-4 flex flex-col gap-2 flex-1">
-          <h3 className="font-bold text-gray-900 text-sm leading-snug line-clamp-2 group-hover:text-brand-700 transition-colors">
+          <h3 className="font-bold text-gray-900 text-xs leading-snug line-clamp-2">
             {article.title}
           </h3>
 
-          {publishedDate && <p className="text-xs text-gray-400 mt-auto">{publishedDate}</p>}
+          {publishedDate && <p className="text-[11px] text-gray-400 mt-auto">{publishedDate}</p>}
         </div>
       </div>
     </Link>
