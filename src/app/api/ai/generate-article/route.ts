@@ -14,7 +14,7 @@ import { buildThumbnailPrompt, generateThumbnailImage, replaceFirstImageUrl } fr
 import { GeminiQuotaExceededError } from "@/lib/ai/gemini";
 import { uploadArticleImage } from "@/lib/storage";
 import { errorResponse, ErrorCode } from "@/lib/errors";
-import { NextRequest } from "next/server";
+import { NextRequest, after } from "next/server";
 import { ArticleType } from "@/types/database";
 
 const ARTICLE_CYCLE: ArticleType[] = ["guide", "faq", "comparison", "campaign", "earnings"];
@@ -169,31 +169,34 @@ export async function POST(request: NextRequest) {
       articleId = inserted!.id;
     }
 
-    // アイキャッチ画像をAI（Gemini）で生成し、本文の先頭にも挿入する。無料枠の上限等で失敗しても記事生成は成功させる
-    try {
-      const thumbnailPrompt = buildThumbnailPrompt(service.name, type, title);
-      const thumbnailUrl = await generateThumbnailImage(thumbnailPrompt, service_id);
-      if (thumbnailUrl) {
-        const updatedContent = replaceFirstImageUrl(content, thumbnailUrl) ?? `![${title}](${thumbnailUrl})\n\n${content}`;
-        await supabase.from("articles").update({ featured_image_url: thumbnailUrl, content: updatedContent }).eq("id", articleId);
+    // アイキャッチ画像生成はGemini呼び出しのレート制限待ちもあり時間がかかるため、
+    // レスポンスを先に返したうえでafter()内で実行する（失敗してもクライアントの記事生成自体は成功扱いのまま）
+    after(async () => {
+      try {
+        const thumbnailPrompt = buildThumbnailPrompt(service.name, type, title);
+        const thumbnailUrl = await generateThumbnailImage(thumbnailPrompt, service_id);
+        if (thumbnailUrl) {
+          const updatedContent = replaceFirstImageUrl(content, thumbnailUrl) ?? `![${title}](${thumbnailUrl})\n\n${content}`;
+          await supabase.from("articles").update({ featured_image_url: thumbnailUrl, content: updatedContent }).eq("id", articleId);
+        }
+      } catch (thumbErr) {
+        console.error("thumbnail generation failed:", thumbErr);
+        await supabase.from("admin_notifications").insert({
+          type: "image_failed",
+          payload: {
+            article_id: articleId,
+            service_id,
+            service_name: service.name,
+            reason: thumbErr instanceof GeminiQuotaExceededError ? "quota_exceeded" : "error",
+            detail: String(thumbErr),
+          },
+        });
       }
-    } catch (thumbErr) {
-      console.error("thumbnail generation failed:", thumbErr);
-      await supabase.from("admin_notifications").insert({
-        type: "image_failed",
-        payload: {
-          article_id: articleId,
-          service_id,
-          service_name: service.name,
-          reason: thumbErr instanceof GeminiQuotaExceededError ? "quota_exceeded" : "error",
-          detail: String(thumbErr),
-        },
-      });
-    }
 
-    await supabase.from("admin_notifications").insert({
-      type: "article_pending",
-      payload: { service_id, service_name: service.name, article_type: type },
+      await supabase.from("admin_notifications").insert({
+        type: "article_pending",
+        payload: { service_id, service_name: service.name, article_type: type },
+      });
     });
 
     return Response.json({ ok: true, article_id: articleId, article_type: type });
