@@ -11,6 +11,18 @@ function getApiKey(): string {
   return process.env.GEMINI_API_KEY;
 }
 
+// Gemini呼び出しの最低間隔（ms）。1回の記事生成で複数回呼び出すため、短期間に連続実行されてレート制限に当たるのを防ぐ
+const MIN_REQUEST_INTERVAL_MS = 5000;
+let lastRequestAt = 0;
+
+async function waitForRateLimit(): Promise<void> {
+  const elapsed = Date.now() - lastRequestAt;
+  if (elapsed < MIN_REQUEST_INTERVAL_MS) {
+    await new Promise((resolve) => setTimeout(resolve, MIN_REQUEST_INTERVAL_MS - elapsed));
+  }
+  lastRequestAt = Date.now();
+}
+
 export type GeneratedImage = {
   mimeType: string;
   data: string; // base64（データURLのprefixなし）
@@ -27,6 +39,7 @@ export class GeminiQuotaExceededError extends Error {
 // Gemini 2.5 Flash Image（Nano Banana）でテキストプロンプトから画像を1枚生成する
 export async function generateImage(prompt: string): Promise<GeneratedImage | null> {
   const apiKey = getApiKey();
+  await waitForRateLimit();
 
   const res = await fetch(`${GEMINI_API_BASE}/${IMAGE_MODEL}:generateContent?key=${apiKey}`, {
     method: "POST",
@@ -57,6 +70,7 @@ export async function generateImage(prompt: string): Promise<GeneratedImage | nu
 // Gemini 2.5 Flashでテキストを生成する（画像入力も可）
 export async function generateText(systemPrompt: string, userPrompt: string, images?: ImageInput[], options?: GenerateTextOptions): Promise<string> {
   const apiKey = getApiKey();
+  await waitForRateLimit();
 
   const requestParts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = (images ?? []).map((image) => ({
     inlineData: { mimeType: image.mediaType, data: image.data },
