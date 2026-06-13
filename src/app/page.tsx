@@ -104,7 +104,7 @@ export default async function HomePage() {
             ) : (
               <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-gray-400">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/mascot/poinavi-kun.png" alt="" className="w-24 h-auto mx-auto mb-2 opacity-90" />
+                <img src="/mascot/library/squirrel-empty-square.png" alt="" className="w-24 h-auto mx-auto mb-2 opacity-90" />
                 <p className="text-sm">記事はまだありません</p>
               </div>
             )}

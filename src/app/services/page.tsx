@@ -65,7 +65,7 @@ export default async function ServicesPage() {
             ) : (
               <div className="text-center py-20 text-gray-400">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/mascot/poinavi-kun.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
+                <img src="/mascot/library/squirrel-empty-square.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
                 <p>サービスはまだ登録されていません</p>
               </div>
             )}
