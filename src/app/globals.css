@@ -54,3 +54,15 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.12) rotate(-6deg); }
+  50% { transform: scale(0.95) rotate(5deg); }
+  75% { transform: scale(1.08) rotate(-3deg); }
+}
+
+.animate-flame {
+  display: inline-block;
+  animation: flame-flicker 1.2s ease-in-out infinite;
+}
