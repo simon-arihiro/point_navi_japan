@@ -72,11 +72,11 @@ export default function ConversionArea({ service }: Props) {
 
   const bonusText =
     service.bonus_points && bonusAmountText
-      ? `🎁 今すぐ登録で${service.bonus_points.toLocaleString()}pt（約${bonusAmountText}円）もらえる！`
+      ? `今すぐ登録で${service.bonus_points.toLocaleString()}pt（約${bonusAmountText}円）もらえる！`
       : service.bonus_points
-      ? `🎁 今すぐ登録で${service.bonus_points.toLocaleString()}ptもらえる！`
+      ? `今すぐ登録で${service.bonus_points.toLocaleString()}ptもらえる！`
       : bonusAmountText
-      ? `🎁 今すぐ登録で約${bonusAmountText}円相当もらえる！`
+      ? `今すぐ登録で約${bonusAmountText}円相当もらえる！`
       : null;
 
   return (
@@ -99,8 +99,8 @@ export default function ConversionArea({ service }: Props) {
       </div>
 
       {bonusText && (
-        <div className="mb-4 bg-green-50 border border-green-200 rounded-xl px-4 py-2.5 text-center">
-          <p className="text-green-700 font-bold text-sm">{bonusText}</p>
+        <div className="mb-4 bg-green-50 border border-green-200 rounded-xl px-2 py-2.5 text-center">
+          <p className="text-green-700 font-bold text-sm whitespace-nowrap">{bonusText}</p>
         </div>
       )}
 
