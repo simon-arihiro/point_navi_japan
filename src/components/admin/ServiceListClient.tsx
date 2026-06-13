@@ -18,6 +18,8 @@ type ServiceRow = {
   official_url: string;
   referral_code: string | null;
   referral_link: string | null;
+  bonus_points: number | null;
+  bonus_amount: string | null;
   created_at: string;
   categories: CategoryOption[];
   articleCount: number;
@@ -33,6 +35,15 @@ type Props = {
 function formatDate(iso: string | null) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("ja-JP");
+}
+
+// 登録時に付与されるポイント・金額を一覧用の短い表示文字列にまとめる
+function formatBonus(points: number | null, amount: string | null) {
+  const amountText = amount?.trim() || null;
+  if (points && amountText) return `${points.toLocaleString()}pt（約${amountText}円）`;
+  if (points) return `${points.toLocaleString()}pt`;
+  if (amountText) return `約${amountText}円`;
+  return null;
 }
 
 export default function ServiceListClient({ services, allCategories }: Props) {
@@ -168,6 +179,9 @@ export default function ServiceListClient({ services, allCategories }: Props) {
             <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
               <span className="text-gray-500">記事 {svc.articleCount}件</span>
               <span className="text-gray-500">閲覧 {svc.viewCount.toLocaleString()}回</span>
+              {formatBonus(svc.bonus_points, svc.bonus_amount) && (
+                <span className="text-gray-500">付与 {formatBonus(svc.bonus_points, svc.bonus_amount)}</span>
+              )}
               <span className="text-gray-400">追加: {formatDate(svc.created_at)}</span>
               <span className="text-gray-400">更新: {formatDate(svc.latestPublishedAt)}</span>
             </div>
