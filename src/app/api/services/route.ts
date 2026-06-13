@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { errorResponse, ErrorCode } from "@/lib/errors";
+import { errorResponse, ErrorCode, isSlugConflict, SLUG_CONFLICT_MESSAGE } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -44,7 +44,10 @@ export async function POST(request: NextRequest) {
     .select()
     .single();
 
-  if (error) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500);
+  if (error) {
+    if (isSlugConflict(error)) return errorResponse(ErrorCode.VALIDATION_ERROR, SLUG_CONFLICT_MESSAGE);
+    return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500);
+  }
 
   if (Array.isArray(category_ids) && category_ids.length > 0) {
     const { error: catError } = await supabase

@@ -1,5 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { errorResponse, ErrorCode } from "@/lib/errors";
+import { errorResponse, ErrorCode, isSlugConflict, SLUG_CONFLICT_MESSAGE } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
 export async function GET(_req: NextRequest, props: RouteContext<"/api/services/[id]">) {
@@ -32,7 +32,11 @@ export async function PUT(request: NextRequest, props: RouteContext<"/api/servic
     .select()
     .single();
 
-  if (error || !data) return errorResponse(ErrorCode.SERVICE_NOT_FOUND, "サービスが見つかりません", 404);
+  if (error) {
+    if (isSlugConflict(error)) return errorResponse(ErrorCode.VALIDATION_ERROR, SLUG_CONFLICT_MESSAGE);
+    return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, error.message, 500);
+  }
+  if (!data) return errorResponse(ErrorCode.SERVICE_NOT_FOUND, "サービスが見つかりません", 404);
 
   if (Array.isArray(category_ids)) {
     await supabase.from("service_categories").delete().eq("service_id", id);
