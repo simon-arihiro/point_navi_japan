@@ -19,6 +19,9 @@ import { ArticleType } from "@/types/database";
 
 const ARTICLE_CYCLE: ArticleType[] = ["guide", "faq", "comparison", "campaign", "earnings"];
 
+// 記事本文・概要・サムネイル生成で複数回のAI呼び出し・画像処理を行うため、デフォルトの実行時間上限では不足することがある
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   const { service_id, article_type, extra_prompt, images } = await request.json();
   if (!service_id) return errorResponse(ErrorCode.VALIDATION_ERROR, "service_id は必須です");
