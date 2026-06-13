@@ -55,21 +55,21 @@ export default async function ArticlePage(
   const [{ data: introArticle }, { data: ownOthers }, { data: otherArticles }] = await Promise.all([
     supabase
       .from("articles")
-      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
+      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
       .eq("primary_service_id", article.primary_service_id)
       .eq("status", "published")
       .eq("article_type", "introduction")
       .maybeSingle(),
     supabase
       .from("articles")
-      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
+      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
       .eq("primary_service_id", article.primary_service_id)
       .eq("status", "published")
       .neq("id", article.id)
       .neq("article_type", "introduction"),
     supabase
       .from("articles")
-      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug)")
+      .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
       .neq("primary_service_id", article.primary_service_id)
       .eq("status", "published")
       .order("published_at", { ascending: false })
