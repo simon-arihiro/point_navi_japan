@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import ServiceCard from "@/components/ServiceCard";
+import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
 import type { Metadata } from "next";
 
@@ -33,39 +34,47 @@ export default async function ServicesPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* カテゴリフィルター */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <Link href="/services" className="px-4 py-2 bg-slate-900 text-white rounded-full text-sm font-medium">
-            すべて
-          </Link>
-          {categories.map((cat: any) => (
-            <Link
-              key={cat.id}
-              href={`/services/${cat.slug}`}
-              className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-sm hover:border-brand-300 transition-colors"
-            >
-              {cat.name}
-            </Link>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+          <div>
+            {/* カテゴリフィルター */}
+            <div className="flex flex-wrap gap-2 mb-8">
+              <Link href="/services" className="px-4 py-2 bg-slate-900 text-white rounded-full text-sm font-medium">
+                すべて
+              </Link>
+              {categories.map((cat: any) => (
+                <Link
+                  key={cat.id}
+                  href={`/services/${cat.slug}`}
+                  className="px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-full text-sm hover:border-brand-300 transition-colors"
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
 
-        {services.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {services.map((svc: any) => (
-              <ServiceCard
-                key={svc.id}
-                service={svc}
-                categorySlug={svc.categories?.[0]?.category?.slug}
-              />
-            ))}
+            {services.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {services.map((svc: any) => (
+                  <ServiceCard
+                    key={svc.id}
+                    service={svc}
+                    categorySlug={svc.categories?.[0]?.category?.slug}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 text-gray-400">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/mascot/poinavi-kun.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
+                <p>サービスはまだ登録されていません</p>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="text-center py-20 text-gray-400">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascot/poinavi-kun.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
-            <p>サービスはまだ登録されていません</p>
-          </div>
-        )}
+
+          <aside>
+            <Sidebar categories={categories} />
+          </aside>
+        </div>
       </div>
     </div>
   );

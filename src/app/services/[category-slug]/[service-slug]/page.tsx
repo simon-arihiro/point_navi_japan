@@ -4,6 +4,7 @@ import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
 import LogoFallback from "@/components/LogoFallback";
+import Sidebar from "@/components/Sidebar";
 import TrackView from "@/components/TrackView";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 import type { Metadata } from "next";
@@ -26,7 +27,7 @@ export default async function ServicePage(
   const { "category-slug": categorySlug, "service-slug": serviceSlug } = await props.params;
   const supabase = await createClient();
 
-  const [svcRes, introRes, articlesRes] = await Promise.all([
+  const [svcRes, introRes, articlesRes, categoriesRes] = await Promise.all([
     supabase
       .from("services")
       .select(`*, categories:service_categories(category:categories(*)), tags:service_tags(tag:tags(*)), images:service_images(*)`)
@@ -45,10 +46,12 @@ export default async function ServicePage(
       .eq("status", "published")
       .order("published_at", { ascending: false })
       .limit(6),
+    supabase.from("categories").select("*").order("name"),
   ]);
 
   if (!svcRes.data) notFound();
   const service = svcRes.data;
+  const categories = categoriesRes.data ?? [];
 
   // この Service の introduction 記事
   const introArticle = introRes.data?.find((a: any) => a.primary_service_id === service.id);
@@ -162,6 +165,8 @@ export default async function ServicePage(
                 公式サイトへ →
               </a>
             </div>
+
+            <Sidebar categories={categories} />
           </div>
         </div>
       </div>

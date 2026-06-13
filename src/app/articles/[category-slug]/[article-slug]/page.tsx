@@ -3,6 +3,7 @@ import { notFound, permanentRedirect } from "next/navigation";
 import Link from "next/link";
 import ConversionArea from "@/components/ConversionArea";
 import ArticleCard from "@/components/ArticleCard";
+import Sidebar from "@/components/Sidebar";
 import TrackView from "@/components/TrackView";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 import { getArticleTypeLabel } from "@/lib/articleTypes";
@@ -23,12 +24,18 @@ export default async function ArticlePage(
   const { "category-slug": categorySlug, "article-slug": articleSlug } = await props.params;
   const supabase = await createClient();
 
-  const { data: article } = await supabase
-    .from("articles")
-    .select(`*, primary_service:services!articles_primary_service_id_fkey(*, categories:service_categories(category:categories(*)))`)
-    .eq("slug", articleSlug)
-    .eq("status", "published")
-    .single();
+  const [articleRes, categoriesRes] = await Promise.all([
+    supabase
+      .from("articles")
+      .select(`*, primary_service:services!articles_primary_service_id_fkey(*, categories:service_categories(category:categories(*)))`)
+      .eq("slug", articleSlug)
+      .eq("status", "published")
+      .single(),
+    supabase.from("categories").select("*").order("name"),
+  ]);
+
+  const article = articleRes.data;
+  const categories = categoriesRes.data ?? [];
 
   if (!article) notFound();
 
@@ -132,6 +139,8 @@ export default async function ArticlePage(
                 </div>
               </div>
             )}
+
+            <Sidebar categories={categories} />
           </aside>
         </div>
       </div>

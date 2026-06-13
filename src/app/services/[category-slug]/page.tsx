@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import ServiceCard from "@/components/ServiceCard";
+import Sidebar from "@/components/Sidebar";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -23,12 +24,13 @@ export default async function CategoryPage(props: PageProps<"/services/[category
 
   const supabase = await createClient();
 
-  const [catRes, servicesRes] = await Promise.all([
+  const [catRes, servicesRes, categoriesRes] = await Promise.all([
     supabase.from("categories").select("*").eq("slug", categorySlug).single(),
     supabase
       .from("services")
       .select(`*, categories:service_categories(category:categories(*)), tags:service_tags(tag:tags(*))`)
       .eq("status", "active"),
+    supabase.from("categories").select("*").order("name"),
   ]);
 
   if (!catRes.data) notFound();
@@ -37,6 +39,7 @@ export default async function CategoryPage(props: PageProps<"/services/[category
   const services = (servicesRes.data ?? []).filter((svc: any) =>
     svc.categories?.some((c: any) => c.category?.slug === categorySlug)
   );
+  const categories = categoriesRes.data ?? [];
 
   return (
     <div>
@@ -55,19 +58,27 @@ export default async function CategoryPage(props: PageProps<"/services/[category
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {services.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {services.map((svc: any) => (
-              <ServiceCard key={svc.id} service={svc} categorySlug={categorySlug} />
-            ))}
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+          <div>
+            {services.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {services.map((svc: any) => (
+                  <ServiceCard key={svc.id} service={svc} categorySlug={categorySlug} />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 text-gray-400">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/mascot/poinavi-kun.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
+                <p>このカテゴリにはまだサービスがありません</p>
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="text-center py-20 text-gray-400">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascot/poinavi-kun.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
-            <p>このカテゴリにはまだサービスがありません</p>
-          </div>
-        )}
+
+          <aside>
+            <Sidebar categories={categories} />
+          </aside>
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { calcHotScore, calcProfitScore } from "@/lib/ranking";
 import { getServiceStatsMap } from "@/lib/analytics";
 import ServiceCard from "@/components/ServiceCard";
+import Sidebar from "@/components/Sidebar";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -17,15 +18,17 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
   const { data: settings } = await supabase.from("system_settings").select("ranking_window_days").eq("id", 1).single();
   const windowDays = settings?.ranking_window_days ?? 30;
 
-  const [servicesRes, statsMap] = await Promise.all([
+  const [servicesRes, statsMap, categoriesRes] = await Promise.all([
     supabase
       .from("services")
       .select(`*, categories:service_categories(category:categories(*)), tags:service_tags(tag:tags(*))`)
       .eq("status", "active"),
     getServiceStatsMap(supabase, windowDays),
+    supabase.from("categories").select("*").order("name"),
   ]);
 
   const services = servicesRes.data ?? [];
+  const categories = categoriesRes.data ?? [];
 
   const ranked = services.map((svc: any) => {
     const st = statsMap.get(svc.id) ?? { pv: 0, rc: 0, cc: 0 };
@@ -54,28 +57,36 @@ export default async function RankingPage(props: PageProps<"/ranking">) {
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {ranked.length > 0 ? (
-          <div className="space-y-3">
-            {ranked.map((svc: any, i: number) => (
-              <ServiceCard
-                key={svc.id}
-                service={svc}
-                categorySlug={svc.categories?.[0]?.category?.slug}
-                rank={i + 1}
-              />
-            ))}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
+          <div>
+            {ranked.length > 0 ? (
+              <div className="space-y-3">
+                {ranked.map((svc: any, i: number) => (
+                  <ServiceCard
+                    key={svc.id}
+                    service={svc}
+                    categorySlug={svc.categories?.[0]?.category?.slug}
+                    rank={i + 1}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-20 text-gray-400">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/mascot/poinavi-kun.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
+                <p>ランキングデータはまだありません</p>
+              </div>
+            )}
+            <p className="text-xs text-center text-gray-400 mt-8">
+              ※直近{windowDays}日間のデータをもとに集計しています
+            </p>
           </div>
-        ) : (
-          <div className="text-center py-20 text-gray-400">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascot/poinavi-kun.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
-            <p>ランキングデータはまだありません</p>
-          </div>
-        )}
-        <p className="text-xs text-center text-gray-400 mt-8">
-          ※直近{windowDays}日間のデータをもとに集計しています
-        </p>
+
+          <aside>
+            <Sidebar categories={categories} />
+          </aside>
+        </div>
       </div>
     </div>
   );
