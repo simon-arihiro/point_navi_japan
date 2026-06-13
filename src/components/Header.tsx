@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { Category } from "@/types/database";
+import SearchBox from "@/components/SearchBox";
 
 type Props = {
   categories?: Category[];
@@ -12,6 +13,7 @@ type Props = {
 export default function Header({ categories = [] }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const dropRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -34,8 +36,9 @@ export default function Header({ categories = [] }: Props) {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
-  // ページ遷移時に開いていたモバイルメニューを閉じる
+  // ページ遷移時に開いていた検索パネル・モバイルメニューを閉じる
   useEffect(() => {
+    setSearchOpen(false);
     setMenuOpen(false);
   }, [pathname]);
 
@@ -104,11 +107,27 @@ export default function Header({ categories = [] }: Props) {
             </Link>
           </nav>
 
-          {/* スマホ: ロゴ(左)＋ハンバーガー(右) */}
+          {/* スマホ: ロゴ(左)＋検索＋ハンバーガー(右) */}
           <div className="flex md:hidden items-center gap-2">
             <button
+              onClick={() => {
+                setSearchOpen((v) => !v);
+                setMenuOpen(false);
+              }}
+              className={`p-2 rounded-full transition-colors ${searchOpen ? "text-brand-700 bg-brand-50" : "text-gray-500"}`}
+              aria-label="検索"
+              aria-expanded={searchOpen}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+            <button
               className="p-2 text-gray-600"
-              onClick={() => setMenuOpen((v) => !v)}
+              onClick={() => {
+                setMenuOpen((v) => !v);
+                setSearchOpen(false);
+              }}
               aria-label="メニュー"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,6 +140,13 @@ export default function Header({ categories = [] }: Props) {
             </button>
           </div>
         </div>
+
+        {/* スマホ検索パネル */}
+        {searchOpen && (
+          <div className="md:hidden border-t border-gray-100 py-4">
+            <SearchBox autoFocus onNavigate={() => setSearchOpen(false)} />
+          </div>
+        )}
 
         {/* スマホメニュー */}
         {menuOpen && (
