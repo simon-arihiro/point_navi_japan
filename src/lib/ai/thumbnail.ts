@@ -34,13 +34,16 @@ export function buildThumbnailPrompt(serviceName: string, articleType: ArticleTy
 }
 
 // 設定されたAIプロバイダーで画像を生成してStorageに保存し、公開URLを返す。
-// 画像が生成できなかった場合はnullを返す。
+// 失敗時はエラーを投げる（呼び出し元でimage_failed通知として記録される）。
 // アスペクト比はAIプロバイダーへのプロンプト指定（16:9）に依存し、生成結果をそのまま保存する
-export async function generateThumbnailImage(prompt: string, serviceId: string): Promise<string | null> {
+export async function generateThumbnailImage(prompt: string, serviceId: string): Promise<string> {
   const image = await generateTaskImage(prompt);
-  if (!image) return null;
+  if (!image) throw new Error("画像生成APIから画像データが返されませんでした");
 
-  return uploadArticleImage(serviceId, image.data, image.mimeType);
+  const url = await uploadArticleImage(serviceId, image.data, image.mimeType);
+  if (!url) throw new Error("生成した画像のStorageへのアップロードに失敗しました");
+
+  return url;
 }
 
 const FIRST_IMAGE_RE = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/;
