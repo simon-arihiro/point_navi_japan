@@ -87,6 +87,8 @@ export default function NewServicePage() {
       ...prev,
       slug: prev.slug || data.slug || prev.slug,
       description: data.description || prev.description,
+      bonus_points: data.bonus_points != null ? String(data.bonus_points) : prev.bonus_points,
+      bonus_amount: data.bonus_amount || prev.bonus_amount,
       campaign_bonus: data.campaign_bonus || prev.campaign_bonus,
       campaign_expires_at: data.campaign_expires_at ? toDatetimeLocalValue(data.campaign_expires_at) : prev.campaign_expires_at,
       logo_url: data.logo_url || prev.logo_url,
@@ -203,7 +205,7 @@ export default function NewServicePage() {
         {aiError && <p className="text-amber-600 text-sm">{aiError}</p>}
 
         <p className="text-xs text-gray-500 bg-blue-50 rounded-lg px-4 py-3">
-          「AI補完」を押すと、公式URLをもとに説明文・カテゴリ・キャンペーン内容・キャンペーン終了日時・ロゴURLを自動入力します（既存の入力は上書きされます。紹介記事は生成されません）。AIは公式サイトに直接アクセスできないため、特にキャンペーン情報は内容を確認・修正のうえ「追加」を押してください。
+          「AI補完」を押すと、公式URLをもとに説明文・カテゴリ・付与ポイント・付与金額・キャンペーン内容・キャンペーン終了日時・ロゴURLを自動入力します（既存の入力は上書きされます。紹介記事は生成されません）。招待コード・招待リンクはAIでは取得できないため、手動で入力してください。公式サイトのページ内容を取得できない場合はAIの一般知識をもとに推測するため、内容を確認・修正のうえ「追加」を押してください。
         </p>
 
         <div className="flex gap-3">

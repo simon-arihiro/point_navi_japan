@@ -97,7 +97,7 @@ export default function EditServicePage() {
     }
   };
 
-  // AI補完: 公式URLをもとに説明・カテゴリ・キャンペーン情報・ロゴURLをフォームに反映する（保存ボタンを押すまでDBは更新されない）
+  // AI補完: 公式URLをもとに説明・カテゴリ・付与ポイント/金額・キャンペーン情報・ロゴURLをフォームに反映する（保存ボタンを押すまでDBは更新されない）
   const handleAutofill = async () => {
     if (!form.official_url) {
       setAiError("AI補完には公式URLが必要です");
@@ -124,6 +124,8 @@ export default function EditServicePage() {
     setForm((prev: typeof form) => ({
       ...prev,
       description: data.description || prev.description,
+      bonus_points: data.bonus_points != null ? String(data.bonus_points) : prev.bonus_points,
+      bonus_amount: data.bonus_amount || prev.bonus_amount,
       campaign_bonus: data.campaign_bonus || prev.campaign_bonus,
       campaign_expires_at: data.campaign_expires_at ? toDatetimeLocalValue(data.campaign_expires_at) : prev.campaign_expires_at,
       logo_url: data.logo_url || prev.logo_url,

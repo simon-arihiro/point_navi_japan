@@ -36,31 +36,39 @@ export const SYSTEM_PROMPT_BASE = `あなたは日本のポイ活・招待コー
 必須表現を自然に散りばめる：「実際に使ってみた」「正直なところ」「これは本当におすすめ」
 出力言語：日本語のみ。`;
 
-export function buildServiceInfoPrompt(officialUrl: string, existingCategories: string[]) {
+export function buildServiceInfoPrompt(officialUrl: string, existingCategories: string[], pageContent?: string | null) {
   const categoryList = existingCategories.length > 0 ? existingCategories.join("、") : "（登録済みカテゴリなし）";
 
-  return `あなたはこのURLに直接アクセスすることはできません。URLのドメイン名やパス、サービス名から推測できる一般的な知識をもとに、サービス情報を推測してJSON形式で返してください。
+  const sourceSection = pageContent
+    ? `以下は公式サイト（${officialUrl}）から取得したページ内容です。この内容を最優先の情報源として、できる限り正確な情報を抽出してください。\n--- ページ内容 ---\n${pageContent}\n--- ページ内容ここまで ---`
+    : `このURLには直接アクセスできなかったため、ドメイン名やパス、サービス名から推測できる一般的な知識をもとに情報を推測してください。`;
+
+  return `あなたはポイ活サービスの情報を調査・整理するAIアシスタントです。サービス情報を推測・抽出してJSON形式で返してください。
 URL: ${officialUrl}
+
+${sourceSection}
 
 既存カテゴリ一覧（categoriesはこの中からのみ選択可能）：
 ${categoryList}
 
 返却するJSON形式：
 {
-  "name": "サービス名（日本語、推測でよい）",
-  "slug": "url-friendly-slug（英小文字・ハイフン区切り）",
+  "name": "サービス名（日本語）",
+  "slug": "url-friendly-slug（英小文字・ハイフン区切り）。公式URLのドメイン名やパスに含まれる、サービスを表す英語表記を最優先で使用してください（例: https://example.com/torima なら 'torima'）",
   "description": "SEO meta description（150字以内・日本語）",
   "categories": ["既存カテゴリ一覧の中から該当するものだけを選択（複数可、なければ空配列）"],
   "tags": ["タグ1", "タグ2", "タグ3"],
+  "bonus_points": "新規登録・新規ダウンロードで付与されるポイント数（数値）。確信が持てない場合は null",
+  "bonus_amount": "上記ポイントの円相当額、またはポイント以外で付与される特典の金額目安（\"25〜30\"のような範囲表記も可）。確信が持てない場合は null",
   "campaign_bonus": "現在実施中のキャンペーン内容（例: 期間限定+1,000pt）。確信が持てない場合は null",
   "campaign_expires_at": "キャンペーン終了日時（YYYY-MM-DD形式）。確信が持てない場合は null",
   "logo_url": "サービスロゴ画像の直接URL。確信が持てない場合は null"
 }
 
 注意：
-- 「アクセスできません」「わかりません」のような断り書きは一切不要です。name, slug, description, tags は必ず推測で値を埋めてください。
+- 「アクセスできません」「わかりません」のような断り書きは一切不要です。name, slug, description, tags は必ず値を埋めてください。
 - categories は必ず上記の「既存カテゴリ一覧」に記載されている名称と完全一致するものだけを選んでください。一覧にない新しいカテゴリ名を作成・出力することは禁止です。該当するものがなければ空配列 [] にしてください。
-- campaign_bonus, campaign_expires_at, logo_url は正確な情報に確信が持てる場合のみ値を入れ、不確かな場合は必ず null にしてください（架空の金額や日付を作らないこと）。
+- bonus_points, bonus_amount, campaign_bonus, campaign_expires_at, logo_url は正確な情報に確信が持てる場合のみ値を入れ、不確かな場合は必ず null にしてください（架空の値を作らないこと）。
 - 前置きや補足説明、コードブロック記号（\`\`\`）は付けず、JSONオブジェクトのみを出力してください。`;
 }
 
