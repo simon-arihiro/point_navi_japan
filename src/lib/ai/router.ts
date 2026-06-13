@@ -46,17 +46,18 @@ export async function generateTaskText(
   const { multiEnabled, settings } = await getAiProviderSettings();
   const order = resolveOrder(task, settings, multiEnabled);
 
-  let lastErr: unknown;
+  const errors: string[] = [];
   for (const provider of order) {
     try {
       return provider === "gemini"
         ? await geminiGenerateText(systemPrompt, userPrompt, images, options)
         : await claudeGenerateText(systemPrompt, userPrompt, images, options);
     } catch (err) {
-      lastErr = err;
+      errors.push(`[${provider}] ${err instanceof Error ? err.message : String(err)}`);
     }
   }
-  throw lastErr ?? new Error("利用可能なAIプロバイダーが設定されていません");
+  if (errors.length === 0) throw new Error("利用可能なAIプロバイダーが設定されていません");
+  throw new Error(errors.join("\n"));
 }
 
 // 設定に従って画像を生成する（現在対応しているのはGeminiのみ）。
@@ -65,14 +66,14 @@ export async function generateTaskImage(prompt: string): Promise<GeneratedImage 
   const { multiEnabled, settings } = await getAiProviderSettings();
   const order = resolveOrder("image", settings, multiEnabled);
 
-  let lastErr: unknown;
+  const errors: string[] = [];
   for (const provider of order) {
     try {
       if (provider === "gemini") return await geminiGenerateImage(prompt);
     } catch (err) {
-      lastErr = err;
+      errors.push(`[${provider}] ${err instanceof Error ? err.message : String(err)}`);
     }
   }
-  if (lastErr) throw lastErr;
+  if (errors.length > 0) throw new Error(errors.join("\n"));
   return null;
 }
