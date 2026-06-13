@@ -31,7 +31,7 @@ export interface AiTaskInfo {
 
 // AI機能（タスク）一覧
 export const AI_TASKS: AiTaskInfo[] = [
-  { id: "autofill", label: "AI補完", description: "新規サービス登録時、公式URLから名称・説明・カテゴリ・タグ等を自動入力" },
+  { id: "autofill", label: "AI補完", description: "新規サービス登録時、公式URLから名称・説明・カテゴリ・タグ・付与ポイント/金額等を自動入力" },
   { id: "image", label: "AI画像生成", description: "記事のアイキャッチ画像を生成" },
   { id: "article", label: "AI記事生成", description: "記事本文・概要(meta description)の生成、既存記事の書き直し" },
 ];
