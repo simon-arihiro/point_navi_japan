@@ -75,9 +75,9 @@ export default async function HomePage() {
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src="/mascot/library/squirrel-treasure-hunt-wide.png"
+            src="/mascot/library/squirrel-postman-points-delivery.png"
             alt="ポイナビくん"
-            className="hidden sm:block w-56 md:w-72 lg:w-96 xl:w-[36rem] h-auto shrink-0 mx-auto md:mx-0"
+            className="hidden sm:block w-56 md:w-72 lg:w-80 xl:w-96 h-auto shrink-0 mx-auto md:mx-0"
           />
         </div>
       </section>
