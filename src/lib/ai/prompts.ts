@@ -129,6 +129,68 @@ ${service.referral_link ? `- 紹介リンク: ${service.referral_link}` : ""}
 - 個人ブロガーの体験談として書く`;
 }
 
+export function buildInvitationArticlePrompt(service: {
+  name: string;
+  description: string;
+  referral_code: string | null;
+  referral_link: string | null;
+  bonus_points: number | null;
+  bonus_amount: string | null;
+  campaign_bonus: string | null;
+  official_url: string;
+}, extra?: ExtraContext) {
+  const now = new Date();
+  const yearMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;
+
+  const codeSection = service.referral_code
+    ? `招待コード: ${service.referral_code}`
+    : service.referral_link
+      ? "招待コードはなし。招待リンク経由でのみ特典が受け取れます"
+      : "招待コード・招待リンクは未登録（一般的な登録方法のみ案内してください）";
+
+  const infoLines = [
+    `公式URL: ${service.official_url}`,
+    `概要: ${service.description}`,
+    codeSection,
+  ];
+  if (service.bonus_points) infoLines.push(`新規登録特典: ${service.bonus_points.toLocaleString()}pt`);
+  if (service.bonus_amount) infoLines.push(`特典の金額目安: 約${service.bonus_amount}円相当`);
+  if (service.campaign_bonus) infoLines.push(`現在実施中のキャンペーン: ${service.campaign_bonus}`);
+
+  return `${buildExtraContextSection(extra)}「${service.name}」の招待コード・友達紹介キャンペーンを紹介する記事の本文を書いてください。
+このサイトのすべての招待コード記事は同じテンプレートで統一しています。下記の見出し（##）の文言・絵文字・順番・レベルは一字一句変えずに使ってください。
+
+最初の行に、以下の形式でタイトル（# ）を出力してください：
+# 【${yearMonth}】${service.name}の招待コード・紹介キャンペーンまとめ｜登録方法と特典の受け取り方を解説
+
+サービス情報：
+${infoLines.map((l) => `- ${l}`).join("\n")}
+
+【出力する見出しと内容】
+
+## 🎁 ${service.name}の招待コード・紹介特典まとめ
+この招待コード・紹介リンクを使うとどんな特典が受け取れるかを、具体的な金額・ポイント数を交えて紹介（200〜300字）。
+
+## 📋 招待コード・招待リンクの使い方
+登録時に招待コードを入力する手順、または招待リンクから登録する手順を3〜5ステップの番号付きリストで説明（300〜450字）。
+
+## 💰 もらえる特典の詳細
+新規登録特典・キャンペーン特典の受け取り条件や反映タイミングなどを説明（250〜350字）。
+
+## ⚠️ 利用時の注意点
+招待コードの有効期限、入力タイミング（後から入力できない場合が多い等）、一人一回までなどの注意点を箇条書き2〜3個で（各1〜2文）。
+
+## 📌 まとめ
+記事全体の総括と、今すぐ登録すべき理由を一言で（150〜250字）。
+
+【厳守事項】
+- 1行目は必ず「# 」から始まるタイトル行にすること
+- 見出し（##）はテキスト・絵文字・順番をすべて上記の通りにすること
+- 箇条書きは「- 」、番号付きリストは「1. 」のように半角数字+ピリオドを使うこと
+- 全体で1500〜2200字程度
+- 個人ブロガーの体験談として書く`;
+}
+
 export function buildRelatedArticlePrompt(
   service: { name: string; description: string },
   articleType: "guide" | "faq" | "comparison" | "campaign" | "earnings",

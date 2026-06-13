@@ -22,7 +22,7 @@ export default function EditServicePage() {
   const [categoryNames, setCategoryNames] = useState<string[]>([]);
 
   // AI記事生成
-  const [genType, setGenType] = useState<"introduction" | "related">("related");
+  const [genType, setGenType] = useState<"introduction" | "related" | "invitation">("related");
   const [genPrompt, setGenPrompt] = useState("");
   const [genImages, setGenImages] = useState<PendingImage[]>([]);
   const [generating, setGenerating] = useState(false);
@@ -157,7 +157,7 @@ export default function EditServicePage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         service_id: id,
-        article_type: genType === "introduction" ? "introduction" : undefined,
+        article_type: genType === "related" ? undefined : genType,
         extra_prompt: genPrompt,
         images: genImages.map((img) => ({ data: img.data, media_type: img.mediaType })),
       }),
@@ -290,9 +290,18 @@ export default function EditServicePage() {
               >
                 関連記事
               </button>
+              <button
+                type="button"
+                onClick={() => setGenType("invitation")}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                  genType === "invitation" ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
+                }`}
+              >
+                招待記事
+              </button>
             </div>
-            {genType === "introduction" && (
-              <p className="text-xs text-gray-400 mt-1">既存の紹介記事がある場合は内容が上書きされます</p>
+            {(genType === "introduction" || genType === "invitation") && (
+              <p className="text-xs text-gray-400 mt-1">既存の{genType === "introduction" ? "紹介" : "招待"}記事がある場合は内容が上書きされます</p>
             )}
           </div>
 

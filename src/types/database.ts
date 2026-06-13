@@ -1,5 +1,5 @@
 export type ServiceStatus = "active" | "inactive";
-export type ArticleType = "introduction" | "guide" | "faq" | "comparison" | "campaign" | "earnings";
+export type ArticleType = "introduction" | "guide" | "faq" | "comparison" | "campaign" | "earnings" | "invitation";
 export type ArticleStatus = "draft" | "reviewing" | "published" | "rejected" | "archived";
 export type EventType =
   | "page_view"

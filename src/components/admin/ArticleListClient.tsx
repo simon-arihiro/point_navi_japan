@@ -52,7 +52,8 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
       if (status === "published" && a.status !== "published") return false;
       if (status === "reviewing" && a.status === "published") return false;
       if (articleType === "introduction" && a.article_type !== "introduction") return false;
-      if (articleType === "related" && a.article_type === "introduction") return false;
+      if (articleType === "invitation" && a.article_type !== "invitation") return false;
+      if (articleType === "related" && (a.article_type === "introduction" || a.article_type === "invitation")) return false;
       if (categoryIds.length > 0 && !(a.primary_service?.categories ?? []).some((c) => categoryIds.includes(c.id))) return false;
       if (q && !a.title.toLowerCase().includes(q) && !(a.primary_service?.name ?? "").toLowerCase().includes(q)) return false;
       return true;
@@ -93,6 +94,7 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
           >
             <option value="">すべて</option>
             <option value="introduction">紹介</option>
+            <option value="invitation">招待コード</option>
             <option value="related">関連</option>
           </select>
         </div>

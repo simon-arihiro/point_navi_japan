@@ -99,6 +99,9 @@ export default function Header({ categories = [] }: Props) {
               )}
             </div>
 
+            <Link href="/invitations" className={navLinkClass("/invitations")}>
+              招待コード
+            </Link>
             <Link href="/ranking" className={navLinkClass("/ranking")}>
               ランキング
             </Link>
@@ -163,6 +166,7 @@ export default function Header({ categories = [] }: Props) {
                 └ {cat.name}
               </Link>
             ))}
+            <Link href="/invitations" className={mobileNavLinkClass("/invitations")} onClick={() => setMenuOpen(false)}>招待コード</Link>
             <Link href="/ranking" className={mobileNavLinkClass("/ranking")} onClick={() => setMenuOpen(false)}>ランキング</Link>
             <Link href="/articles" className={mobileNavLinkClass("/articles")} onClick={() => setMenuOpen(false)}>記事</Link>
           </div>
