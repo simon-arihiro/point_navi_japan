@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 type Props = {
   name: string;
   logoUrl?: string | null;
@@ -29,16 +31,21 @@ function getFaviconUrl(officialUrl?: string): string | null {
   }
 }
 
-// 3-tier logo mechanism:
+// ロゴ画像のフォールバックチェーン:
 // 1. logo_storage_path (Supabase Storage)
-// 2. Favicon from official_url
-// 3. Text avatar with auto color
+// 2. logo_url（AI補完等で設定された直接URL）
+// 3. 公式URLのfavicon
+// 4. 文字アバター（自動配色）
+// 画像の読み込みに失敗した場合は次の候補へ自動フォールバックする
 export default function LogoFallback({ name, logoUrl, logoStoragePath, officialUrl, size = 48, className = "" }: Props) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const storageUrl = logoStoragePath ? `${supabaseUrl}/storage/v1/object/public/${logoStoragePath}` : null;
   const faviconUrl = getFaviconUrl(officialUrl);
 
-  const imgSrc = storageUrl ?? logoUrl ?? faviconUrl;
+  const candidates = [storageUrl, logoUrl, faviconUrl].filter((url): url is string => !!url);
+  const [failedCount, setFailedCount] = useState(0);
+
+  const imgSrc = candidates[failedCount];
   const initial = name.charAt(0).toUpperCase();
   const bgColor = getAutoColor(name);
 
@@ -53,9 +60,7 @@ export default function LogoFallback({ name, logoUrl, logoStoragePath, officialU
           src={imgSrc}
           alt={`${name} logo`}
           className="absolute inset-0 w-full h-full object-contain"
-          onError={(e) => {
-            (e.currentTarget as HTMLImageElement).style.display = "none";
-          }}
+          onError={() => setFailedCount((c) => c + 1)}
         />
       </div>
     );
