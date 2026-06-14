@@ -172,6 +172,7 @@ export interface ServiceWithRelations extends Service {
   categories?: Category[];
   tags?: Tag[];
   images?: ServiceImage[];
+}
 
 export interface ArticleWithService extends Article {
   primary_service?: Service;
