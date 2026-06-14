@@ -159,12 +159,19 @@ export interface SystemSettings {
   updated_at: string;
 }
 
+export interface AiPrompt {
+  id: string;
+  title: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Joined types for UI
 export interface ServiceWithRelations extends Service {
   categories?: Category[];
   tags?: Tag[];
   images?: ServiceImage[];
-}
 
 export interface ArticleWithService extends Article {
   primary_service?: Service;
