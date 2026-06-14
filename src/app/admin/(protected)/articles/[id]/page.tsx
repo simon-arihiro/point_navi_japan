@@ -26,6 +26,8 @@ export default function AdminArticleDetailPage() {
   const [generatingThumbnail, setGeneratingThumbnail] = useState(false);
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [thumbnailFeedback, setThumbnailFeedback] = useState("");
+  const [services, setServices] = useState<any[]>([]);
+  const [updatingRelated, setUpdatingRelated] = useState(false);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
   const thumbnailFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -33,7 +35,25 @@ export default function AdminArticleDetailPage() {
     fetch(`/api/articles/${id}`)
       .then((r) => r.json())
       .then(({ data }) => { setArticle(data); setLoading(false); });
+    fetch("/api/services")
+      .then((r) => r.json())
+      .then(({ data }) => setServices(data ?? []));
   }, [id]);
+
+  // 比較記事などで関連付ける他サービスを更新する
+  const updateRelatedServices = async (serviceIds: string[]) => {
+    setUpdatingRelated(true);
+    const res = await fetch(`/api/articles/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ related_service_ids: serviceIds }),
+    });
+    if (res.ok) {
+      const { data } = await res.json();
+      setArticle(data);
+    }
+    setUpdatingRelated(false);
+  };
 
   const updateStatus = async (status: string) => {
     setSaving(true);
@@ -344,6 +364,49 @@ export default function AdminArticleDetailPage() {
                 </dd>
               </div>
             </dl>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+            <h2 className="font-bold text-gray-900 mb-1 text-sm">関連サービス</h2>
+            <p className="text-xs text-gray-400 mb-3">比較記事などで他サービスを関連付けると、そのサービスの記事も「関連記事」に表示されやすくなります</p>
+            <div className="space-y-2 mb-3">
+              {(article.related_services ?? []).length === 0 ? (
+                <p className="text-xs text-gray-400">未設定</p>
+              ) : (
+                article.related_services.map((rel: any) => (
+                  <div key={rel.service.id} className="flex items-center justify-between bg-gray-50 rounded-xl px-3 py-2 text-sm">
+                    <span className="truncate">{rel.service.name}</span>
+                    <button
+                      onClick={() => updateRelatedServices(
+                        article.related_services.filter((r: any) => r.service.id !== rel.service.id).map((r: any) => r.service.id)
+                      )}
+                      disabled={updatingRelated}
+                      className="text-gray-400 hover:text-red-600 text-xs ml-2 shrink-0 disabled:opacity-50"
+                    >
+                      削除
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+            <select
+              value=""
+              disabled={updatingRelated}
+              onChange={(e) => {
+                if (!e.target.value) return;
+                const currentIds = (article.related_services ?? []).map((r: any) => r.service.id);
+                updateRelatedServices([...currentIds, e.target.value]);
+              }}
+              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50"
+            >
+              <option value="">＋ サービスを追加...</option>
+              {services
+                .filter((s) => s.id !== article.primary_service_id)
+                .filter((s) => !(article.related_services ?? []).some((r: any) => r.service.id === s.id))
+                .map((s) => (
+                  <option key={s.id} value={s.id}>{s.name}</option>
+                ))}
+            </select>
           </div>
 
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">

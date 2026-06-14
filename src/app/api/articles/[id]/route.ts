@@ -24,15 +24,37 @@ export async function PUT(request: NextRequest, props: RouteContext<"/api/articl
   const supabase = createAdminClient();
   const body = await request.json();
 
-  if (body.status === "published" && !body.published_at) {
-    body.published_at = new Date().toISOString();
+  // 比較記事などで関連付ける他サービス（article_services中間テーブル）の更新
+  const { related_service_ids, ...articleFields } = body;
+  if (Array.isArray(related_service_ids)) {
+    await supabase.from("article_services").delete().eq("article_id", id);
+    if (related_service_ids.length > 0) {
+      const { error: relError } = await supabase
+        .from("article_services")
+        .insert(related_service_ids.map((service_id: string) => ({ article_id: id, service_id })));
+      if (relError) return errorResponse(ErrorCode.INTERNAL_SERVER_ERROR, relError.message, 500);
+    }
+  }
+
+  if (articleFields.status === "published" && !articleFields.published_at) {
+    articleFields.published_at = new Date().toISOString();
+  }
+
+  if (Object.keys(articleFields).length === 0) {
+    const { data, error } = await supabase
+      .from("articles")
+      .select(`*, primary_service:services!articles_primary_service_id_fkey(*), related_services:article_services(service:services(*))`)
+      .eq("id", id)
+      .single();
+    if (error || !data) return errorResponse(ErrorCode.ARTICLE_NOT_FOUND, "記事が見つかりません", 404);
+    return Response.json({ data });
   }
 
   const { data, error } = await supabase
     .from("articles")
-    .update(body)
+    .update(articleFields)
     .eq("id", id)
-    .select()
+    .select(`*, primary_service:services!articles_primary_service_id_fkey(*), related_services:article_services(service:services(*))`)
     .single();
 
   if (error || !data) return errorResponse(ErrorCode.ARTICLE_NOT_FOUND, "記事が見つかりません", 404);

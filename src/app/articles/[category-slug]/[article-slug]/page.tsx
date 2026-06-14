@@ -29,7 +29,7 @@ export default async function ArticlePage(
   const [articleRes, categoriesRes] = await Promise.all([
     supabase
       .from("articles")
-      .select(`*, primary_service:services!articles_primary_service_id_fkey(*, categories:service_categories(category:categories(*)))`)
+      .select(`*, primary_service:services!articles_primary_service_id_fkey(*, categories:service_categories(category:categories(*))), related_services:article_services(service_id)`)
       .eq("slug", articleSlug)
       .eq("status", "published")
       .single(),
@@ -50,10 +50,12 @@ export default async function ArticlePage(
   }
 
   // 関連記事：1番目は本サービスの紹介記事、2〜5番目は本サービスの他記事（PV降順）、
-  // 残りは他サービスの記事（紹介記事含む、PV降順）で最大10件まで埋める
+  // 続いて手動で関連付けたサービスの記事（PV降順）、残りは他サービスの記事（紹介記事含む、PV降順）で最大10件まで埋める
   const RELATED_LIMIT = 10;
   const OWN_OTHERS_LIMIT = 4;
-  const [{ data: introArticle }, { data: ownOthers }, { data: otherArticles }] = await Promise.all([
+  const relatedServiceIds = (article.related_services ?? []).map((r: { service_id: string }) => r.service_id);
+
+  const [{ data: introArticle }, { data: ownOthers }, { data: comparedArticles }, { data: otherArticles }] = await Promise.all([
     supabase
       .from("articles")
       .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
@@ -68,6 +70,14 @@ export default async function ArticlePage(
       .eq("status", "published")
       .neq("id", article.id)
       .neq("article_type", "introduction"),
+    relatedServiceIds.length > 0
+      ? supabase
+          .from("articles")
+          .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
+          .in("primary_service_id", relatedServiceIds)
+          .eq("status", "published")
+          .order("published_at", { ascending: false })
+      : Promise.resolve({ data: [] }),
     supabase
       .from("articles")
       .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
@@ -77,16 +87,20 @@ export default async function ArticlePage(
       .limit(50),
   ]);
 
-  const candidateIds = [...(ownOthers ?? []), ...(otherArticles ?? [])].map((a) => a.id);
+  const candidateIds = [...(ownOthers ?? []), ...(comparedArticles ?? []), ...(otherArticles ?? [])].map((a) => a.id);
   const viewCounts = await getArticleViewCountsForIds(supabase, candidateIds);
   const byPvDesc = (a: { id: string }, b: { id: string }) => (viewCounts.get(b.id) ?? 0) - (viewCounts.get(a.id) ?? 0);
 
   const sortedOwnOthers = [...(ownOthers ?? [])].sort(byPvDesc);
-  const sortedOtherArticles = [...(otherArticles ?? [])].sort(byPvDesc);
+  const sortedComparedArticles = [...(comparedArticles ?? [])].sort(byPvDesc);
+  const sortedOtherArticles = [...(otherArticles ?? [])]
+    .filter((a) => !relatedServiceIds.includes(a.primary_service_id))
+    .sort(byPvDesc);
 
   const related = [
     ...(introArticle ? [introArticle] : []),
     ...sortedOwnOthers.slice(0, OWN_OTHERS_LIMIT),
+    ...sortedComparedArticles,
     ...sortedOtherArticles,
   ].slice(0, RELATED_LIMIT);
 
