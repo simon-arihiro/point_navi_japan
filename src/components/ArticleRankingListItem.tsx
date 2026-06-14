@@ -21,7 +21,7 @@ export default function ArticleRankingListItem({ article, categorySlug }: Props)
         officialUrl={article.primary_service?.official_url}
         size={36}
       />
-      <p className="min-w-0 flex-1 font-bold text-sm text-gray-900 line-clamp-2 group-hover:text-brand-700 transition-colors">
+      <p className="min-w-0 flex-1 text-sm text-gray-900 line-clamp-2 group-hover:text-brand-700 transition-colors">
         {article.title}
       </p>
     </Link>

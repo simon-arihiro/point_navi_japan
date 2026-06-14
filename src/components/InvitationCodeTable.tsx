@@ -53,7 +53,7 @@ export default function InvitationCodeTable({ rows }: { rows: Row[] }) {
               <button
                 type="button"
                 onClick={() => handleCopy(row.id, row.referralCode!)}
-                className={`font-mono text-[11px] font-bold rounded px-1.5 py-0.5 tracking-wider shrink-0 transition-colors cursor-pointer ${
+                className={`font-mono text-xs font-bold rounded px-1.5 py-0.5 tracking-wider shrink-0 transition-colors cursor-pointer ${
                   copiedId === row.id ? "bg-green-100 text-green-700" : "bg-gray-50 text-gray-900 hover:bg-brand-100"
                 }`}
               >
