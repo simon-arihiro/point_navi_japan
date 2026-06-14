@@ -43,6 +43,21 @@ export function extractFirstImageUrl(content: string): string | null {
   return match ? match[1] : null;
 }
 
+// 本文先頭の画像（既存のアイキャッチ等）にマッチする正規表現
+const LEADING_IMAGE_RE = /^!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)\s*\n+/;
+
+// 生成・アップロードした画像を必ず本文の最前面に配置する（記事のサムネイルは本文内の最初の画像を使用するため）。
+// 本文が既に画像から始まっている場合はその画像を新しいものに置き換え、
+// そうでない場合は先頭に新しい画像を追加する
+export function placeImageAtTop(content: string, title: string, newUrl: string): string {
+  const trimmed = content.trimStart();
+  const image = `![${title}](${newUrl})`;
+  if (LEADING_IMAGE_RE.test(trimmed)) {
+    return trimmed.replace(LEADING_IMAGE_RE, `${image}\n\n`);
+  }
+  return `${image}\n\n${trimmed}`;
+}
+
 // 記事本文（Markdown→HTML）の見た目を統一するためのprose設定。
 // サイトの琥珀×ネイビー基調に合わせて見出し・リンク・引用の色を調整している。
 export const ARTICLE_PROSE_CLASS =

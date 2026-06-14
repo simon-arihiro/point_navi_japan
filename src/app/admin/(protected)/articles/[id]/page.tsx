@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import LogoFallback from "@/components/LogoFallback";
-import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
+import { renderMarkdown, ARTICLE_PROSE_CLASS, placeImageAtTop } from "@/lib/markdown";
 import { getArticleTypeLabel, getArticleTypeIcon, getArticleStatusLabel, getArticleStatusBadgeClass } from "@/lib/articleTypes";
 import { compressImage } from "@/lib/imageCompress";
 
@@ -179,7 +179,7 @@ export default function AdminArticleDetailPage() {
     }
   };
 
-  // サムネイル画像を手動でアップロードして差し替える
+  // AI画像を手動でアップロードして差し替える（本文の最初の画像も置き換える）
   const handleThumbnailFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -193,12 +193,14 @@ export default function AdminArticleDetailPage() {
       });
       if (uploadRes.ok) {
         const { url } = await uploadRes.json();
+        const updatedContent = placeImageAtTop(article.content, article.title, url);
         await fetch(`/api/articles/${id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ featured_image_url: url }),
+          body: JSON.stringify({ featured_image_url: url, content: updatedContent }),
         });
-        setArticle({ ...article, featured_image_url: url });
+        setArticle({ ...article, featured_image_url: url, content: updatedContent });
+        if (isEditing) setEditContent(updatedContent);
       }
     } finally {
       setUploadingThumbnail(false);
@@ -206,7 +208,7 @@ export default function AdminArticleDetailPage() {
     }
   };
 
-  // サムネイル設定を解除する（本文内の最初の画像にフォールバック）
+  // AI画像の参照表示をクリアする（本文内の画像はそのまま残る）
   const handleClearThumbnail = async () => {
     await fetch(`/api/articles/${id}`, {
       method: "PUT",
@@ -410,13 +412,14 @@ export default function AdminArticleDetailPage() {
           </div>
 
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-            <h2 className="font-bold text-gray-900 mb-3 text-sm">サムネイル画像</h2>
+            <h2 className="font-bold text-gray-900 mb-3 text-sm">AI画像</h2>
+            <p className="text-xs text-gray-400 mb-3">記事のサムネイルには本文内の最初の画像が使用されます。ここで生成・アップロードした画像は本文の最初に挿入されます</p>
             <div className="aspect-video bg-gray-50 rounded-xl overflow-hidden mb-3">
               {article.featured_image_url ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={article.featured_image_url} alt="" className="w-full h-full object-cover" />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">未設定（本文内の最初の画像を使用）</div>
+                <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">未設定</div>
               )}
             </div>
             <textarea
@@ -454,7 +457,7 @@ export default function AdminArticleDetailPage() {
                   disabled={generatingThumbnail || uploadingThumbnail}
                   className="w-full py-2 text-gray-400 text-xs hover:text-red-600 transition-colors disabled:opacity-50"
                 >
-                  サムネイル設定を解除
+                  AI画像の表示をクリア
                 </button>
               )}
             </div>

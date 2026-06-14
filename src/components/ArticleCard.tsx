@@ -22,7 +22,7 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
   const typeIcon = getArticleTypeIcon(article.article_type);
 
   if (size === "featured") {
-    const thumbnailUrl = article.featured_image_url ?? extractFirstImageUrl(article.content);
+    const thumbnailUrl = extractFirstImageUrl(article.content);
 
     return (
       <Link href={href} className="group block h-full">
