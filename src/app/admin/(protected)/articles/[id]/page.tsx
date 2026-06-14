@@ -28,8 +28,10 @@ export default function AdminArticleDetailPage() {
   const [thumbnailFeedback, setThumbnailFeedback] = useState("");
   const [services, setServices] = useState<any[]>([]);
   const [updatingRelated, setUpdatingRelated] = useState(false);
+  const [feedbackImages, setFeedbackImages] = useState<{ dataUrl: string; data: string; mediaType: "image/jpeg" | "image/png" }[]>([]);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
   const thumbnailFileInputRef = useRef<HTMLInputElement>(null);
+  const feedbackImageInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch(`/api/articles/${id}`)
@@ -72,14 +74,32 @@ export default function AdminArticleDetailPage() {
     await fetch("/api/ai/rewrite", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ article_id: id, feedback }),
+      body: JSON.stringify({
+        article_id: id,
+        feedback,
+        images: feedbackImages.map((img) => ({ data: img.data, mediaType: img.mediaType })),
+      }),
     });
     // 再取得
     const res = await fetch(`/api/articles/${id}`);
     const { data } = await res.json();
     setArticle(data);
     setFeedback("");
+    setFeedbackImages([]);
     setRewriting(false);
+  };
+
+  // AIへの修正依頼に参考画像を添付する（スマホからはファイル選択でカメラ/アルバムから追加）
+  const handleFeedbackImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (files.length === 0) return;
+    const compressed = await Promise.all(files.map((file) => compressImage(file)));
+    setFeedbackImages((prev) => [...prev, ...compressed]);
+    if (feedbackImageInputRef.current) feedbackImageInputRef.current.value = "";
+  };
+
+  const removeFeedbackImage = (index: number) => {
+    setFeedbackImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleDelete = async () => {
@@ -339,13 +359,50 @@ export default function AdminArticleDetailPage() {
               rows={4}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
             />
-            <button
-              onClick={handleRewrite}
-              disabled={rewriting || !feedback.trim()}
-              className="mt-3 px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
-            >
-              {rewriting ? "書き直し中..." : "AIに書き直しを依頼"}
-            </button>
+
+            {feedbackImages.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-3">
+                {feedbackImages.map((img, i) => (
+                  <div key={i} className="relative">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img.dataUrl} alt="" className="w-16 h-16 object-cover rounded-lg border border-gray-200" />
+                    <button
+                      type="button"
+                      onClick={() => removeFeedbackImage(i)}
+                      aria-label="画像を削除"
+                      className="absolute -top-1.5 -right-1.5 w-5 h-5 flex items-center justify-center bg-gray-700 text-white rounded-full text-xs leading-none"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex items-center gap-3 mt-3">
+              <input
+                ref={feedbackImageInputRef}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFeedbackImageSelect}
+                className="hidden"
+                id="feedback-image-input"
+              />
+              <label
+                htmlFor="feedback-image-input"
+                className="px-4 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 transition-colors cursor-pointer"
+              >
+                📷 参考画像を追加
+              </label>
+              <button
+                onClick={handleRewrite}
+                disabled={rewriting || !feedback.trim()}
+                className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {rewriting ? "書き直し中..." : "AIに書き直しを依頼"}
+              </button>
+            </div>
           </div>
         </div>
 

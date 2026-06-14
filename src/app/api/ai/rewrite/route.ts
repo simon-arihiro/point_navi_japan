@@ -5,7 +5,7 @@ import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const { article_id, feedback } = await request.json();
+  const { article_id, feedback, images } = await request.json();
   if (!article_id || !feedback) {
     return errorResponse(ErrorCode.VALIDATION_ERROR, "article_id と feedback は必須です");
   }
@@ -16,7 +16,13 @@ export async function POST(request: NextRequest) {
 
   try {
     const { data: defaultPrompt } = await supabase.from("ai_prompts").select("content").eq("category", "article").eq("is_default", true).maybeSingle();
-    const newContent = await generateTaskText("article", SYSTEM_PROMPT_BASE, buildRewritePrompt(article.content, feedback, defaultPrompt?.content));
+    const hasImages = Array.isArray(images) && images.length > 0;
+    const newContent = await generateTaskText(
+      "article",
+      SYSTEM_PROMPT_BASE,
+      buildRewritePrompt(article.content, feedback, defaultPrompt?.content, hasImages),
+      hasImages ? images : undefined
+    );
     const titleMatch = newContent.match(/^#\s+(.+)/m);
     const title = titleMatch ? titleMatch[1].trim() : article.title;
 

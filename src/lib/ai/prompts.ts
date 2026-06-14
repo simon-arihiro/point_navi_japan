@@ -222,15 +222,19 @@ export function buildRelatedArticlePrompt(
 最初の行にタイトル（# タイトル）を含めてください。${DESCRIPTION_SUFFIX_INSTRUCTION}`;
 }
 
-export function buildRewritePrompt(originalContent: string, feedback: string, defaultPrompt?: string) {
+export function buildRewritePrompt(originalContent: string, feedback: string, defaultPrompt?: string, hasImages?: boolean) {
   const defaultSection = defaultPrompt?.trim()
     ? `【最優先指示】管理者から以下の指示が常時設定されています。書き直しの際もこの指示を踏まえてください。\n${defaultPrompt.trim()}\n\n---\n\n`
+    : "";
+
+  const imageNote = hasImages
+    ? "\n\n管理者から参考画像が添付されています。画像の内容（画面の様子、キャンペーン情報、誤字、レイアウトなど）を踏まえてフィードバックに対応してください。"
     : "";
 
   return `${defaultSection}以下の記事を管理者のフィードバックに基づいて書き直してください。
 
 【フィードバック】
-${feedback}
+${feedback}${imageNote}
 
 【元の記事】
 ${originalContent}
