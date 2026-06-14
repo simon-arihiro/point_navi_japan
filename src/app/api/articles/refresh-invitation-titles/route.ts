@@ -60,14 +60,16 @@ export async function POST() {
     if (svc.referral_code) {
       const code = svc.referral_code;
       const escapedCode = code.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-      // バッククォート付き（`==コード==`）も含めて、強調済みの==コード==を一時的に退避してから
-      // 未強調のコードを本文中の全出現箇所で強調する
-      const placeholder = "@@HIGHLIGHTED_CODE@@";
+      // バッククォート付き（`==コード==`）も含めて、強調済みの==コード==を一旦プレーンなコードに戻す
       const highlightedPattern = new RegExp("`?==" + escapedCode + "==`?", "g");
+      let next = content.replace(highlightedPattern, code);
+      // 本文中のコード出現箇所のうち、最初の2回だけを赤字強調する（読者への過度な訴求を避けるため）
       const bareCodePattern = new RegExp(escapedCode, "g");
-      let next = content.replace(highlightedPattern, placeholder);
-      next = next.replace(bareCodePattern, `==${code}==`);
-      next = next.split(placeholder).join(`==${code}==`);
+      let count = 0;
+      next = next.replace(bareCodePattern, (match) => {
+        count++;
+        return count <= 2 ? `==${match}==` : match;
+      });
       content = next;
     }
 
