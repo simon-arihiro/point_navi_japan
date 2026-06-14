@@ -22,7 +22,7 @@ export default async function ArticlesPage() {
     supabase.from("categories").select("*").order("name"),
   ]);
 
-  const articles = articlesRes.data ?? [];
+  const articles = (articlesRes.data ?? []).filter((a: any) => a.primary_service);
   const categories = categoriesRes.data ?? [];
 
   return (

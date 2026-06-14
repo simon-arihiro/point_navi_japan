@@ -41,7 +41,7 @@ export default function SearchPageClient() {
           .limit(9),
       ]);
       setServices(svcRes.data ?? []);
-      setArticles(artRes.data ?? []);
+      setArticles((artRes.data ?? []).filter((a: any) => a.primary_service));
       setLoading(false);
     }, 400);
     return () => clearTimeout(timer);

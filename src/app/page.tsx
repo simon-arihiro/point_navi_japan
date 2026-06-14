@@ -33,7 +33,7 @@ export default async function HomePage() {
     ]);
 
     const services = servicesRes.data ?? [];
-    const articles = articlesRes.data ?? [];
+    const articles = (articlesRes.data ?? []).filter((a: any) => a.primary_service);
 
     const rankedServices = services.map((svc: any) => ({ ...svc, pv: statsMap.get(svc.id)?.pv ?? 0 }));
     popularServices = [...rankedServices].sort((a, b) => b.pv - a.pv).slice(0, 5);

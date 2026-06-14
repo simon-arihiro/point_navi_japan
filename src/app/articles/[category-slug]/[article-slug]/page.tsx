@@ -102,7 +102,9 @@ export default async function ArticlePage(
     ...sortedOwnOthers.slice(0, OWN_OTHERS_LIMIT),
     ...sortedComparedArticles,
     ...sortedOtherArticles,
-  ].slice(0, RELATED_LIMIT);
+  ]
+    .filter((a) => a.primary_service)
+    .slice(0, RELATED_LIMIT);
 
   const publishedDate = article.published_at
     ? new Date(article.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })
