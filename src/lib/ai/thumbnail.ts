@@ -16,6 +16,13 @@ const ARTICLE_TYPE_THEME: Record<ArticleType, string> = {
   invitation: "招待コード・プレゼントでお得な特典を受け取るイメージ",
 };
 
+// すべてのサムネイル生成で共通の厳守事項。AIプロンプトライブラリのデフォルトプロンプトの有無に関わらず常に付与する
+const THUMBNAIL_GENERAL_RULES = `【厳守事項】
+- 画像内に文字を入れる場合は、必ず正確で自然な日本語のみを使用すること
+- 誤字・崩れた文字・意味不明な文字列（文字化け・架空の漢字）は絶対に生成しないこと
+- 正確な日本語表記に自信がない場合は、文字を一切含めない構図にすること
+- 文字を入れる場合は短い単語・フレーズのみとし、長い文章は避けること`;
+
 // 記事のアイキャッチ画像用のGeminiプロンプトを生成する。
 // defaultStyleはAIプロンプトライブラリ（サムネイル用）でデフォルト設定されたスタイル指示。指定時は基本スタイル指定の代わりに使用する
 export function buildThumbnailPrompt(serviceName: string, articleType: ArticleType, title: string, defaultStyle?: string): string {
@@ -35,7 +42,9 @@ export function buildThumbnailPrompt(serviceName: string, articleType: ArticleTy
 対象サービス: ${serviceName}
 イメージ: ${theme}
 
-${styleSection}`;
+${styleSection}
+
+${THUMBNAIL_GENERAL_RULES}`;
 }
 
 // 設定されたAIプロバイダーで画像を生成してStorageに保存し、公開URLを返す。
