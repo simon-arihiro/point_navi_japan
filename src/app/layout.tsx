@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import SiteChrome from "@/components/SiteChrome";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { createClient } from "@/lib/supabase/server";
 
 const notoSansJP = Noto_Sans_JP({
@@ -10,6 +11,7 @@ const notoSansJP = Noto_Sans_JP({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
     default: "ポイナビ | 日本のポイ活サービス比較・体験レビュー",
     template: "%s | ポイナビ",
@@ -33,6 +35,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="ja" className={notoSansJP.className}>
       <body className="bg-gray-50 text-gray-900 antialiased">
+        <GoogleAnalytics />
         <SiteChrome categories={categories}>{children}</SiteChrome>
       </body>
     </html>
