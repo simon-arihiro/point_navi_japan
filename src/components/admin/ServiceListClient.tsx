@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import LogoFallback from "@/components/LogoFallback";
 import MultiSelectFilter from "@/components/admin/MultiSelectFilter";
+import { getArticleStatusLabel, getArticleStatusBadgeClass } from "@/lib/articleTypes";
 
 type CategoryOption = { id: string; name: string };
 
@@ -25,6 +26,10 @@ type ServiceRow = {
   articleCount: number;
   latestPublishedAt: string | null;
   viewCount: number;
+  introductionArticle: { id: string; status: string } | null;
+  invitationArticle: { id: string; status: string } | null;
+  relatedArticleCount: number;
+  relatedPublishedCount: number;
 };
 
 type Props = {
@@ -92,6 +97,20 @@ export default function ServiceListClient({ services, allCategories }: Props) {
     e.preventDefault();
     e.stopPropagation();
     router.push(`/admin/services/${svc.id}#ai-generate`);
+  };
+
+  // 記事の編集画面へジャンプする（サービスカード自体もLinkのためネスト回避でstopPropagation）
+  const goToArticle = (e: React.MouseEvent, articleId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/admin/articles/${articleId}`);
+  };
+
+  // 関連記事一覧を該当サービスで絞り込んで開く
+  const goToRelatedArticles = (e: React.MouseEvent, svc: ServiceRow) => {
+    e.preventDefault();
+    e.stopPropagation();
+    router.push(`/admin/articles?q=${encodeURIComponent(svc.name)}`);
   };
 
   return (
@@ -181,6 +200,45 @@ export default function ServiceListClient({ services, allCategories }: Props) {
               <span className="text-gray-500">閲覧 {svc.viewCount.toLocaleString()}回</span>
               <span className="text-gray-400">追加: {formatDate(svc.created_at)}</span>
               <span className="text-gray-400">更新: {formatDate(svc.latestPublishedAt)}</span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 mt-2 text-xs">
+              <span className="text-gray-400 shrink-0">記事:</span>
+              {svc.introductionArticle ? (
+                <button
+                  type="button"
+                  onClick={(e) => goToArticle(e, svc.introductionArticle!.id)}
+                  className={`rounded-full px-2.5 py-1 font-bold hover:opacity-75 transition-opacity ${getArticleStatusBadgeClass(svc.introductionArticle.status)}`}
+                >
+                  📄 紹介文: {getArticleStatusLabel(svc.introductionArticle.status)}
+                </button>
+              ) : (
+                <span className="rounded-full px-2.5 py-1 font-bold bg-gray-100 text-gray-400">📄 紹介文: 未作成</span>
+              )}
+
+              {svc.invitationArticle ? (
+                <button
+                  type="button"
+                  onClick={(e) => goToArticle(e, svc.invitationArticle!.id)}
+                  className={`rounded-full px-2.5 py-1 font-bold hover:opacity-75 transition-opacity ${getArticleStatusBadgeClass(svc.invitationArticle.status)}`}
+                >
+                  🎁 招待文: {getArticleStatusLabel(svc.invitationArticle.status)}
+                </button>
+              ) : (
+                <span className="rounded-full px-2.5 py-1 font-bold bg-gray-100 text-gray-400">🎁 招待文: 未作成</span>
+              )}
+
+              {svc.relatedArticleCount > 0 ? (
+                <button
+                  type="button"
+                  onClick={(e) => goToRelatedArticles(e, svc)}
+                  className="rounded-full px-2.5 py-1 font-bold bg-blue-50 text-blue-700 hover:opacity-75 transition-opacity"
+                >
+                  🔗 関連文: {svc.relatedArticleCount}件（公開{svc.relatedPublishedCount}）
+                </button>
+              ) : (
+                <span className="rounded-full px-2.5 py-1 font-bold bg-gray-100 text-gray-400">🔗 関連文: 0件</span>
+              )}
             </div>
 
             {svc.categories.length > 0 && (

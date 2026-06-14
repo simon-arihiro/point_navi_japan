@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import LogoFallback from "@/components/LogoFallback";
 import MultiSelectFilter from "@/components/admin/MultiSelectFilter";
@@ -41,10 +42,11 @@ function formatDate(iso: string | null) {
 }
 
 export default function ArticleListClient({ articles, allCategories }: Props) {
+  const searchParams = useSearchParams();
   const [status, setStatus] = useState("");
   const [articleType, setArticleType] = useState("");
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();

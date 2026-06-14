@@ -12,8 +12,12 @@ interface ServiceQueryRow extends Service {
 }
 
 interface ArticleStatRow {
+  id: string;
   primary_service_id: string;
+  article_type: string;
+  status: string;
   published_at: string | null;
+  created_at: string;
 }
 
 export default async function AdminServicesPage() {
@@ -27,20 +31,41 @@ export default async function AdminServicesPage() {
       .order("created_at", { ascending: false })
       .returns<ServiceQueryRow[]>(),
     supabase.from("categories").select("id, name, slug, created_at, updated_at").is("deleted_at", null).order("name").returns<Category[]>(),
-    supabase.from("articles").select("primary_service_id, published_at").is("deleted_at", null).returns<ArticleStatRow[]>(),
+    supabase
+      .from("articles")
+      .select("id, primary_service_id, article_type, status, published_at, created_at")
+      .is("deleted_at", null)
+      .returns<ArticleStatRow[]>(),
     getServiceArticleViewCounts(supabase),
   ]);
 
   const articleStats = new Map<string, { count: number; latest: string | null }>();
+  const articlesByService = new Map<string, ArticleStatRow[]>();
   for (const a of articles ?? []) {
     const stat = articleStats.get(a.primary_service_id) ?? { count: 0, latest: null };
     stat.count += 1;
     if (a.published_at && (!stat.latest || a.published_at > stat.latest)) stat.latest = a.published_at;
     articleStats.set(a.primary_service_id, stat);
+
+    const list = articlesByService.get(a.primary_service_id) ?? [];
+    list.push(a);
+    articlesByService.set(a.primary_service_id, list);
   }
+
+  // 紹介・招待は1件のみ存在する想定（archived除く）なので、最新の1件を採用する
+  const pickLatest = (list: ArticleStatRow[], type: string) =>
+    list
+      .filter((a) => a.article_type === type && a.status !== "archived")
+      .sort((a, b) => (a.created_at > b.created_at ? -1 : 1))[0] ?? null;
 
   const rows = (services ?? []).map((svc) => {
     const stat = articleStats.get(svc.id) ?? { count: 0, latest: null };
+    const svcArticles = articlesByService.get(svc.id) ?? [];
+    const introductionArticle = pickLatest(svcArticles, "introduction");
+    const invitationArticle = pickLatest(svcArticles, "invitation");
+    const relatedArticles = svcArticles.filter(
+      (a) => a.article_type !== "introduction" && a.article_type !== "invitation" && a.status !== "archived"
+    );
     return {
       id: svc.id,
       name: svc.name,
@@ -61,6 +86,10 @@ export default async function AdminServicesPage() {
       articleCount: stat.count,
       latestPublishedAt: stat.latest,
       viewCount: viewCounts.get(svc.id) ?? 0,
+      introductionArticle: introductionArticle ? { id: introductionArticle.id, status: introductionArticle.status } : null,
+      invitationArticle: invitationArticle ? { id: invitationArticle.id, status: invitationArticle.status } : null,
+      relatedArticleCount: relatedArticles.length,
+      relatedPublishedCount: relatedArticles.filter((a) => a.status === "published").length,
     };
   });
 
