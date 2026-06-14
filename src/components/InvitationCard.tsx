@@ -37,6 +37,9 @@ function pickMascot(seed: string) {
   return POSITIVE_MASCOTS[hash % POSITIVE_MASCOTS.length];
 }
 
+// 招待コードカードの枠線色（サービスごとに変えず統一する）
+const CARD_BORDER_COLOR = "#3182CE";
+
 // HEXカラーに透明度を付けてrgba化する（淡い背景・枠線に使用）
 function hexToRgba(hex: string, alpha: number) {
   const r = parseInt(hex.slice(1, 3), 16);
@@ -73,7 +76,7 @@ export default function InvitationCard({ article, categorySlug }: Props) {
     <Link href={href} className="block h-full">
       <div
         className="relative bg-white rounded-2xl border-4 overflow-hidden h-full flex flex-col transition-transform duration-200 ease-out hover:scale-[1.04] hover:shadow-lg hover:z-10"
-        style={{ borderColor: hexToRgba(bgColor, 0.35) }}
+        style={{ borderColor: hexToRgba(CARD_BORDER_COLOR, 0.35) }}
       >
         <div className="flex flex-col gap-2 flex-1">
           {/* ヘッダー行: サービスロゴ＋名前（金色バー・横幅いっぱい） */}
