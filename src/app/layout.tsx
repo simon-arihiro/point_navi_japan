@@ -34,8 +34,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="ja" className={notoSansJP.className}>
-      <body className="bg-gray-50 text-gray-900 antialiased">
+      <head>
         <GoogleAnalytics />
+      </head>
+      <body className="bg-gray-50 text-gray-900 antialiased">
         <SiteChrome categories={categories}>{children}</SiteChrome>
       </body>
     </html>
