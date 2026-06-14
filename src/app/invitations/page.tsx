@@ -66,7 +66,7 @@ export default async function InvitationsPage() {
 
         {articles.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {articles.map((a: any) => (
+            {articles.filter((a: any) => a.primary_service).map((a: any) => (
               <InvitationCard key={a.id} article={a} />
             ))}
           </div>

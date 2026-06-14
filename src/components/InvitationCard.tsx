@@ -113,8 +113,8 @@ export default function InvitationCard({ article, categorySlug }: Props) {
           >
             {svc?.referral_code ? (
               <p className="text-xs font-bold text-gray-800 truncate">
-                紹介コード <span className="text-gray-400">⇒</span>{" "}
-                <span className="font-mono tracking-wider text-gray-900">{svc.referral_code}</span>
+                紹介コード{" "}
+                <span className="font-mono tracking-wider text-red-600 font-black">{svc.referral_code}</span>
               </p>
             ) : (
               <p className="text-xs font-bold text-gray-700">招待リンクから登録でお得！</p>
