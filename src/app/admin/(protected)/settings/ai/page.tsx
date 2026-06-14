@@ -245,10 +245,25 @@ function AiPromptLibrary() {
     }
   };
 
+  const handleSetDefault = async (id: string, isDefault: boolean) => {
+    const res = await fetch(`/api/ai-prompts/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_default: isDefault }),
+    });
+    if (res.ok) {
+      setItems((prev) => prev.map((item) => ({ ...item, is_default: item.id === id ? isDefault : false })));
+    } else {
+      alert("更新に失敗しました");
+    }
+  };
+
   return (
     <div className="mt-10">
       <h2 className="text-lg font-bold text-gray-900 mb-1">AIプロンプトライブラリ</h2>
-      <p className="text-xs text-gray-400 mb-4">AIにコンテンツ作成を依頼する際に参考にするプロンプトを保存・閲覧できます</p>
+      <p className="text-xs text-gray-400 mb-4">
+        AIにコンテンツ作成を依頼する際に参考にするプロンプトを保存・閲覧できます。「デフォルト」に設定したプロンプトは、AI記事生成のたびに最優先指示として自動的に適用されます。
+      </p>
 
       <form onSubmit={handleAdd} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6 space-y-3">
         <h3 className="font-bold text-gray-900 text-sm">新規追加</h3>
@@ -319,8 +334,21 @@ function AiPromptLibrary() {
               ) : (
                 <>
                   <div className="flex items-start justify-between gap-3 mb-2">
-                    <h3 className="font-bold text-gray-900 text-sm break-words">{item.title}</h3>
+                    <h3 className="font-bold text-gray-900 text-sm break-words flex items-center gap-2">
+                      {item.title}
+                      {item.is_default && (
+                        <span className="inline-block bg-red-50 text-red-600 text-xs font-bold px-2 py-0.5 rounded-full shrink-0">
+                          デフォルト
+                        </span>
+                      )}
+                    </h3>
                     <div className="flex items-center gap-3 shrink-0">
+                      <button
+                        onClick={() => handleSetDefault(item.id, !item.is_default)}
+                        className={`text-xs ${item.is_default ? "text-gray-400 hover:text-gray-600" : "text-red-500 hover:text-red-700"}`}
+                      >
+                        {item.is_default ? "デフォルト解除" : "デフォルトに設定"}
+                      </button>
                       <button onClick={() => startEdit(item)} className="text-xs text-gray-500 hover:text-gray-700">
                         編集
                       </button>

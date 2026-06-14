@@ -60,7 +60,11 @@ export async function POST(request: NextRequest) {
     const urls = extractUrls(extra_prompt ?? "");
     const webContents = await fetchWebContents(urls);
 
-    const extraContext: ExtraContext = { userPrompt: extra_prompt, webContents, imageUrls };
+    // デフォルトに設定されたAIプロンプト（あれば）を常に最優先指示の先頭に適用する
+    const { data: defaultPrompt } = await supabase.from("ai_prompts").select("content").eq("is_default", true).maybeSingle();
+    const userPrompt = [defaultPrompt?.content?.trim(), extra_prompt?.trim()].filter(Boolean).join("\n\n");
+
+    const extraContext: ExtraContext = { userPrompt, webContents, imageUrls };
 
     let title: string;
     let content: string;
