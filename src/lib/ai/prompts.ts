@@ -90,7 +90,7 @@ export function buildIntroductionArticlePrompt(service: {
 }, extra?: ExtraContext) {
   const referralGuide =
     service.referral_code || service.referral_link
-      ? `「🚀 登録方法・始め方」の最後のステップで、紹介コード・紹介リンクの使い方を自然に案内してください。${service.referral_code ? `紹介コード「${service.referral_code}」を記載する箇所は \`==${service.referral_code}==\` のように記述してください。` : ""}`
+      ? `「🚀 登録方法・始め方」の最後のステップで、紹介コード・紹介リンクの使い方を自然に案内してください。${service.referral_code ? `紹介コード「${service.referral_code}」を記載する箇所は、バッククォートやコードブロックで囲まず、==${service.referral_code}== の形式（半角イコール2つで前後を囲む）でそのまま記述してください。` : ""}`
       : "紹介コード・紹介リンクは提供されていないため、公式サイトからの通常の登録手順のみを案内してください。";
 
   return `${buildExtraContextSection(extra)}「${service.name}」のサービス紹介記事の本文を書いてください。
@@ -173,7 +173,7 @@ ${infoLines.map((l) => `- ${l}`).join("\n")}
 この招待コード・紹介リンクを使うとどんな特典が受け取れるかを、具体的な金額・ポイント数を交えて紹介（200〜300字）。
 
 ## 📋 招待コード・招待リンクの使い方
-登録時に招待コードを入力する手順、または招待リンクから登録する手順を3〜5ステップの番号付きリストで説明（300〜450字）。${service.referral_code ? `招待コード「${service.referral_code}」を記載する箇所は \`==${service.referral_code}==\` のように記述してください。` : ""}
+登録時に招待コードを入力する手順、または招待リンクから登録する手順を3〜5ステップの番号付きリストで説明（300〜450字）。${service.referral_code ? `招待コード「${service.referral_code}」を記載する箇所は、バッククォートやコードブロックで囲まず、==${service.referral_code}== の形式（半角イコール2つで前後を囲む）でそのまま記述してください。` : ""}
 
 ## 💰 もらえる特典の詳細
 新規登録特典・キャンペーン特典の受け取り条件や反映タイミングなどを説明（250〜350字）。
