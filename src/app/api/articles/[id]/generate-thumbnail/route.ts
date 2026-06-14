@@ -24,7 +24,8 @@ export async function POST(request: NextRequest, props: RouteContext<"/api/artic
     .single();
 
   try {
-    let prompt = buildThumbnailPrompt(service?.name ?? "", article.article_type, article.title);
+    const { data: defaultThumbnailPrompt } = await supabase.from("ai_prompts").select("content").eq("category", "thumbnail").eq("is_default", true).maybeSingle();
+    let prompt = buildThumbnailPrompt(service?.name ?? "", article.article_type, article.title, defaultThumbnailPrompt?.content);
     if (feedback?.trim()) {
       prompt += `\n\n【追加の指示】\n${feedback.trim()}`;
     }

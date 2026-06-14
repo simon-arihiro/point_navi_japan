@@ -22,6 +22,7 @@ export async function PUT(request: NextRequest) {
     hide_articles_on_inactive,
     ai_multi_provider_enabled,
     ai_provider_settings,
+    thumbnail_auto_generate,
   } = body;
 
   const { data, error } = await supabase
@@ -36,6 +37,7 @@ export async function PUT(request: NextRequest) {
       hide_articles_on_inactive,
       ai_multi_provider_enabled,
       ai_provider_settings,
+      thumbnail_auto_generate,
     })
     .eq("id", 1)
     .select()

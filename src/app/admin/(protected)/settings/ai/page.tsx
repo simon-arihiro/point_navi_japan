@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { AI_TASKS, AI_PROVIDERS, DEFAULT_AI_PROVIDER_SETTINGS, providersForTask } from "@/lib/ai/providers";
-import type { AiPrompt, AiProviderId, AiTaskId } from "@/types/database";
+import type { AiPrompt, AiProviderId, AiPromptCategory, AiTaskId } from "@/types/database";
 
 export default function AdminAiSettingsPage() {
   const [settings, setSettings] = useState<any>(null);
@@ -40,6 +40,10 @@ export default function AdminAiSettingsPage() {
 
   const toggleMultiEnabled = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSettings((prev: any) => ({ ...prev, ai_multi_provider_enabled: e.target.checked }));
+  };
+
+  const toggleThumbnailAutoGenerate = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSettings((prev: any) => ({ ...prev, thumbnail_auto_generate: e.target.checked }));
   };
 
   const handleSave = async () => {
@@ -149,6 +153,29 @@ export default function AdminAiSettingsPage() {
         </div>
       </div>
 
+      <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-4 mt-6">
+        <div>
+          <h2 className="text-lg font-bold text-gray-900">アイキャッチ画像の自動生成</h2>
+          <p className="text-xs text-gray-400 mt-1">AIによる記事生成と連動するアイキャッチ画像の動作を設定します</p>
+        </div>
+
+        <div className="flex items-start gap-3">
+          <input
+            type="checkbox"
+            id="thumbnail_auto_generate"
+            checked={settings?.thumbnail_auto_generate ?? true}
+            onChange={toggleThumbnailAutoGenerate}
+            className="w-4 h-4 mt-0.5 text-red-600 shrink-0"
+          />
+          <label htmlFor="thumbnail_auto_generate" className="text-sm">
+            <span className="font-medium text-gray-700">記事生成時にアイキャッチ画像を自動生成する</span>
+            <p className="text-xs text-gray-400 mt-0.5">
+              オフにすると、AI記事生成後の画像自動生成をスキップします（記事本文の生成自体には影響しません）。記事編集画面からはいつでも手動で再生成できます。
+            </p>
+          </label>
+        </div>
+      </div>
+
       <button
         onClick={handleSave}
         disabled={saving}
@@ -167,8 +194,14 @@ export default function AdminAiSettingsPage() {
   );
 }
 
+const PROMPT_CATEGORIES: { id: AiPromptCategory; label: string; description: string }[] = [
+  { id: "article", label: "記事本文用", description: "AI記事生成のたびに、デフォルトに設定したプロンプトが最優先指示として自動的に適用されます" },
+  { id: "thumbnail", label: "サムネイル画像用", description: "アイキャッチ画像生成のたびに、デフォルトに設定したプロンプトがスタイル指定として自動的に適用されます" },
+];
+
 // AIにコンテンツ作成を依頼する際に参考にするプロンプトを保存・閲覧するライブラリ
 function AiPromptLibrary() {
+  const [category, setCategory] = useState<AiPromptCategory>("article");
   const [items, setItems] = useState<AiPrompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
@@ -181,10 +214,11 @@ function AiPromptLibrary() {
   const [editSaving, setEditSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/ai-prompts")
+    setLoading(true);
+    fetch(`/api/ai-prompts?category=${category}`)
       .then((r) => r.json())
       .then(({ data }) => { setItems(data ?? []); setLoading(false); });
-  }, []);
+  }, [category]);
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -195,7 +229,7 @@ function AiPromptLibrary() {
       const res = await fetch("/api/ai-prompts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: title.trim(), content }),
+        body: JSON.stringify({ title: title.trim(), content, category }),
       });
       const json = await res.json();
       if (res.ok) {
@@ -258,12 +292,31 @@ function AiPromptLibrary() {
     }
   };
 
+  const currentCategory = PROMPT_CATEGORIES.find((c) => c.id === category)!;
+
   return (
     <div className="mt-10">
       <h2 className="text-lg font-bold text-gray-900 mb-1">AIプロンプトライブラリ</h2>
       <p className="text-xs text-gray-400 mb-4">
-        AIにコンテンツ作成を依頼する際に参考にするプロンプトを保存・閲覧できます。「デフォルト」に設定したプロンプトは、AI記事生成のたびに最優先指示として自動的に適用されます。
+        AIにコンテンツ作成を依頼する際に参考にするプロンプトを保存・閲覧できます。{currentCategory.description}。
       </p>
+
+      <div className="flex gap-2 mb-4 text-sm">
+        {PROMPT_CATEGORIES.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => setCategory(c.id)}
+            className={`px-4 py-2 rounded-xl border ${
+              category === c.id
+                ? "bg-white border-gray-100 font-bold text-gray-900"
+                : "text-gray-500 border-transparent hover:bg-white hover:border-gray-100"
+            }`}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
 
       <form onSubmit={handleAdd} className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6 space-y-3">
         <h3 className="font-bold text-gray-900 text-sm">新規追加</h3>

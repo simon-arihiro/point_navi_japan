@@ -16,21 +16,26 @@ const ARTICLE_TYPE_THEME: Record<ArticleType, string> = {
   invitation: "招待コード・プレゼントでお得な特典を受け取るイメージ",
 };
 
-// 記事のアイキャッチ画像用のGeminiプロンプトを生成する
-export function buildThumbnailPrompt(serviceName: string, articleType: ArticleType, title: string): string {
+// 記事のアイキャッチ画像用のGeminiプロンプトを生成する。
+// defaultStyleはAIプロンプトライブラリ（サムネイル用）でデフォルト設定されたスタイル指示。指定時は基本スタイル指定の代わりに使用する
+export function buildThumbnailPrompt(serviceName: string, articleType: ArticleType, title: string, defaultStyle?: string): string {
   const theme = ARTICLE_TYPE_THEME[articleType] ?? "";
+
+  const styleSection = defaultStyle?.trim()
+    ? `スタイル指定:\n${defaultStyle.trim()}`
+    : `スタイル指定:
+- 親しみやすいフラットデザインのイラスト
+- 暖色系（オレンジ・ゴールド・黄色）を基調とした配色
+- スマホ・ポイントカード・コインなどのモチーフを使ってもよい
+- 文字・ロゴ・ブランド名・ウォーターマークは一切含めない
+- 16:9の横長構図、シンプルな背景`;
 
   return `日本のポイ活（ポイント活動）ブログ記事用のアイキャッチ画像を1枚生成してください。
 記事タイトル: 「${title}」
 対象サービス: ${serviceName}
 イメージ: ${theme}
 
-スタイル指定:
-- 親しみやすいフラットデザインのイラスト
-- 暖色系（オレンジ・ゴールド・黄色）を基調とした配色
-- スマホ・ポイントカード・コインなどのモチーフを使ってもよい
-- 文字・ロゴ・ブランド名・ウォーターマークは一切含めない
-- 16:9の横長構図、シンプルな背景`;
+${styleSection}`;
 }
 
 // 設定されたAIプロバイダーで画像を生成してStorageに保存し、公開URLを返す。

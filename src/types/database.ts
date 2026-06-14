@@ -20,6 +20,9 @@ export type AiTaskId = "autofill" | "image" | "article";
 export type AiProviderId = "gemini" | "claude";
 // タスクごとの優先順位付きプロバイダー一覧
 export type AiProviderSettings = Record<AiTaskId, AiProviderId[]>;
+// AIプロンプトライブラリの用途: 記事本文生成 / サムネイル画像生成
+export type AiPromptCategory = "article" | "thumbnail";
+
 
 export interface Service {
   id: string;
@@ -156,6 +159,7 @@ export interface SystemSettings {
   hide_articles_on_inactive: boolean;
   ai_multi_provider_enabled: boolean;
   ai_provider_settings: AiProviderSettings;
+  thumbnail_auto_generate: boolean;
   updated_at: string;
 }
 
@@ -163,6 +167,7 @@ export interface AiPrompt {
   id: string;
   title: string;
   content: string;
+  category: AiPromptCategory;
   is_default: boolean;
   created_at: string;
   updated_at: string;

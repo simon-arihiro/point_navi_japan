@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
     const webContents = await fetchWebContents(urls);
 
     // デフォルトに設定されたAIプロンプト（あれば）を常に最優先指示の先頭に適用する
-    const { data: defaultPrompt } = await supabase.from("ai_prompts").select("content").eq("is_default", true).maybeSingle();
+    const { data: defaultPrompt } = await supabase.from("ai_prompts").select("content").eq("category", "article").eq("is_default", true).maybeSingle();
     const userPrompt = [defaultPrompt?.content?.trim(), extra_prompt?.trim()].filter(Boolean).join("\n\n");
 
     const extraContext: ExtraContext = { userPrompt, webContents, imageUrls };
@@ -168,25 +168,29 @@ export async function POST(request: NextRequest) {
     // アイキャッチ画像生成はGemini呼び出しのレート制限待ちもあり時間がかかるため、
     // レスポンスを先に返したうえでafter()内で実行する（失敗してもクライアントの記事生成自体は成功扱いのまま）
     after(async () => {
-      try {
-        const thumbnailPrompt = buildThumbnailPrompt(service.name, type, title);
-        const thumbnailUrl = await generateThumbnailImage(thumbnailPrompt, service_id);
-        if (thumbnailUrl) {
-          const updatedContent = placeImageAtTop(content, title, thumbnailUrl);
-          await supabase.from("articles").update({ featured_image_url: thumbnailUrl, content: updatedContent }).eq("id", articleId);
+      const { data: settings } = await supabase.from("system_settings").select("thumbnail_auto_generate").eq("id", 1).single();
+      if (settings?.thumbnail_auto_generate !== false) {
+        try {
+          const { data: defaultThumbnailPrompt } = await supabase.from("ai_prompts").select("content").eq("category", "thumbnail").eq("is_default", true).maybeSingle();
+          const thumbnailPrompt = buildThumbnailPrompt(service.name, type, title, defaultThumbnailPrompt?.content);
+          const thumbnailUrl = await generateThumbnailImage(thumbnailPrompt, service_id);
+          if (thumbnailUrl) {
+            const updatedContent = placeImageAtTop(content, title, thumbnailUrl);
+            await supabase.from("articles").update({ featured_image_url: thumbnailUrl, content: updatedContent }).eq("id", articleId);
+          }
+        } catch (thumbErr) {
+          console.error("thumbnail generation failed:", thumbErr);
+          await supabase.from("admin_notifications").insert({
+            type: "image_failed",
+            payload: {
+              article_id: articleId,
+              service_id,
+              service_name: service.name,
+              reason: thumbErr instanceof GeminiQuotaExceededError ? "quota_exceeded" : "error",
+              detail: String(thumbErr),
+            },
+          });
         }
-      } catch (thumbErr) {
-        console.error("thumbnail generation failed:", thumbErr);
-        await supabase.from("admin_notifications").insert({
-          type: "image_failed",
-          payload: {
-            article_id: articleId,
-            service_id,
-            service_name: service.name,
-            reason: thumbErr instanceof GeminiQuotaExceededError ? "quota_exceeded" : "error",
-            detail: String(thumbErr),
-          },
-        });
       }
 
       await supabase.from("admin_notifications").insert({
