@@ -68,9 +68,6 @@ export default async function HomePage() {
               <Link href="/services" className="bg-slate-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-slate-800 transition-colors">
                 サービス一覧を見る
               </Link>
-              <Link href="/ranking" className="bg-brand-400 text-slate-900 font-bold px-6 py-3 rounded-xl border border-brand-300 hover:bg-brand-500 transition-colors">
-                ランキングを見る
-              </Link>
             </div>
           </div>
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -125,9 +122,6 @@ export default async function HomePage() {
                     <RankingListItem key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} rank={i + 1} />
                   ))}
                 </div>
-                <Link href="/ranking" className="block text-center text-brand-700 font-medium text-sm hover:underline mt-3 pt-3 border-t border-gray-50">
-                  ランキングをすべて見る →
-                </Link>
               </div>
             )}
 

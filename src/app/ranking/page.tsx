@@ -3,6 +3,7 @@ import { calcHotScore, calcProfitScore } from "@/lib/ranking";
 import { getServiceStatsMap } from "@/lib/analytics";
 import ServiceCard from "@/components/ServiceCard";
 import Sidebar from "@/components/Sidebar";
+import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,6 +12,9 @@ export const metadata: Metadata = {
 };
 
 export default async function RankingPage(props: PageProps<"/ranking">) {
+  // このページは一時的に非表示にしている
+  notFound();
+
   const searchParams = await props.searchParams;
   const type = searchParams.type === "profit" ? "profit" : "hot";
 
