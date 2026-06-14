@@ -67,6 +67,13 @@ export async function POST() {
       }
     }
 
+    // `==テキスト==`（バッククォート付き）になっている箇所は、赤字強調が効かないため`==テキスト==`に修正する
+    const BACKTICKED_HIGHLIGHT = /`==([^=\n]+)==`/g;
+    if (BACKTICKED_HIGHLIGHT.test(content)) {
+      content = content.replace(BACKTICKED_HIGHLIGHT, "==$1==");
+      changed = true;
+    }
+
     if (!changed) continue;
 
     const { error: updateError } = await supabase.from("articles").update({ content }).eq("id", article.id);
