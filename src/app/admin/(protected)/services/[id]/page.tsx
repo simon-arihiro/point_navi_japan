@@ -6,6 +6,7 @@ import { Category, resolveCategoryIds } from "@/lib/categories";
 import CategorySelector from "@/components/admin/CategorySelector";
 import { toDatetimeLocalValue, fromDatetimeLocalValue } from "@/lib/campaign";
 import PromptInputWithImages, { PendingImage } from "@/components/admin/PromptInputWithImages";
+import { getArticleStatusLabel } from "@/lib/articleTypes";
 
 export default function EditServicePage() {
   const params = useParams();
@@ -27,6 +28,7 @@ export default function EditServicePage() {
   const [genImages, setGenImages] = useState<PendingImage[]>([]);
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState("");
+  const [existingArticles, setExistingArticles] = useState<{ article_type: string; status: string }[]>([]);
 
   useEffect(() => {
     fetch(`/api/services/${id}`)
@@ -43,6 +45,12 @@ export default function EditServicePage() {
       .then((res) => res.json())
       .then(({ data }) => setAllCategories(data ?? []));
   }, []);
+
+  useEffect(() => {
+    fetch(`/api/articles?service_id=${id}&limit=100`)
+      .then((res) => res.json())
+      .then(({ data }) => setExistingArticles((data ?? []).map((a: any) => ({ article_type: a.article_type, status: a.status }))));
+  }, [id]);
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm((prev: any) => ({ ...prev, [key]: e.target.value }));
@@ -149,6 +157,18 @@ export default function EditServicePage() {
 
   // AI記事生成: プロンプト・参考URL・添付画像をもとに記事を生成し、審査待ちとして保存する
   const handleGenerate = async () => {
+    if (genType === "introduction" || genType === "invitation") {
+      const existing = existingArticles.find((a) => a.article_type === genType);
+      if (existing) {
+        const label = genType === "introduction" ? "紹介記事" : "招待記事";
+        const ok = confirm(
+          `既に${label}が存在します（ステータス: ${getArticleStatusLabel(existing.status)}）。\n` +
+          `生成すると既存の${label}の内容が上書きされます。続行しますか？`
+        );
+        if (!ok) return;
+      }
+    }
+
     setGenError("");
     setGenerating(true);
 
