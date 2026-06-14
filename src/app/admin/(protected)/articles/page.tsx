@@ -1,7 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import ArticleListClient from "@/components/admin/ArticleListClient";
-import RefreshInvitationTitlesButton from "@/components/admin/RefreshInvitationTitlesButton";
+import UpdateExistingArticlesButton from "@/components/admin/UpdateExistingArticlesButton";
 import type { Category } from "@/types/database";
 
 export const metadata: Metadata = { title: "記事管理" };
@@ -67,7 +67,7 @@ export default async function AdminArticlesPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-black text-gray-900">記事管理</h1>
-        <RefreshInvitationTitlesButton />
+        <UpdateExistingArticlesButton />
       </div>
 
       <ArticleListClient articles={rows} allCategories={(categories ?? []).map((c) => ({ id: c.id, name: c.name }))} />

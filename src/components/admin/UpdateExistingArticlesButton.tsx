@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function RefreshInvitationTitlesButton() {
+export default function UpdateExistingArticlesButton() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export default function RefreshInvitationTitlesButton() {
         disabled={loading}
         className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
       >
-        {loading ? "更新中..." : "招待記事タイトルの年月を最新化"}
+        {loading ? "更新中..." : "既存記事を更新"}
       </button>
     </div>
   );
