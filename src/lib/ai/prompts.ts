@@ -219,8 +219,12 @@ export function buildRelatedArticlePrompt(
 最初の行にタイトル（# タイトル）を含めてください。${DESCRIPTION_SUFFIX_INSTRUCTION}`;
 }
 
-export function buildRewritePrompt(originalContent: string, feedback: string) {
-  return `以下の記事を管理者のフィードバックに基づいて書き直してください。
+export function buildRewritePrompt(originalContent: string, feedback: string, defaultPrompt?: string) {
+  const defaultSection = defaultPrompt?.trim()
+    ? `【最優先指示】管理者から以下の指示が常時設定されています。書き直しの際もこの指示を踏まえてください。\n${defaultPrompt.trim()}\n\n---\n\n`
+    : "";
+
+  return `${defaultSection}以下の記事を管理者のフィードバックに基づいて書き直してください。
 
 【フィードバック】
 ${feedback}

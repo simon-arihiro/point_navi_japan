@@ -15,7 +15,8 @@ export async function POST(request: NextRequest) {
   if (!article) return errorResponse(ErrorCode.ARTICLE_NOT_FOUND, "記事が見つかりません", 404);
 
   try {
-    const newContent = await generateTaskText("article", SYSTEM_PROMPT_BASE, buildRewritePrompt(article.content, feedback));
+    const { data: defaultPrompt } = await supabase.from("ai_prompts").select("content").eq("category", "article").eq("is_default", true).maybeSingle();
+    const newContent = await generateTaskText("article", SYSTEM_PROMPT_BASE, buildRewritePrompt(article.content, feedback, defaultPrompt?.content));
     const titleMatch = newContent.match(/^#\s+(.+)/m);
     const title = titleMatch ? titleMatch[1].trim() : article.title;
 
