@@ -10,7 +10,7 @@ import {
   ExtraContext,
 } from "@/lib/ai/prompts";
 import { extractUrls, fetchWebContents } from "@/lib/ai/webContent";
-import { buildThumbnailPrompt, generateThumbnailImage, replaceFirstImageUrl } from "@/lib/ai/thumbnail";
+import { buildThumbnailPrompt, generateThumbnailImage, placeImageAtTop } from "@/lib/ai/thumbnail";
 import { GeminiQuotaExceededError } from "@/lib/ai/gemini";
 import { uploadArticleImage } from "@/lib/storage";
 import { errorResponse, ErrorCode } from "@/lib/errors";
@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
         const thumbnailPrompt = buildThumbnailPrompt(service.name, type, title);
         const thumbnailUrl = await generateThumbnailImage(thumbnailPrompt, service_id);
         if (thumbnailUrl) {
-          const updatedContent = replaceFirstImageUrl(content, thumbnailUrl) ?? `![${title}](${thumbnailUrl})\n\n${content}`;
+          const updatedContent = placeImageAtTop(content, title, thumbnailUrl);
           await supabase.from("articles").update({ featured_image_url: thumbnailUrl, content: updatedContent }).eq("id", articleId);
         }
       } catch (thumbErr) {

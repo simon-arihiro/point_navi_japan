@@ -46,10 +46,17 @@ export async function generateThumbnailImage(prompt: string, serviceId: string):
   return url;
 }
 
-const FIRST_IMAGE_RE = /!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)/;
+// 本文先頭の画像（既存のアイキャッチ等）にマッチする正規表現
+const LEADING_IMAGE_RE = /^!\[([^\]]*)\]\((https?:\/\/[^\s)]+)\)\s*\n+/;
 
-// 本文内の最初の画像リンクを新しいURLに置き換える。画像が無ければnullを返す
-export function replaceFirstImageUrl(content: string, newUrl: string): string | null {
-  if (!FIRST_IMAGE_RE.test(content)) return null;
-  return content.replace(FIRST_IMAGE_RE, (_match, alt) => `![${alt}](${newUrl})`);
+// 生成したアイキャッチ画像を必ず本文の最前面に配置する。
+// 本文が既に画像から始まっている場合はその画像を新しいものに置き換え、
+// そうでない場合は先頭に新しい画像を追加する
+export function placeImageAtTop(content: string, title: string, newUrl: string): string {
+  const trimmed = content.trimStart();
+  const image = `![${title}](${newUrl})`;
+  if (LEADING_IMAGE_RE.test(trimmed)) {
+    return trimmed.replace(LEADING_IMAGE_RE, `${image}\n\n`);
+  }
+  return `${image}\n\n${trimmed}`;
 }
