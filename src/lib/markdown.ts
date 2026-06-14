@@ -64,4 +64,6 @@ export const ARTICLE_PROSE_CLASS =
   "prose prose-sm sm:prose-base max-w-none prose-slate " +
   "prose-headings:font-black prose-headings:text-slate-900 " +
   "prose-a:text-brand-700 prose-a:no-underline hover:prose-a:underline " +
-  "prose-strong:text-slate-900 prose-blockquote:border-brand-300 prose-img:rounded-xl";
+  "prose-strong:text-slate-900 prose-blockquote:border-brand-300 " +
+  // 縦長画像が記事内で過剰に大きく表示されないよう、高さに上限を設けて中央寄せにする
+  "prose-img:rounded-xl prose-img:mx-auto prose-img:w-auto prose-img:max-w-full prose-img:max-h-[32rem]";

@@ -222,13 +222,16 @@ export function buildRelatedArticlePrompt(
 最初の行にタイトル（# タイトル）を含めてください。${DESCRIPTION_SUFFIX_INSTRUCTION}`;
 }
 
-export function buildRewritePrompt(originalContent: string, feedback: string, defaultPrompt?: string, hasImages?: boolean) {
+export function buildRewritePrompt(originalContent: string, feedback: string, defaultPrompt?: string, imageUrls?: string[]) {
   const defaultSection = defaultPrompt?.trim()
     ? `【最優先指示】管理者から以下の指示が常時設定されています。書き直しの際もこの指示を踏まえてください。\n${defaultPrompt.trim()}\n\n---\n\n`
     : "";
 
-  const imageNote = hasImages
-    ? "\n\n管理者から参考画像が添付されています。画像の内容（画面の様子、キャンペーン情報、誤字、レイアウトなど）を踏まえてフィードバックに対応してください。"
+  const imageNote = imageUrls && imageUrls.length > 0
+    ? `\n\n管理者から参考画像が添付されています。画像の内容（画面の様子、キャンペーン情報、誤字、レイアウトなど）を踏まえてフィードバックに対応してください。
+フィードバックでこの画像を本文に挿入するよう指示されている場合は、内容に合った見出しの直後など適切な位置に ![説明](URL) の形式で挿入してください。画像は縦長の場合もあるため、無理に複数並べたりせず、文脈に合わせて1箇所に自然に配置してください。
+添付画像のURL（上から順）:
+${imageUrls.map((url) => `- ${url}`).join("\n")}`
     : "";
 
   return `${defaultSection}以下の記事を管理者のフィードバックに基づいて書き直してください。
