@@ -43,6 +43,7 @@ export async function POST(request: NextRequest) {
 
     return Response.json({ ok: true });
   } catch (err) {
-    return errorResponse(ErrorCode.AI_GENERATION_FAILED, "AI書き直しに失敗しました", 500);
+    const message = err instanceof Error ? err.message : String(err);
+    return errorResponse(ErrorCode.AI_GENERATION_FAILED, `AI書き直しに失敗しました: ${message}`, 500);
   }
 }

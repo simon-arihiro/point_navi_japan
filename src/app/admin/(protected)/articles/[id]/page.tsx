@@ -71,7 +71,7 @@ export default function AdminArticleDetailPage() {
   const handleRewrite = async () => {
     if (!feedback.trim()) return;
     setRewriting(true);
-    await fetch("/api/ai/rewrite", {
+    const res = await fetch("/api/ai/rewrite", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -80,9 +80,15 @@ export default function AdminArticleDetailPage() {
         images: feedbackImages.map((img) => ({ data: img.data, mediaType: img.mediaType })),
       }),
     });
+    if (!res.ok) {
+      const body = await res.json().catch(() => null);
+      alert(`AI書き直しに失敗しました: ${body?.error?.message ?? res.statusText}`);
+      setRewriting(false);
+      return;
+    }
     // 再取得
-    const res = await fetch(`/api/articles/${id}`);
-    const { data } = await res.json();
+    const res2 = await fetch(`/api/articles/${id}`);
+    const { data } = await res2.json();
     setArticle(data);
     setFeedback("");
     setFeedbackImages([]);
