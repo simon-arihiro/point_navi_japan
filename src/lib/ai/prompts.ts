@@ -193,7 +193,7 @@ ${infoLines.map((l) => `- ${l}`).join("\n")}
 - 「登録はこちら」「ぜひ使ってみてください」のような登録を促す文言は、記事全体で合計2回程度まで（##🎁の見出しと📋の使い方セクションなど）に留め、他の見出しでは繰り返さないこと。読者に何度も勧誘している印象を与えないようにする
 - 招待コード「${service.referral_code}」自体の記載も、記事全体で合計2回まで（##🎁の見出しと📋の使い方セクションのみ）に留めること。それ以外の見出しでは「招待コード」「上記のコード」のように言葉で言及するだけにし、コード番号そのものを繰り返し書かないこと
 - 全体で1500〜2200字程度
-- 個人ブロガーの体験談として書く${DESCRIPTION_SUFFIX_INSTRUCTION}`;
+- 個人ブロガーの体験談として書く${DESCRIPTION_SUFFIX_INSTRUCTION}${CATCH_COPY_SUFFIX_INSTRUCTION}`;
 }
 
 export function buildRelatedArticlePrompt(
@@ -258,4 +258,19 @@ export function splitContentAndDescription(raw: string): { content: string; desc
   const parts = raw.split(DESCRIPTION_DELIMITER);
   if (parts.length < 2) return { content: raw.trim(), description: "" };
   return { content: parts[0].trim(), description: parts.slice(1).join("").trim() };
+}
+
+// 招待コード記事生成プロンプトの末尾に付与する指示。招待コードカード用の2行キャッチコピーをSEO meta descriptionに続けて生成させる
+const CATCH_COPY_SUFFIX_INSTRUCTION = `
+
+【招待コードカード用キャッチコピー】
+SEO meta descriptionの出力後、さらに区切り行 "---CATCH_COPY---" を出力し、その次の2行に、招待コード一覧ページのカードに表示するキャッチコピーを出力してください。サービスの特徴・特典内容を踏まえた具体的な訴求文にし、各行20字以内、絵文字や記号は使わないでください。`;
+
+const CATCH_COPY_DELIMITER = /\n*---CATCH_COPY---\n*/;
+
+// SEO meta descriptionの出力を、description本体と招待コードカード用キャッチコピーに分割する。区切りが見つからない場合はcatchCopyをnullで返す
+export function splitDescriptionAndCatchCopy(raw: string): { description: string; catchCopy: string | null } {
+  const parts = raw.split(CATCH_COPY_DELIMITER);
+  if (parts.length < 2) return { description: raw.trim(), catchCopy: null };
+  return { description: parts[0].trim(), catchCopy: parts.slice(1).join("").trim() || null };
 }
