@@ -150,7 +150,10 @@ export default function InvitationCard({ article, categorySlug }: Props) {
             )}
           </div>
 
-          {publishedDate && <p className="text-[11px] text-gray-400 mt-auto pb-3">{publishedDate}</p>}
+          <div className="mt-auto pb-3">
+            <h3 className="text-xs text-gray-600 font-bold leading-snug line-clamp-2">{article.title}</h3>
+            {publishedDate && <p className="text-[11px] text-gray-400 mt-1">{publishedDate}</p>}
+          </div>
           </div>
         </div>
       </div>
