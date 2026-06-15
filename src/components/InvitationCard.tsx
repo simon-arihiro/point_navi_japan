@@ -94,7 +94,8 @@ export default function InvitationCard({ article, categorySlug }: Props) {
     : null;
 
   return (
-    <Link href={href} className="block h-full">
+    <div className="flex flex-col h-full">
+    <Link href={href} className="block flex-1">
       <div
         className="relative bg-white rounded-2xl border-4 overflow-hidden h-full flex flex-col transition-transform duration-200 ease-out hover:scale-[1.04] hover:shadow-lg hover:z-10"
         style={{ borderColor: hexToRgba(CARD_BORDER_COLOR, 0.35) }}
@@ -150,13 +151,12 @@ export default function InvitationCard({ article, categorySlug }: Props) {
             )}
           </div>
 
-          <div className="mt-auto pb-3">
-            <h3 className="text-xs text-gray-600 font-bold leading-snug line-clamp-2">{article.title}</h3>
-            {publishedDate && <p className="text-[11px] text-gray-400 mt-1">{publishedDate}</p>}
-          </div>
+          {publishedDate && <p className="text-[11px] text-gray-400 mt-auto pb-3">{publishedDate}</p>}
           </div>
         </div>
       </div>
     </Link>
+    <p className="text-xs text-gray-600 leading-snug line-clamp-2 mt-2 px-1 select-text">{article.title}</p>
+    </div>
   );
 }
