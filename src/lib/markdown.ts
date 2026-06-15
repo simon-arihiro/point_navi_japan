@@ -1,9 +1,20 @@
-import { marked } from "marked";
+import { marked, Parser } from "marked";
+
+// 見出し(h2/h3)にアンカー用のidを振るためのカウンター。renderMarkdown呼び出しごとにリセットする
+let headingCounter = 0;
 
 // AI生成記事はMarkdown本文をそのまま保存しているため、表示時にHTMLへ変換する。
 // 本文中に生のHTMLタグが含まれていても出力しない（XSS対策）。
 marked.use({
   renderer: {
+    heading(token) {
+      const text = this.parser.parseInline(token.tokens);
+      if (token.depth === 2 || token.depth === 3) {
+        const id = `section-${headingCounter++}`;
+        return `<h${token.depth} id="${id}">${text}</h${token.depth}>\n`;
+      }
+      return `<h${token.depth}>${text}</h${token.depth}>\n`;
+    },
     html() {
       return "";
     },
@@ -34,7 +45,33 @@ marked.use({
 });
 
 export function renderMarkdown(content: string): string {
+  headingCounter = 0;
   return marked.parse(content ?? "", { async: false }) as string;
+}
+
+export type TocItem = {
+  id: string;
+  text: string;
+  depth: number;
+};
+
+// 記事本文（Markdown）からh2/h3見出しを抽出し、renderMarkdownで振られるidと同じ規則でidを付与する
+export function extractHeadings(content: string): TocItem[] {
+  const tokens = marked.lexer(content ?? "");
+  const headings: TocItem[] = [];
+  let counter = 0;
+  for (const token of tokens) {
+    if (token.type === "heading" && (token.depth === 2 || token.depth === 3)) {
+      const html = Parser.parseInline(token.tokens ?? []) as string;
+      const text = html.replace(/<[^>]+>/g, "").trim();
+      headings.push({
+        id: `section-${counter++}`,
+        text,
+        depth: token.depth,
+      });
+    }
+  }
+  return headings;
 }
 
 // 記事本文（Markdown）内で最初に登場する画像のURLを抽出する（カード等のサムネイル表示用）

@@ -6,7 +6,8 @@ import ArticleCard from "@/components/ArticleCard";
 import HighlightServiceName from "@/components/HighlightServiceName";
 import { SearchCard, CategoryCard } from "@/components/Sidebar";
 import TrackView from "@/components/TrackView";
-import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
+import { renderMarkdown, extractHeadings, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
+import ArticleToc from "@/components/ArticleToc";
 import { getArticleViewCountsForIds } from "@/lib/analytics";
 import type { Metadata } from "next";
 
@@ -110,6 +111,7 @@ export default async function ArticlePage(
     : "";
 
   const service = article.primary_service;
+  const tocItems = extractHeadings(article.content);
 
   return (
     <div>
@@ -152,6 +154,13 @@ export default async function ArticlePage(
               </div>
             )}
 
+            {tocItems.length > 0 && (
+              <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-8">
+                <p className="font-bold text-gray-900 mb-3 text-sm">この記事の目次</p>
+                <ArticleToc items={tocItems} />
+              </div>
+            )}
+
             <div
               className={ARTICLE_PROSE_CLASS}
               dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
@@ -177,6 +186,13 @@ export default async function ArticlePage(
             {service && (
               <div className="lg:sticky lg:top-[116px]">
                 <ConversionArea service={service} />
+              </div>
+            )}
+
+            {tocItems.length > 0 && (
+              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+                <h3 className="font-bold text-gray-900 mb-4 text-sm">この記事の目次</h3>
+                <ArticleToc items={tocItems} />
               </div>
             )}
 
