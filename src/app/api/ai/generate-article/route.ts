@@ -211,6 +211,7 @@ export async function POST(request: NextRequest) {
       type: "ai_failed",
       payload: { service_id, error: String(err) },
     });
-    return errorResponse(ErrorCode.AI_GENERATION_FAILED, "AI記事生成に失敗しました", 500);
+    const message = err instanceof Error ? err.message : String(err);
+    return errorResponse(ErrorCode.AI_GENERATION_FAILED, `AI記事生成に失敗しました: ${message}`, 500);
   }
 }
