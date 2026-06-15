@@ -111,11 +111,15 @@ export default function ServiceListClient({ services, allCategories }: Props) {
     router.push(`/admin/articles/${articleId}`);
   };
 
-  // 招待コードカード用キャッチコピーが未設定のサービスに対し、AIで一括生成する（記事本文は変更しない）
-  const handleBulkGenerateCatchCopy = async () => {
-    const targets = localServices.filter((s) => s.invitationArticle && !s.catch_copy?.trim());
+  // 招待コードカード用キャッチコピーをAIで一括生成する（記事本文は変更しない）。
+  // onlyMissing=trueなら未設定のサービスのみ、falseなら招待記事のある全サービスを上書き対象にする
+  const handleBulkGenerateCatchCopy = async (onlyMissing: boolean) => {
+    const targets = localServices.filter((s) => s.invitationArticle && (!onlyMissing || !s.catch_copy?.trim()));
     if (targets.length === 0) return;
-    if (!confirm(`キャッチコピー未設定の${targets.length}件のサービスに対し、AIでキャッチコピーを生成します。よろしいですか？`)) return;
+    const message = onlyMissing
+      ? `キャッチコピー未設定の${targets.length}件のサービスに対し、AIでキャッチコピーを生成します。よろしいですか？`
+      : `招待記事のある全${targets.length}件のサービスのキャッチコピーを、既存の内容を上書きしてAIで再生成します。よろしいですか？`;
+    if (!confirm(message)) return;
 
     setBulkRunning(true);
     setBulkProgress({ done: 0, total: targets.length });
@@ -143,21 +147,35 @@ export default function ServiceListClient({ services, allCategories }: Props) {
   };
 
   const missingCatchCopyCount = localServices.filter((s) => s.invitationArticle && !s.catch_copy?.trim()).length;
+  const invitationServiceCount = localServices.filter((s) => s.invitationArticle).length;
 
   return (
     <div>
-      {missingCatchCopyCount > 0 && (
+      {invitationServiceCount > 0 && (
         <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm text-gray-600">
-            招待コードカード用キャッチコピーが未設定のサービスが <span className="font-bold text-gray-900">{missingCatchCopyCount}件</span> あります
+            {missingCatchCopyCount > 0
+              ? <>招待コードカード用キャッチコピーが未設定のサービスが <span className="font-bold text-gray-900">{missingCatchCopyCount}件</span> あります</>
+              : "招待コードカード用キャッチコピー"}
           </p>
-          <button
-            onClick={handleBulkGenerateCatchCopy}
-            disabled={bulkRunning}
-            className="bg-blue-600 text-white font-medium px-4 py-2 rounded-xl text-sm hover:bg-blue-700 transition-colors disabled:opacity-50"
-          >
-            {bulkRunning ? `生成中... (${bulkProgress.done}/${bulkProgress.total})` : "キャッチコピーを一括生成"}
-          </button>
+          <div className="flex flex-wrap gap-2">
+            {missingCatchCopyCount > 0 && (
+              <button
+                onClick={() => handleBulkGenerateCatchCopy(true)}
+                disabled={bulkRunning}
+                className="bg-blue-600 text-white font-medium px-4 py-2 rounded-xl text-sm hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {bulkRunning ? `生成中... (${bulkProgress.done}/${bulkProgress.total})` : "未設定分を一括生成"}
+              </button>
+            )}
+            <button
+              onClick={() => handleBulkGenerateCatchCopy(false)}
+              disabled={bulkRunning}
+              className="bg-gray-100 text-gray-700 font-medium px-4 py-2 rounded-xl text-sm hover:bg-gray-200 transition-colors disabled:opacity-50"
+            >
+              {bulkRunning ? `生成中... (${bulkProgress.done}/${bulkProgress.total})` : "全件を再生成（上書き）"}
+            </button>
+          </div>
         </div>
       )}
 
