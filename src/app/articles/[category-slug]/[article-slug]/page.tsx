@@ -51,7 +51,7 @@ export default async function ArticlePage(
 
   // 関連記事：1番目は本サービスの紹介記事、2〜5番目は本サービスの他記事（PV降順）、
   // 続いて手動で関連付けたサービスの記事（PV降順）、残りは他サービスの記事（紹介記事含む、PV降順）で最大10件まで埋める
-  const RELATED_LIMIT = 10;
+  const RELATED_LIMIT = 5;
   const OWN_OTHERS_LIMIT = 4;
   const relatedServiceIds = (article.related_services ?? []).map((r: { service_id: string }) => r.service_id);
 
@@ -189,13 +189,6 @@ export default async function ArticlePage(
               </div>
             )}
 
-            {tocItems.length > 0 && (
-              <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-                <h3 className="font-bold text-gray-900 mb-4 text-sm">この記事の目次</h3>
-                <ArticleToc items={tocItems} />
-              </div>
-            )}
-
             {related.length > 0 && (
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
                 <h3 className="font-bold text-gray-900 mb-4 text-sm">関連記事</h3>
@@ -208,6 +201,13 @@ export default async function ArticlePage(
             )}
 
             <CategoryCard categories={categories} />
+
+            {tocItems.length > 0 && (
+              <div className="lg:sticky lg:bottom-4 bg-white rounded-2xl p-5 shadow-sm border border-gray-100 max-h-[40vh] overflow-y-auto">
+                <h3 className="font-bold text-gray-900 mb-4 text-sm">この記事の目次</h3>
+                <ArticleToc items={tocItems} />
+              </div>
+            )}
           </aside>
         </div>
       </div>
