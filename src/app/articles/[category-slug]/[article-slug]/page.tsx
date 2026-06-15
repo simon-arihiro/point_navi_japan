@@ -183,11 +183,7 @@ export default async function ArticlePage(
           <aside className="space-y-6">
             <SearchCard />
 
-            {service && (
-              <div className="lg:sticky lg:top-[116px]">
-                <ConversionArea service={service} />
-              </div>
-            )}
+            {service && <ConversionArea service={service} />}
 
             {related.length > 0 && (
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
