@@ -48,6 +48,24 @@ const POSITIVE_MASCOTS = [
   "squirrel-coin-stack-sit.png",
 ];
 
+// サービスのcatch_copy未設定時、特典情報からそれっぽい2行コピーを組み立てる
+function buildFallbackCatchCopy(svc: any): string[] {
+  const bonusAmount = svc?.bonus_amount?.trim() || null;
+  if (svc?.bonus_points && bonusAmount) {
+    return [`新規登録で${svc.bonus_points.toLocaleString()}pt`, `（約${bonusAmount}円相当）獲得！`];
+  }
+  if (svc?.bonus_points) {
+    return ["新規登録で", `${svc.bonus_points.toLocaleString()}ptもらえる！`];
+  }
+  if (bonusAmount) {
+    return ["新規登録で", `約${bonusAmount}円相当もらえる！`];
+  }
+  if (svc?.campaign_bonus) {
+    return ["今がチャンス！", "キャンペーン実施中"];
+  }
+  return ["新規登録は", "お得！"];
+}
+
 function pickMascot(seed: string) {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
@@ -89,9 +107,10 @@ export default function InvitationCard({ article, categorySlug }: Props) {
 
   const mascot = pickMascot(svc?.id ?? article.id);
 
-  const catchCopyLines: string[] | null = svc?.catch_copy?.trim()
-    ? svc.catch_copy.trim().split("\n").map((l: string) => l.trim()).filter(Boolean).slice(0, 2)
-    : null;
+  const catchCopyLines: string[] =
+    (svc?.catch_copy?.trim()
+      ? svc.catch_copy.trim().split("\n").map((l: string) => l.trim()).filter(Boolean).slice(0, 2)
+      : null) ?? buildFallbackCatchCopy(svc);
 
   return (
     <div className="flex flex-col h-full">
@@ -117,17 +136,11 @@ export default function InvitationCard({ article, categorySlug }: Props) {
           <div className="px-3 flex flex-col gap-2 flex-1">
           {/* 訴求文＋マスコット */}
           <div className="flex items-center justify-between gap-2">
-            {catchCopyLines ? (
-              <p className="font-black text-gray-900 text-base leading-snug">
-                {catchCopyLines.map((line, i) => (
-                  <span key={i} className="block">{line}</span>
-                ))}
-              </p>
-            ) : (
-              <p className="font-black text-gray-900 text-xl leading-snug whitespace-nowrap">
-                新規登録は<span style={{ color: bgColor }}>お得</span>！
-              </p>
-            )}
+            <p className="font-black text-gray-900 text-base leading-snug">
+              {catchCopyLines.map((line, i) => (
+                <span key={i} className="block">{line}</span>
+              ))}
+            </p>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`/mascot/library/${mascot}`} alt="" className="w-20 h-20 object-contain shrink-0" />
           </div>
@@ -156,7 +169,9 @@ export default function InvitationCard({ article, categorySlug }: Props) {
         </div>
       </div>
     </Link>
-    <p className="text-xs text-gray-600 leading-snug line-clamp-2 mt-2 px-1 select-text">{article.title}</p>
+    <Link href={href} className="text-base text-gray-700 font-bold leading-snug line-clamp-2 mt-2 px-1 hover:underline">
+      {article.title}
+    </Link>
     </div>
   );
 }
