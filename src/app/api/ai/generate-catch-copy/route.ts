@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const raw = await generateTaskText("article", SYSTEM_PROMPT_BASE, buildCatchCopyPrompt(service));
-    const catchCopy = raw.trim().split("\n").map((l) => l.trim()).filter(Boolean).slice(0, 2).join("\n");
+    const catchCopy = raw.trim().split("\n").map((l) => l.trim().slice(0, 15)).filter(Boolean).slice(0, 2).join("\n");
     if (!catchCopy) return errorResponse(ErrorCode.AI_GENERATION_FAILED, "キャッチコピーの生成結果が空でした", 500);
 
     await supabase.from("services").update({ catch_copy: catchCopy }).eq("id", service_id);

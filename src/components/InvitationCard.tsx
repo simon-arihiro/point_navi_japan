@@ -109,7 +109,7 @@ export default function InvitationCard({ article, categorySlug }: Props) {
 
   const catchCopyLines: string[] =
     (svc?.catch_copy?.trim()
-      ? svc.catch_copy.trim().split("\n").map((l: string) => l.trim()).filter(Boolean).slice(0, 2)
+      ? svc.catch_copy.trim().split("\n").map((l: string) => l.trim().slice(0, 15)).filter(Boolean).slice(0, 2)
       : null) ?? buildFallbackCatchCopy(svc);
 
   return (
