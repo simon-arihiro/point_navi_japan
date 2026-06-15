@@ -139,17 +139,11 @@ export function buildCatchCopyPrompt(service: {
   bonus_amount: string | null;
   campaign_bonus: string | null;
 }) {
-  const infoLines = [`サービス概要: ${service.description}`];
-  if (service.bonus_points) infoLines.push(`新規登録特典: ${service.bonus_points.toLocaleString()}pt`);
-  if (service.bonus_amount?.trim()) infoLines.push(`特典の金額目安: 約${service.bonus_amount}円相当`);
-  if (service.campaign_bonus?.trim()) infoLines.push(`現在実施中のキャンペーン: ${service.campaign_bonus}`);
-
   return `「${service.name}」の招待コード一覧ページのカードに表示するキャッチコピーを作成してください。
 
-${infoLines.map((l) => `- ${l}`).join("\n")}
+- サービス概要: ${service.description}
 
-【出力形式】
-2行のテキストのみを出力してください（前置き・説明・記号は一切不要）。各行15字以内（厳守）、絵文字や記号は使わないこと。サービスの特徴・特典内容を踏まえた具体的な訴求文にすること。`;
+${CATCH_COPY_RULES}`;
 }
 
 export function buildInvitationArticlePrompt(service: {
@@ -282,11 +276,20 @@ export function splitContentAndDescription(raw: string): { content: string; desc
   return { content: parts[0].trim(), description: parts.slice(1).join("").trim() };
 }
 
+// 招待コードカード用キャッチコピーの共通ルール（記事生成時・既存サービスの一括生成時の両方で使用）
+const CATCH_COPY_RULES = `【キャッチコピーのルール】
+- 2行のテキストのみを出力すること（前置き・説明・記号は一切不要）
+- 各行15字以内（厳守）。文字数を数えてから出力し、15字を超える場合や、文の途中で切れて不完全・不自然になる場合は、15字以内で意味が通る完結した文になるよう書き直してから出力すること
+- ポイント数・金額・キャンペーン名などの数字情報は含めないこと（数字情報は別の場所に表示されるため）
+- サービスの特徴・強み・メリットを端的に伝える訴求文にすること
+- 絵文字や記号は使わないこと`;
+
 // 招待コード記事生成プロンプトの末尾に付与する指示。招待コードカード用の2行キャッチコピーをSEO meta descriptionに続けて生成させる
 const CATCH_COPY_SUFFIX_INSTRUCTION = `
 
 【招待コードカード用キャッチコピー（必須）】
-SEO meta descriptionの出力後、必ず区切り行 "---CATCH_COPY---" を出力し、その次の2行に、招待コード一覧ページのカードに表示するキャッチコピーを出力してください（この出力は省略しないこと）。サービスの特徴・特典内容を踏まえた具体的な訴求文にし、各行15字以内（厳守）、絵文字や記号は使わないでください。`;
+SEO meta descriptionの出力後、必ず区切り行 "---CATCH_COPY---" を出力し、その次の2行に、招待コード一覧ページのカードに表示するキャッチコピーを出力してください（この出力は省略しないこと）。
+${CATCH_COPY_RULES}`;
 
 const CATCH_COPY_DELIMITER = /\n*---CATCH_COPY---\n*/;
 
