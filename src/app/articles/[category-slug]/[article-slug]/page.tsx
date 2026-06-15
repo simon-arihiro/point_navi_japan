@@ -156,8 +156,12 @@ export default async function ArticlePage(
 
             {tocItems.length > 0 && (
               <div className="bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-8">
-                <p className="font-bold text-gray-900 mb-3 text-sm">この記事の目次</p>
-                <ArticleToc items={tocItems} />
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <p className="font-black text-gray-900 text-2xl">この記事の目次</p>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+                <ArticleToc items={tocItems} className="text-lg" />
               </div>
             )}
 
@@ -200,8 +204,12 @@ export default async function ArticlePage(
 
             {tocItems.length > 0 && (
               <div className="lg:sticky lg:top-[116px] bg-white rounded-2xl p-5 shadow-sm border border-gray-100 max-h-[calc(100vh-140px)] overflow-y-auto">
-                <h3 className="font-bold text-gray-900 mb-4 text-sm">この記事の目次</h3>
-                <ArticleToc items={tocItems} />
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px bg-gray-200" />
+                  <h3 className="font-black text-gray-900 text-2xl">この記事の目次</h3>
+                  <div className="flex-1 h-px bg-gray-200" />
+                </div>
+                <ArticleToc items={tocItems} className="text-lg" />
               </div>
             )}
           </aside>

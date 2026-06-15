@@ -10,8 +10,8 @@ export default function ArticleToc({ items, className }: Props) {
   if (items.length === 0) return null;
 
   return (
-    <nav className={className} aria-label="目次">
-      <ul className="space-y-2 text-sm">
+    <nav aria-label="目次">
+      <ul className={`space-y-2 ${className ?? "text-sm"}`}>
         {items.map((item) => (
           <li key={item.id} className={item.depth === 3 ? "ml-4" : ""}>
             <a href={`#${item.id}`} className="text-brand-700 hover:underline">
