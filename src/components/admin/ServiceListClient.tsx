@@ -21,6 +21,9 @@ type ServiceRow = {
   referral_link: string | null;
   bonus_points: number | null;
   bonus_amount: string | null;
+  campaign_bonus: string | null;
+  catch_copy: string | null;
+  description: string;
   created_at: string;
   categories: CategoryOption[];
   articleCount: number;
@@ -58,6 +61,8 @@ export default function ServiceListClient({ services, allCategories }: Props) {
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [query, setQuery] = useState("");
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [bulkRunning, setBulkRunning] = useState(false);
+  const [bulkProgress, setBulkProgress] = useState({ done: 0, total: 0 });
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -106,6 +111,30 @@ export default function ServiceListClient({ services, allCategories }: Props) {
     router.push(`/admin/articles/${articleId}`);
   };
 
+  // 招待コードカード用キャッチコピーが未設定のサービスに対し、AIで一括生成する（記事本文は変更しない）
+  const handleBulkGenerateCatchCopy = async () => {
+    const targets = localServices.filter((s) => s.invitationArticle && !s.catch_copy?.trim());
+    if (targets.length === 0) return;
+    if (!confirm(`キャッチコピー未設定の${targets.length}件のサービスに対し、AIでキャッチコピーを生成します。よろしいですか？`)) return;
+
+    setBulkRunning(true);
+    setBulkProgress({ done: 0, total: targets.length });
+
+    for (const svc of targets) {
+      const res = await fetch("/api/ai/generate-catch-copy", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ service_id: svc.id }),
+      });
+      if (res.ok) {
+        const { catch_copy } = await res.json();
+        setLocalServices((prev) => prev.map((s) => (s.id === svc.id ? { ...s, catch_copy } : s)));
+      }
+      setBulkProgress((prev) => ({ ...prev, done: prev.done + 1 }));
+    }
+    setBulkRunning(false);
+  };
+
   // 関連記事一覧を該当サービスで絞り込んで開く
   const goToRelatedArticles = (e: React.MouseEvent, svc: ServiceRow) => {
     e.preventDefault();
@@ -113,8 +142,25 @@ export default function ServiceListClient({ services, allCategories }: Props) {
     router.push(`/admin/articles?q=${encodeURIComponent(svc.name)}`);
   };
 
+  const missingCatchCopyCount = localServices.filter((s) => s.invitationArticle && !s.catch_copy?.trim()).length;
+
   return (
     <div>
+      {missingCatchCopyCount > 0 && (
+        <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm text-gray-600">
+            招待コードカード用キャッチコピーが未設定のサービスが <span className="font-bold text-gray-900">{missingCatchCopyCount}件</span> あります
+          </p>
+          <button
+            onClick={handleBulkGenerateCatchCopy}
+            disabled={bulkRunning}
+            className="bg-blue-600 text-white font-medium px-4 py-2 rounded-xl text-sm hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            {bulkRunning ? `生成中... (${bulkProgress.done}/${bulkProgress.total})` : "キャッチコピーを一括生成"}
+          </button>
+        </div>
+      )}
+
       <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 mb-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div>
           <label className="block text-xs font-medium text-gray-500 mb-1">検索</label>

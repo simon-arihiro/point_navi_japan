@@ -131,6 +131,27 @@ ${service.referral_link ? `- 紹介リンク: ${service.referral_link}` : ""}
 - 個人ブロガーの体験談として書く${DESCRIPTION_SUFFIX_INSTRUCTION}`;
 }
 
+// 招待コード一覧ページのカードに表示する2行キャッチコピーのみを生成するプロンプト（既存サービスの一括バックフィル用）
+export function buildCatchCopyPrompt(service: {
+  name: string;
+  description: string;
+  bonus_points: number | null;
+  bonus_amount: string | null;
+  campaign_bonus: string | null;
+}) {
+  const infoLines = [`サービス概要: ${service.description}`];
+  if (service.bonus_points) infoLines.push(`新規登録特典: ${service.bonus_points.toLocaleString()}pt`);
+  if (service.bonus_amount?.trim()) infoLines.push(`特典の金額目安: 約${service.bonus_amount}円相当`);
+  if (service.campaign_bonus?.trim()) infoLines.push(`現在実施中のキャンペーン: ${service.campaign_bonus}`);
+
+  return `「${service.name}」の招待コード一覧ページのカードに表示するキャッチコピーを作成してください。
+
+${infoLines.map((l) => `- ${l}`).join("\n")}
+
+【出力形式】
+2行のテキストのみを出力してください（前置き・説明・記号は一切不要）。各行20字以内、絵文字や記号は使わないこと。サービスの特徴・特典内容を踏まえた具体的な訴求文にすること。`;
+}
+
 export function buildInvitationArticlePrompt(service: {
   name: string;
   description: string;
