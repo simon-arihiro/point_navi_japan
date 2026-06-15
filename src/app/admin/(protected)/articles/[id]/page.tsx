@@ -108,6 +108,20 @@ export default function AdminArticleDetailPage() {
     setFeedbackImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // PC等でテキストエリアに画像をペーストしたら参考画像として追加する
+  const handleFeedbackPaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
+    const items = Array.from(e.clipboardData?.items ?? []);
+    const imageFiles = items
+      .filter((item) => item.type.startsWith("image/"))
+      .map((item) => item.getAsFile())
+      .filter((f): f is File => !!f);
+    if (imageFiles.length === 0) return;
+
+    e.preventDefault();
+    const compressed = await Promise.all(imageFiles.map((file) => compressImage(file)));
+    setFeedbackImages((prev) => [...prev, ...compressed]);
+  };
+
   const handleDelete = async () => {
     if (!confirm(`「${article.title}」をゴミ箱に移動しますか？ゴミ箱から復元することもできます。`)) return;
     setDeleting(true);
@@ -361,7 +375,8 @@ export default function AdminArticleDetailPage() {
             <textarea
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
-              placeholder="修正したい点を記入してください。例: もっと口語的に、招待コードの案内をより自然に"
+              onPaste={handleFeedbackPaste}
+              placeholder="修正したい点を記入してください。例: もっと口語的に、招待コードの案内をより自然に（画像をそのまま貼り付けることもできます）"
               rows={4}
               className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
             />
