@@ -199,7 +199,7 @@ export default async function ArticlePage(
             <CategoryCard categories={categories} />
 
             {tocItems.length > 0 && (
-              <div className="lg:sticky lg:bottom-4 bg-white rounded-2xl p-5 shadow-sm border border-gray-100 max-h-[40vh] overflow-y-auto">
+              <div className="lg:sticky lg:top-[116px] bg-white rounded-2xl p-5 shadow-sm border border-gray-100 max-h-[calc(100vh-140px)] overflow-y-auto">
                 <h3 className="font-bold text-gray-900 mb-4 text-sm">この記事の目次</h3>
                 <ArticleToc items={tocItems} />
               </div>
