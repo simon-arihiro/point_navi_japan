@@ -13,7 +13,7 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   title: {
-    default: "ポイナビ | 日本のポイ活サービス比較・体験レビュー",
+    default: "りすくんのポイナビ｜招待コード・ポイ活アプリを正直レビュー",
     template: "%s | ポイナビ",
   },
   description: "日本のポイ活サービスを実際に使ってみた正直な感想や活用方法をわかりやすくまとめています。",
