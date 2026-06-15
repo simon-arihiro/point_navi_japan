@@ -99,17 +99,37 @@ export function buildIntroductionArticlePrompt(service: {
 }, extra?: ExtraContext) {
   const referralGuide =
     service.referral_code || service.referral_link
-      ? `「🚀 登録方法・始め方」の最後のステップで、紹介コード・紹介リンクの使い方を自然に案内してください。${service.referral_code ? `紹介コード「${service.referral_code}」を記載する箇所は、バッククォートやコードブロックで囲まず、==${service.referral_code}== の形式（半角イコール2つで前後を囲む）でそのまま記述してください。` : ""}`
+      ? `登録方法を説明する箇所の最後で、紹介コード・紹介リンクの使い方を自然に案内してください。${service.referral_code ? `紹介コード「${service.referral_code}」を記載する箇所は、バッククォートやコードブロックで囲まず、==${service.referral_code}== の形式（半角イコール2つで前後を囲む）でそのまま記述してください。` : ""}`
       : "紹介コード・紹介リンクは提供されていないため、公式サイトからの通常の登録手順のみを案内してください。";
+
+  const serviceInfoLines = `サービス情報：
+- 公式URL: ${service.official_url}
+- 概要: ${service.description}
+${service.referral_code ? `- 紹介コード: ${service.referral_code}` : ""}
+${service.referral_link ? `- 紹介リンク: ${service.referral_link}` : ""}`;
+
+  // 管理者が大綱（目次案）を指定している場合は、固定テンプレートを使わず大綱の関心領域＋最新情報をもとに見出し構成を自由に組み立てる
+  if (extra?.userPrompt?.trim()) {
+    return `${buildExtraContextSection(extra)}「${service.name}」のサービス紹介記事の本文を書いてください。タイトル（h1 / # ）は不要です。本文は「## 」から始める見出しで構成してください。
+
+${serviceInfoLines}
+
+【記事の方針】
+- 上記の【最優先指示】で示された大綱の関心領域と、Web検索で調査した最新情報をもとに、見出し（##・###）構成を自分で組み立ててください
+- サービスの基本情報、実際に使ってみた感想、メリット・デメリット、登録方法、注意点、まとめ、といった観点は読者にとって有益な場合は含めることを推奨しますが、見出しの文言・粒度・順序・数は大綱と完全に一致させず、記事全体の論理が自然になるように再構成してください
+- ${referralGuide}
+
+【厳守事項】
+- 箇条書きは「- 」、番号付きリストは「1. 」のように半角数字+ピリオドを使うこと
+- \`==テキスト==\` は赤字強調表示になる特別な記法です。指示された箇所以外では使用しないこと
+- 全体で2000〜3000字程度
+- 個人ブロガーの体験談として書く${DESCRIPTION_SUFFIX_INSTRUCTION}`;
+  }
 
   return `${buildExtraContextSection(extra)}「${service.name}」のサービス紹介記事の本文を書いてください。
 このサイトのすべてのサービス紹介記事は同じテンプレートで統一しています。下記の見出し（##）の文言・絵文字・順番・レベルは一字一句変えずに使ってください。タイトル（h1 / # ）は不要です。本文は「## 📝 ...」から始めてください。
 
-サービス情報：
-- 公式URL: ${service.official_url}
-- 概要: ${service.description}
-${service.referral_code ? `- 紹介コード: ${service.referral_code}` : ""}
-${service.referral_link ? `- 紹介リンク: ${service.referral_link}` : ""}
+${serviceInfoLines}
 
 【出力する見出しと内容】
 
@@ -126,7 +146,7 @@ ${service.referral_link ? `- 紹介リンク: ${service.referral_link}` : ""}
 箇条書き2〜3個（各1〜2文、具体的に）。
 
 ## 🚀 登録方法・始め方
-3〜5ステップの番号付きリストで登録手順を説明（300〜450字）。${referralGuide}
+3〜5ステップの番号付きリストで登録手順を説明（300〜450字）。${service.referral_code || service.referral_link ? `「🚀 登録方法・始め方」の最後のステップで、紹介コード・紹介リンクの使い方を自然に案内してください。${service.referral_code ? `紹介コード「${service.referral_code}」を記載する箇所は、バッククォートやコードブロックで囲まず、==${service.referral_code}== の形式（半角イコール2つで前後を囲む）でそのまま記述してください。` : ""}` : referralGuide}
 
 ## 📌 まとめ
 記事全体の総括とおすすめ度を一言で（150〜250字）。
