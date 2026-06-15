@@ -264,8 +264,8 @@ export function splitContentAndDescription(raw: string): { content: string; desc
 // 招待コード記事生成プロンプトの末尾に付与する指示。招待コードカード用の2行キャッチコピーをSEO meta descriptionに続けて生成させる
 const CATCH_COPY_SUFFIX_INSTRUCTION = `
 
-【招待コードカード用キャッチコピー】
-SEO meta descriptionの出力後、さらに区切り行 "---CATCH_COPY---" を出力し、その次の2行に、招待コード一覧ページのカードに表示するキャッチコピーを出力してください。サービスの特徴・特典内容を踏まえた具体的な訴求文にし、各行20字以内、絵文字や記号は使わないでください。`;
+【招待コードカード用キャッチコピー（必須）】
+SEO meta descriptionの出力後、必ず区切り行 "---CATCH_COPY---" を出力し、その次の2行に、招待コード一覧ページのカードに表示するキャッチコピーを出力してください（この出力は省略しないこと）。サービスの特徴・特典内容を踏まえた具体的な訴求文にし、各行20字以内、絵文字や記号は使わないでください。`;
 
 const CATCH_COPY_DELIMITER = /\n*---CATCH_COPY---\n*/;
 
@@ -274,4 +274,13 @@ export function splitDescriptionAndCatchCopy(raw: string): { description: string
   const parts = raw.split(CATCH_COPY_DELIMITER);
   if (parts.length < 2) return { description: raw.trim(), catchCopy: null };
   return { description: parts[0].trim(), catchCopy: parts.slice(1).join("").trim() || null };
+}
+
+// AIがCATCH_COPYを出力しなかった場合のフォールバック。meta descriptionの文章から先頭2文を2行のキャッチコピーとして抜き出す
+export function deriveCatchCopyFromDescription(description: string, serviceName: string): string {
+  const text = description.replace(/\s+/g, "");
+  const segments = text.split(/[。！？]/).filter(Boolean);
+  const line1 = (segments[0] ?? serviceName).slice(0, 20);
+  const line2 = (segments[1] ?? `${serviceName}は今がお得！`).slice(0, 20);
+  return `${line1}\n${line2}`;
 }

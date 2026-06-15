@@ -7,6 +7,7 @@ import {
   buildRelatedArticlePrompt,
   splitContentAndDescription,
   splitDescriptionAndCatchCopy,
+  deriveCatchCopyFromDescription,
   SYSTEM_PROMPT_BASE,
   ExtraContext,
 } from "@/lib/ai/prompts";
@@ -113,10 +114,10 @@ export async function POST(request: NextRequest) {
       content = generated.content;
       const { description, catchCopy } = splitDescriptionAndCatchCopy(generated.description);
 
-      // 招待コードカードに表示する2行キャッチコピーをサービス側に保存する
-      if (catchCopy) {
-        await supabase.from("services").update({ catch_copy: catchCopy }).eq("id", service_id);
-      }
+      // 招待コードカードに表示する2行キャッチコピーをサービス側に保存する（AIが出力しなかった場合はdescriptionから抜き出してフォールバック）
+      await supabase.from("services").update({
+        catch_copy: catchCopy ?? deriveCatchCopyFromDescription(description, service.name),
+      }).eq("id", service_id);
 
       const titleMatch = content.match(/^#\s+(.+)/m);
       title = titleMatch ? titleMatch[1].trim() : `${service.name}の招待コード・紹介特典まとめ`;
