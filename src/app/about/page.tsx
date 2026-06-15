@@ -67,11 +67,6 @@ export default function AboutPage() {
             報酬の有無によって評価を変えることはありません。良い点も気になる点も、
             実際に使って感じたことをそのまま伝えるようにしています。
           </p>
-          <p>
-            アフィリエイトプログラムについての詳細は
-            <a href="/disclosure" className="text-brand-700 hover:underline">アフィリエイト収益開示</a>
-            のページをご確認ください。
-          </p>
         </section>
 
         <section>
