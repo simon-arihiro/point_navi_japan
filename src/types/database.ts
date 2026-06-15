@@ -35,6 +35,7 @@ export interface Service {
   bonus_amount: string | null;
   campaign_bonus: string | null;
   campaign_expires_at: string | null;
+  catch_copy: string | null;
   official_url: string;
   logo_url: string | null;
   logo_storage_path: string | null;

@@ -239,6 +239,18 @@ export default function EditServicePage() {
           />
         </div>
 
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">キャッチコピー（招待コードカード用・2行）</label>
+          <textarea
+            value={form.catch_copy ?? ""}
+            onChange={set("catch_copy")}
+            rows={2}
+            placeholder={"例: 1分の操作で\n500ptザクザク貯まる"}
+            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none"
+          />
+          <p className="text-xs text-gray-400 mt-1">未設定の場合は「新規登録はお得！」が表示されます。改行で2行に分けて入力してください</p>
+        </div>
+
         <CategorySelector allCategories={allCategories} selected={categoryNames} onToggle={toggleCategory} />
 
         <div>

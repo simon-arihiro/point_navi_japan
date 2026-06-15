@@ -90,6 +90,10 @@ export default function InvitationCard({ article, categorySlug }: Props) {
 
   const mascot = pickMascot(svc?.id ?? article.id);
 
+  const catchCopyLines: string[] | null = svc?.catch_copy?.trim()
+    ? svc.catch_copy.trim().split("\n").map((l: string) => l.trim()).filter(Boolean).slice(0, 2)
+    : null;
+
   return (
     <Link href={href} className="block h-full">
       <div
@@ -113,9 +117,17 @@ export default function InvitationCard({ article, categorySlug }: Props) {
           <div className="px-3 flex flex-col gap-2 flex-1">
           {/* 訴求文＋マスコット */}
           <div className="flex items-center justify-between gap-2">
-            <p className="font-black text-gray-900 text-xl leading-snug whitespace-nowrap">
-              新規登録は<span style={{ color: bgColor }}>お得</span>！
-            </p>
+            {catchCopyLines ? (
+              <p className="font-black text-gray-900 text-base leading-snug">
+                {catchCopyLines.map((line, i) => (
+                  <span key={i} className="block">{line}</span>
+                ))}
+              </p>
+            ) : (
+              <p className="font-black text-gray-900 text-xl leading-snug whitespace-nowrap">
+                新規登録は<span style={{ color: bgColor }}>お得</span>！
+              </p>
+            )}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={`/mascot/library/${mascot}`} alt="" className="w-20 h-20 object-contain shrink-0" />
           </div>
