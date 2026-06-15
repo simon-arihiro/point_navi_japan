@@ -7,7 +7,6 @@ import HighlightServiceName from "@/components/HighlightServiceName";
 import { SearchCard, CategoryCard } from "@/components/Sidebar";
 import TrackView from "@/components/TrackView";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
-import { getArticleTypeLabel } from "@/lib/articleTypes";
 import { getArticleViewCountsForIds } from "@/lib/analytics";
 import type { Metadata } from "next";
 
@@ -132,9 +131,6 @@ export default async function ArticlePage(
           {/* 記事本文 */}
           <article className="lg:col-span-2">
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-xs bg-brand-50 text-brand-700 font-medium rounded-full px-3 py-1">
-                {getArticleTypeLabel(article.article_type)}
-              </span>
               {service && (
                 <Link
                   href={`/services/${categorySlug}/${service.slug}`}

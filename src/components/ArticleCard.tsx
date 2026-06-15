@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArticleWithService } from "@/types/database";
 import LogoFallback from "./LogoFallback";
 import HighlightServiceName from "./HighlightServiceName";
-import { getArticleTypeLabel, getArticleTypeIcon } from "@/lib/articleTypes";
 import { extractFirstImageUrl } from "@/lib/markdown";
 
 type Props = {
@@ -18,8 +17,6 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
   const publishedDate = article.published_at
     ? new Date(article.published_at).toLocaleDateString("ja-JP")
     : "";
-  const typeLabel = getArticleTypeLabel(article.article_type);
-  const typeIcon = getArticleTypeIcon(article.article_type);
 
   if (size === "featured") {
     const thumbnailUrl = extractFirstImageUrl(article.content);
@@ -70,11 +67,9 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
               officialUrl={article.primary_service?.official_url}
               size={36}
             />
-            <div className="min-w-0">
-              <span className="inline-flex items-center gap-1 text-xs bg-brand-50 text-brand-700 font-medium rounded-full px-3 py-1">
-                {typeIcon} {typeLabel}
-              </span>
-            </div>
+            {article.primary_service?.name && (
+              <span className="text-sm text-gray-500 truncate">{article.primary_service.name}</span>
+            )}
           </div>
           <h3 className="font-bold text-gray-900 text-base leading-snug group-hover:text-brand-700 transition-colors line-clamp-2 mb-2">
             <HighlightServiceName title={article.title} serviceName={article.primary_service?.name} />
