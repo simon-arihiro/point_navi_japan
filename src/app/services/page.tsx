@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getServiceStatsMap } from "@/lib/analytics";
 import ServiceCard from "@/components/ServiceCard";
 import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
@@ -9,20 +10,32 @@ export const metadata: Metadata = {
   description: "日本のお得なポイ活サービス一覧です。",
 };
 
-export default async function ServicesPage() {
+export default async function ServicesPage(props: PageProps<"/services">) {
+  const searchParams = await props.searchParams;
+  const sort = searchParams.sort === "copy" ? "copy" : "name";
+
   const supabase = await createClient();
 
-  const [servicesRes, categoriesRes] = await Promise.all([
+  const [servicesRes, categoriesRes, settingsRes] = await Promise.all([
     supabase
       .from("services")
       .select(`*, categories:service_categories(category:categories(*))`)
       .eq("status", "active")
       .order("name"),
     supabase.from("categories").select("*").order("name"),
+    supabase.from("system_settings").select("ranking_window_days").eq("id", 1).single(),
   ]);
 
-  const services = servicesRes.data ?? [];
   const categories = categoriesRes.data ?? [];
+  const windowDays = settingsRes.data?.ranking_window_days ?? 30;
+
+  let services = servicesRes.data ?? [];
+  if (sort === "copy") {
+    const statsMap = await getServiceStatsMap(supabase, windowDays);
+    services = [...services].sort(
+      (a: any, b: any) => (statsMap.get(b.id)?.cc ?? 0) - (statsMap.get(a.id)?.cc ?? 0)
+    );
+  }
 
   return (
     <div>
@@ -37,7 +50,7 @@ export default async function ServicesPage() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
           <div>
             {/* カテゴリフィルター */}
-            <div className="flex flex-wrap gap-2 mb-8">
+            <div className="flex flex-wrap gap-2 mb-4">
               <Link href="/services" className="px-4 py-2 bg-slate-900 text-white rounded-full text-sm font-medium">
                 すべて
               </Link>
@@ -50,6 +63,22 @@ export default async function ServicesPage() {
                   {cat.name}
                 </Link>
               ))}
+            </div>
+
+            {/* 並び順 */}
+            <div className="flex gap-2 mb-8">
+              <Link
+                href="/services"
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${sort === "name" ? "bg-brand-400 text-slate-900" : "bg-white border border-gray-200 text-gray-500 hover:border-brand-300"}`}
+              >
+                名前順
+              </Link>
+              <Link
+                href="/services?sort=copy"
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${sort === "copy" ? "bg-brand-400 text-slate-900" : "bg-white border border-gray-200 text-gray-500 hover:border-brand-300"}`}
+              >
+                コピー数が多い順
+              </Link>
             </div>
 
             {services.length > 0 ? (

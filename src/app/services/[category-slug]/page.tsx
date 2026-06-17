@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { getServiceStatsMap } from "@/lib/analytics";
 import ServiceCard from "@/components/ServiceCard";
 import Sidebar from "@/components/Sidebar";
 import { notFound, redirect } from "next/navigation";
@@ -17,6 +18,8 @@ export async function generateMetadata(props: PageProps<"/services/[category-slu
 
 export default async function CategoryPage(props: PageProps<"/services/[category-slug]">) {
   const { "category-slug": categorySlug } = await props.params;
+  const searchParams = await props.searchParams;
+  const sort = searchParams.sort === "copy" ? "copy" : "name";
 
   // カテゴリ未設定のサービス／記事へのリンクが "all" を仮のカテゴリスラッグとして使うため、
   // 実カテゴリが存在しない "all" はサービス一覧へ誘導する（404防止）
@@ -24,22 +27,32 @@ export default async function CategoryPage(props: PageProps<"/services/[category
 
   const supabase = await createClient();
 
-  const [catRes, servicesRes, categoriesRes] = await Promise.all([
+  const [catRes, servicesRes, categoriesRes, settingsRes] = await Promise.all([
     supabase.from("categories").select("*").eq("slug", categorySlug).single(),
     supabase
       .from("services")
       .select(`*, categories:service_categories(category:categories(*)), tags:service_tags(tag:tags(*))`)
-      .eq("status", "active"),
+      .eq("status", "active")
+      .order("name"),
     supabase.from("categories").select("*").order("name"),
+    supabase.from("system_settings").select("ranking_window_days").eq("id", 1).single(),
   ]);
 
   if (!catRes.data) notFound();
   const category = catRes.data;
 
-  const services = (servicesRes.data ?? []).filter((svc: any) =>
+  let services = (servicesRes.data ?? []).filter((svc: any) =>
     svc.categories?.some((c: any) => c.category?.slug === categorySlug)
   );
   const categories = categoriesRes.data ?? [];
+
+  if (sort === "copy") {
+    const windowDays = settingsRes.data?.ranking_window_days ?? 30;
+    const statsMap = await getServiceStatsMap(supabase, windowDays);
+    services = [...services].sort(
+      (a: any, b: any) => (statsMap.get(b.id)?.cc ?? 0) - (statsMap.get(a.id)?.cc ?? 0)
+    );
+  }
 
   return (
     <div>
@@ -60,6 +73,22 @@ export default async function CategoryPage(props: PageProps<"/services/[category
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
           <div>
+            {/* 並び順 */}
+            <div className="flex gap-2 mb-6">
+              <Link
+                href={`/services/${categorySlug}`}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${sort === "name" ? "bg-brand-400 text-slate-900" : "bg-white border border-gray-200 text-gray-500 hover:border-brand-300"}`}
+              >
+                名前順
+              </Link>
+              <Link
+                href={`/services/${categorySlug}?sort=copy`}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-colors ${sort === "copy" ? "bg-brand-400 text-slate-900" : "bg-white border border-gray-200 text-gray-500 hover:border-brand-300"}`}
+              >
+                コピー数が多い順
+              </Link>
+            </div>
+
             {services.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {services.map((svc: any) => (
