@@ -132,7 +132,7 @@ export default function ConversionArea({ service }: Props) {
         <a
           href={service.referral_link}
           target="_blank"
-          rel="noopener noreferrer"
+          rel="noopener noreferrer sponsored nofollow"
           className="block w-full text-center bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-colors"
         >
           招待リンクから登録する →
