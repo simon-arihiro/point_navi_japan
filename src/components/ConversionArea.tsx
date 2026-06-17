@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Service } from "@/types/database";
 import { getCampaignBadge } from "@/lib/campaign";
+import { trackGaEvent } from "@/lib/gtag";
 
 type Props = {
   service: Service;
@@ -22,6 +23,7 @@ export default function ConversionArea({ service }: Props) {
       body: JSON.stringify({ event_type: "copy_code", service_id: service.id }),
       keepalive: true,
     });
+    trackGaEvent("copy_invitation_code", { service_name: service.name, service_id: service.id });
   };
 
   const handleCopy = async () => {
@@ -51,6 +53,7 @@ export default function ConversionArea({ service }: Props) {
           body: JSON.stringify({ event_type: "referral_click", service_id: service.id }),
           keepalive: true,
         });
+        trackGaEvent("click_referral_link", { service_name: service.name, service_id: service.id });
       }
     };
 

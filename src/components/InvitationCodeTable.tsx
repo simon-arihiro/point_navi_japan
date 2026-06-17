@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import LogoFallback from "./LogoFallback";
+import { trackGaEvent } from "@/lib/gtag";
 
 type Row = {
   id: string;
@@ -24,10 +25,11 @@ export default function InvitationCodeTable({ rows }: { rows: Row[] }) {
 
   if (rows.length === 0) return null;
 
-  const handleCopy = async (id: string, code: string) => {
+  const handleCopy = async (id: string, name: string, code: string) => {
     await navigator.clipboard.writeText(code);
     setCopiedId(id);
     setTimeout(() => setCopiedId((current) => (current === id ? null : current)), 1500);
+    trackGaEvent("copy_invitation_code", { service_name: name, service_id: id });
   };
 
   return (
@@ -52,7 +54,7 @@ export default function InvitationCodeTable({ rows }: { rows: Row[] }) {
             {row.referralCode ? (
               <button
                 type="button"
-                onClick={() => handleCopy(row.id, row.referralCode!)}
+                onClick={() => handleCopy(row.id, row.name, row.referralCode!)}
                 className={`font-mono text-xs font-bold rounded px-1.5 py-0.5 tracking-wider shrink-0 transition-colors cursor-pointer ${
                   copiedId === row.id ? "bg-green-100 text-green-700" : "bg-gray-50 text-gray-900 hover:bg-brand-100"
                 }`}
