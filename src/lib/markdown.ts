@@ -11,7 +11,7 @@ marked.use({
       const text = this.parser.parseInline(token.tokens);
       if (token.depth === 2 || token.depth === 3) {
         const id = `section-${headingCounter++}`;
-        return `<h${token.depth} id="${id}">${text}</h${token.depth}>\n`;
+        return `<h${token.depth} id="${id}" class="scroll-mt-[100px] md:scroll-mt-[120px]">${text}</h${token.depth}>\n`;
       }
       return `<h${token.depth}>${text}</h${token.depth}>\n`;
     },
