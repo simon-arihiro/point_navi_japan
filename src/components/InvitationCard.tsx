@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArticleWithService } from "@/types/database";
 import LogoFallback from "./LogoFallback";
 import { getAutoColor } from "@/lib/autoColor";
@@ -86,6 +89,7 @@ function hexToRgba(hex: string, alpha: number) {
 // 招待コード一覧ページ用の統一テンプレートカード
 // 色付きヘッダー（サービス名＋ロゴ）＋訴求文＋招待コード/リンク＋記事タイトル＋公開日 を同じレイアウトで表示する
 export default function InvitationCard({ article, categorySlug }: Props) {
+  const router = useRouter();
   const svc = article.primary_service as any;
   const cat = categorySlug ?? svc?.categories?.[0]?.category?.slug ?? "all";
   const href = `/articles/${cat}/${article.slug}`;
@@ -107,6 +111,13 @@ export default function InvitationCard({ article, categorySlug }: Props) {
 
   const mascot = pickMascot(svc?.id ?? article.id);
 
+  // 訴求文をテキスト選択・コピーできるようにするため、カード全体はリンクではなくクリックで遷移させる
+  // （文字列選択中にクリックが発生した場合はナビゲーションしない）
+  const handleCardClick = () => {
+    if (window.getSelection()?.toString()) return;
+    router.push(href);
+  };
+
   const catchCopyLines: string[] =
     (svc?.catch_copy?.trim()
       ? svc.catch_copy.trim().split("\n").map((l: string) => l.trim().slice(0, 15)).filter(Boolean).slice(0, 2)
@@ -114,7 +125,15 @@ export default function InvitationCard({ article, categorySlug }: Props) {
 
   return (
     <div className="flex flex-col h-full">
-    <Link href={href} className="block flex-1">
+    <div
+      onClick={handleCardClick}
+      role="link"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") router.push(href);
+      }}
+      className="block flex-1 cursor-pointer"
+    >
       <div
         className="relative bg-white rounded-2xl border-4 overflow-hidden h-full flex flex-col transition-transform duration-200 ease-out hover:scale-[1.04] hover:shadow-lg hover:z-10"
         style={{ borderColor: hexToRgba(CARD_BORDER_COLOR, 0.35) }}
@@ -168,7 +187,7 @@ export default function InvitationCard({ article, categorySlug }: Props) {
           </div>
         </div>
       </div>
-    </Link>
+    </div>
     <Link href={href} className="text-base text-gray-700 font-bold leading-snug line-clamp-2 mt-2 px-1 hover:underline">
       {article.title}
     </Link>
