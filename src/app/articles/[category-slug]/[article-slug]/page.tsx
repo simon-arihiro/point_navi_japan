@@ -113,8 +113,48 @@ export default async function ArticlePage(
   const service = article.primary_service;
   const tocItems = extractHeadings(article.content);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://jp-point-navi.com";
+  const articleUrl = `${siteUrl}/articles/${categorySlug}/${articleSlug}`;
+  const imageUrl = article.featured_image_url ?? `${siteUrl}/mascot/library/poinavi-header-banner-lg.png`;
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "ホーム", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "記事", item: `${siteUrl}/articles` },
+      { "@type": "ListItem", position: 3, name: article.title, item: articleUrl },
+    ],
+  };
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: article.title,
+    description: article.description ?? undefined,
+    image: [imageUrl],
+    datePublished: article.published_at ?? article.created_at,
+    dateModified: article.updated_at,
+    author: { "@type": "Organization", name: "りすくんのポイナビ" },
+    publisher: {
+      "@type": "Organization",
+      name: "りすくんのポイナビ",
+      logo: { "@type": "ImageObject", url: `${siteUrl}/mascot/library/poinavi-header-banner-lg.png` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
+      />
+
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
