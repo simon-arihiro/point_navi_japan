@@ -23,6 +23,7 @@ export async function PUT(request: NextRequest) {
     ai_multi_provider_enabled,
     ai_provider_settings,
     thumbnail_auto_generate,
+    sns_platform_settings,
   } = body;
 
   const { data, error } = await supabase
@@ -38,6 +39,7 @@ export async function PUT(request: NextRequest) {
       ai_multi_provider_enabled,
       ai_provider_settings,
       thumbnail_auto_generate,
+      sns_platform_settings,
     })
     .eq("id", 1)
     .select()

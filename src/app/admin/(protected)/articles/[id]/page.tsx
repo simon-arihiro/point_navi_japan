@@ -6,6 +6,7 @@ import LogoFallback from "@/components/LogoFallback";
 import { renderMarkdown, ARTICLE_PROSE_CLASS, placeImageAtTop } from "@/lib/markdown";
 import { getArticleTypeLabel, getArticleTypeIcon, getArticleStatusLabel, getArticleStatusBadgeClass } from "@/lib/articleTypes";
 import { compressImage } from "@/lib/imageCompress";
+import { SNS_PLATFORMS } from "@/lib/sns/platforms";
 
 export default function AdminArticleDetailPage() {
   const params = useParams();
@@ -29,6 +30,9 @@ export default function AdminArticleDetailPage() {
   const [services, setServices] = useState<any[]>([]);
   const [updatingRelated, setUpdatingRelated] = useState(false);
   const [feedbackImages, setFeedbackImages] = useState<{ dataUrl: string; data: string; mediaType: "image/jpeg" | "image/png" }[]>([]);
+  const [enabledSnsPlatforms, setEnabledSnsPlatforms] = useState<string[]>([]);
+  const [distributionLogs, setDistributionLogs] = useState<any[]>([]);
+  const [distributing, setDistributing] = useState<string | null>(null);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
   const thumbnailFileInputRef = useRef<HTMLInputElement>(null);
   const feedbackImageInputRef = useRef<HTMLInputElement>(null);
@@ -40,7 +44,34 @@ export default function AdminArticleDetailPage() {
     fetch("/api/services")
       .then((r) => r.json())
       .then(({ data }) => setServices(data ?? []));
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then(({ data }) => {
+        const settings = data?.sns_platform_settings ?? {};
+        setEnabledSnsPlatforms(Object.keys(settings).filter((p) => settings[p]?.enabled));
+      });
+    fetchDistributionLogs();
   }, [id]);
+
+  const fetchDistributionLogs = () => {
+    fetch(`/api/distribution/trigger?article_id=${id}`)
+      .then((r) => r.json())
+      .then(({ data }) => setDistributionLogs(data ?? []));
+  };
+
+  const handleDistribute = async (platform: string) => {
+    setDistributing(platform);
+    try {
+      await fetch("/api/distribution/trigger", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ article_id: id, platforms: [platform] }),
+      });
+      fetchDistributionLogs();
+    } finally {
+      setDistributing(null);
+    }
+  };
 
   // 比較記事などで関連付ける他サービスを更新する
   const updateRelatedServices = async (serviceIds: string[]) => {
@@ -568,6 +599,54 @@ export default function AdminArticleDetailPage() {
               </button>
             </div>
           </div>
+
+          {article.status === "published" && (
+            <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+              <h2 className="font-bold text-gray-900 mb-4 text-sm">SNS配信</h2>
+              {enabledSnsPlatforms.length === 0 ? (
+                <p className="text-xs text-gray-400">
+                  有効化されたプラットフォームがありません。
+                  <br />
+                  設定画面で有効化してください。
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {SNS_PLATFORMS.filter((p) => enabledSnsPlatforms.includes(p.id)).map((platform) => (
+                    <button
+                      key={platform.id}
+                      onClick={() => handleDistribute(platform.id)}
+                      disabled={distributing === platform.id}
+                      className="w-full py-2.5 rounded-xl text-sm font-medium bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                    >
+                      {distributing === platform.id ? "配信中..." : `${platform.label} へ配信`}
+                    </button>
+                  ))}
+                </div>
+              )}
+              {distributionLogs.length > 0 && (
+                <div className="mt-4 space-y-2 border-t border-gray-100 pt-3">
+                  {distributionLogs.map((log) => (
+                    <div key={log.id} className="text-xs flex items-start justify-between gap-2">
+                      <span className="text-gray-500">
+                        {SNS_PLATFORMS.find((p) => p.id === log.platform)?.label ?? log.platform}
+                      </span>
+                      <span
+                        className={
+                          log.status === "success"
+                            ? "text-green-600"
+                            : log.status === "failed"
+                            ? "text-red-600"
+                            : "text-gray-400"
+                        }
+                      >
+                        {log.status === "success" ? "成功" : log.status === "failed" ? log.error_message ?? "失敗" : "処理中"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
             <button

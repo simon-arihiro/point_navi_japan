@@ -9,7 +9,7 @@ export type EventType =
   | "referral_click"
   | "share_link"
   | "ranking_click";
-export type DistributionPlatform = "x" | "instagram" | "threads";
+export type DistributionPlatform = "x" | "instagram" | "threads" | "facebook";
 export type DistributionStatus = "pending" | "success" | "failed";
 export type NotificationType = "article_pending" | "ai_failed" | "image_failed" | "distribution_failed";
 export type OperationMode = "manual" | "auto";
@@ -161,8 +161,13 @@ export interface SystemSettings {
   ai_multi_provider_enabled: boolean;
   ai_provider_settings: AiProviderSettings;
   thumbnail_auto_generate: boolean;
+  sns_platform_settings: SnsPlatformSettings;
   updated_at: string;
 }
+
+// プラットフォームごとのSNS配信設定（有効/無効・APIクレデンシャル）
+export type SnsCredentials = Record<string, string>;
+export type SnsPlatformSettings = Partial<Record<DistributionPlatform, { enabled: boolean; credentials: SnsCredentials }>>;
 
 export interface AiPrompt {
   id: string;
