@@ -14,10 +14,14 @@ import type { Metadata } from "next";
 export async function generateMetadata(
   props: PageProps<"/articles/[category-slug]/[article-slug]">
 ): Promise<Metadata> {
-  const { "article-slug": articleSlug } = await props.params;
+  const { "category-slug": categorySlug, "article-slug": articleSlug } = await props.params;
   const supabase = await createClient();
   const { data: a } = await supabase.from("articles").select("title, description").eq("slug", articleSlug).single();
-  return { title: a?.title ?? "記事", description: a?.description ?? "" };
+  return {
+    title: a?.title ?? "記事",
+    description: a?.description ?? "",
+    alternates: { canonical: `/articles/${categorySlug}/${articleSlug}` },
+  };
 }
 
 export default async function ArticlePage(

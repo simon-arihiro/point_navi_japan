@@ -8,6 +8,8 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "サービス一覧",
   description: "日本のお得なポイ活サービス一覧です。",
+  // ?sort=copy などのクエリ付きURLも正規URLへ統合し重複コンテンツ化を防ぐ
+  alternates: { canonical: "/services" },
 };
 
 export default async function ServicesPage(props: PageProps<"/services">) {

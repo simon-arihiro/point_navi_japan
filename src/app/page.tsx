@@ -5,6 +5,11 @@ import RankingListItem from "@/components/RankingListItem";
 import ArticleRankingListItem from "@/components/ArticleRankingListItem";
 import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 export default async function HomePage() {
   let popularServices: any[] = [];

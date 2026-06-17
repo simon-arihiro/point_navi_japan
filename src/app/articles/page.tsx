@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "記事一覧",
   description: "ポイ活サービスの使い方・攻略・比較記事一覧です。",
+  alternates: { canonical: "/articles" },
 };
 
 export default async function ArticlesPage() {

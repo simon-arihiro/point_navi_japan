@@ -32,10 +32,38 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     // Supabase 未接続時は空で表示
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://jp-point-navi.com";
+  const siteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "りすくんのポイナビ",
+    url: siteUrl,
+    potentialAction: {
+      "@type": "SearchAction",
+      target: `${siteUrl}/search?q={search_term_string}`,
+      "query-input": "required name=search_term_string",
+    },
+  };
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "りすくんのポイナビ",
+    url: siteUrl,
+    logo: `${siteUrl}/mascot/library/poinavi-header-banner-lg.png`,
+  };
+
   return (
     <html lang="ja" className={notoSansJP.className}>
       <head>
         <GoogleAnalytics />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
       </head>
       <body className="bg-gray-50 text-gray-900 antialiased">
         <SiteChrome categories={categories}>{children}</SiteChrome>

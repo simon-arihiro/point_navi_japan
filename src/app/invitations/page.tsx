@@ -7,6 +7,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "招待コード一覧",
   description: "ポイ活サービスの招待コード・招待リンクと特典をまとめてご紹介します。",
+  alternates: { canonical: "/invitations" },
 };
 
 export default async function InvitationsPage() {

@@ -12,12 +12,13 @@ import type { Metadata } from "next";
 export async function generateMetadata(
   props: PageProps<"/services/[category-slug]/[service-slug]">
 ): Promise<Metadata> {
-  const { "service-slug": serviceSlug } = await props.params;
+  const { "category-slug": categorySlug, "service-slug": serviceSlug } = await props.params;
   const supabase = await createClient();
   const { data: svc } = await supabase.from("services").select("name, description").eq("slug", serviceSlug).single();
   return {
     title: svc?.name ?? "サービス詳細",
     description: svc?.description ?? "",
+    alternates: { canonical: `/services/${categorySlug}/${serviceSlug}` },
   };
 }
 
@@ -57,8 +58,26 @@ export default async function ServicePage(
   const introArticle = introRes.data?.find((a: any) => a.primary_service_id === service.id);
   const relatedArticles = (articlesRes.data ?? []).filter((a: any) => a.primary_service_id === service.id);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://jp-point-navi.com";
+  const categoryName = service.categories?.[0]?.category?.name ?? categorySlug;
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "ホーム", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "サービス一覧", item: `${siteUrl}/services` },
+      { "@type": "ListItem", position: 3, name: categoryName, item: `${siteUrl}/services/${categorySlug}` },
+      { "@type": "ListItem", position: 4, name: service.name, item: `${siteUrl}/services/${categorySlug}/${serviceSlug}` },
+    ],
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">

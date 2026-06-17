@@ -13,6 +13,7 @@ export async function generateMetadata(props: PageProps<"/services/[category-slu
   return {
     title: cat ? `${cat.name}のサービス一覧` : "カテゴリ",
     description: cat ? `${cat.name}カテゴリのポイ活サービス一覧` : "",
+    alternates: { canonical: `/services/${categorySlug}` },
   };
 }
 
