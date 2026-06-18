@@ -5,8 +5,8 @@ import SearchBox from "@/components/SearchBox";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "招待コード一覧",
-  description: "ポイ活サービスの招待コード・招待リンクと特典をまとめてご紹介します。",
+  title: "招待コードおすすめ一覧｜お得な特典・キャンペーンまとめ",
+  description: "ポイ活サービスのおすすめ招待コード・招待リンクをまとめてご紹介。実際に使ってもらえた特典額やキャンペーン情報を厳選して掲載しています。",
   alternates: { canonical: "/invitations" },
 };
 
@@ -44,8 +44,8 @@ export default async function InvitationsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-8">
             <div>
-              <h1 className="text-3xl font-black text-gray-900 mb-2">🎁 招待コード一覧</h1>
-              <p className="text-gray-500 text-sm">各サービスの招待コード・招待リンクと特典をまとめてご紹介します</p>
+              <h1 className="text-3xl font-black text-gray-900 mb-2">🎁 招待コードおすすめ一覧</h1>
+              <p className="text-gray-500 text-sm">各サービスのおすすめ招待コード・招待リンクと特典をまとめてご紹介します</p>
             </div>
 
             <div className="w-full lg:w-80 shrink-0">
@@ -62,7 +62,12 @@ export default async function InvitationsPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h2 className="font-black text-gray-900 text-base mb-3">📋 招待コード一覧表</h2>
+        <p className="text-sm text-gray-600 leading-relaxed mb-8">
+          このページでは、りすくんが実際に登録して特典を受け取れたポイ活サービスの招待コード・招待リンクをおすすめ順にまとめています。
+          新規登録ボーナスの金額やポイント還元率、キャンペーン情報を比較しながら、お得なサービスを選ぶ際の参考にしてください。
+          気になるサービスが見つかったら、招待コードをコピーするか招待リンクから登録するだけで特典の対象になります。
+        </p>
+        <h2 className="font-black text-gray-900 text-base mb-3">📋 招待コードおすすめ一覧表</h2>
         <InvitationCodeTable rows={codeRows} />
 
         {articles.length > 0 ? (
