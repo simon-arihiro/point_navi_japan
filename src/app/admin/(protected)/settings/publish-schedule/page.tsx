@@ -90,11 +90,11 @@ export default function AdminPublishSchedulePage() {
       </div>
 
       <p className="text-xs text-gray-400 mb-2">
-        記事詳細画面で「代発行待ち」にした記事は、ここで設定したタイマーが発火するたびに、更新日時が最も古いものから指定件数だけ自動公開されます。
+        記事詳細画面で「公開待ち」にした記事は、ここで設定したタイマーが発火するたびに、更新日時が最も古いものから指定件数だけ自動公開されます。
         時刻はすべて日本時間（JST）です。タイマーは複数登録でき、時間帯ごとに発行件数を変えられます。
       </p>
       {queuedCount !== null && (
-        <p className="text-xs text-blue-600 mb-4">現在「代発行待ち」の記事: {queuedCount} 件</p>
+        <p className="text-xs text-blue-600 mb-4">現在「公開待ち」の記事: {queuedCount} 件</p>
       )}
       <p className="text-xs text-gray-400 mb-6">
         ※ 分（分）を0以外に設定した場合、Vercelの標準cronは時報（00分）にしか実行されないため発火しません。0分以外を使う場合は外部スケジューラから本エンドポイントを数分おきに呼び出す運用に切り替えてください。

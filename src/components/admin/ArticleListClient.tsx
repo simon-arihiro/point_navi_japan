@@ -85,7 +85,7 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
           >
             <option value="">すべて</option>
             <option value="published">公開中</option>
-            <option value="queued">代発行待ち</option>
+            <option value="queued">公開待ち</option>
             <option value="reviewing">審査待ち</option>
           </select>
         </div>

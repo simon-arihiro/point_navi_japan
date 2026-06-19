@@ -596,7 +596,7 @@ export default function AdminArticleDetailPage() {
                     : "bg-blue-600 text-white hover:bg-blue-700"
                 }`}
               >
-                ⏱ 代発行待ちにする
+                ⏱ 公開待ちにする
               </button>
               <button
                 onClick={() => updateStatus("reviewing")}
@@ -611,7 +611,7 @@ export default function AdminArticleDetailPage() {
               </button>
               {article.status === "queued" && (
                 <p className="text-xs text-gray-400 pt-1">
-                  定時発行タイマーが発火すると、代発行待ちの記事から更新日時の古いものから順に自動公開されます。
+                  定時発行タイマーが発火すると、公開待ちの記事から更新日時の古いものから順に自動公開されます。
                   <Link href="/admin/settings/publish-schedule" className="text-blue-600 hover:underline ml-1">タイマー設定を見る</Link>
                 </p>
               )}

@@ -169,7 +169,7 @@ export interface SystemSettings {
 export type SnsCredentials = Record<string, string>;
 export type SnsPlatformSettings = Partial<Record<DistributionPlatform, { enabled: boolean; credentials: SnsCredentials }>>;
 
-// 定時発行タイマー（日本時間ベース）。代発行待ち（status=queued）の記事を更新日時の古い順に発行する
+// 定時発行タイマー（日本時間ベース）。公開待ち（status=queued）の記事を更新日時の古い順に発行する
 export interface PublishSchedule {
   id: string;
   hour: number;

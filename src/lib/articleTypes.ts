@@ -22,7 +22,7 @@ export function getArticleTypeBadgeClass(type: string): string {
 
 export function getArticleStatusLabel(status: string): string {
   if (status === "published") return "公開中";
-  if (status === "queued") return "代発行待ち";
+  if (status === "queued") return "公開待ち";
   return "審査待ち";
 }
 

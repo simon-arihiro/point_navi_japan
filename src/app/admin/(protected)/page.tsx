@@ -17,6 +17,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     { count: introArticles },
     { count: relatedArticles },
     { count: pendingArticles },
+    { count: queuedArticles },
     { count: imageFailedCount },
     { count: unreadContactCount },
     { data: servicesList },
@@ -26,6 +27,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("article_type", "introduction").eq("status", "published").is("deleted_at", null),
     supabase.from("articles").select("*", { count: "exact", head: true }).neq("article_type", "introduction").eq("status", "published").is("deleted_at", null),
     supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "reviewing").is("deleted_at", null),
+    supabase.from("articles").select("*", { count: "exact", head: true }).eq("status", "queued").is("deleted_at", null),
     supabase.from("admin_notifications").select("*", { count: "exact", head: true }).eq("type", "image_failed").eq("is_read", false),
     supabase.from("contact_messages").select("*", { count: "exact", head: true }).eq("is_read", false),
     supabase.from("services").select("id, name, slug").eq("status", "active").is("deleted_at", null).order("name"),
@@ -43,6 +45,7 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
     { label: "サービス紹介記事", value: introArticles ?? 0, href: "/admin/articles?type=introduction" },
     { label: "関連記事", value: relatedArticles ?? 0, href: "/admin/articles" },
     { label: "審査待ち記事", value: pendingArticles ?? 0, href: "/admin/articles?status=reviewing", alert: (pendingArticles ?? 0) > 0 },
+    { label: "公開待ち記事", value: queuedArticles ?? 0, href: "/admin/articles?status=queued" },
   ];
 
   return (
