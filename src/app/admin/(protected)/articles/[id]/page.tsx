@@ -91,12 +91,17 @@ export default function AdminArticleDetailPage() {
 
   const updateStatus = async (status: string) => {
     setSaving(true);
-    await fetch(`/api/articles/${id}`, {
+    const res = await fetch(`/api/articles/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),
     });
-    setArticle((prev: any) => ({ ...prev, status }));
+    if (res.ok) {
+      setArticle((prev: any) => ({ ...prev, status }));
+    } else {
+      const json = await res.json().catch(() => null);
+      alert(json?.error?.message ?? `ステータス更新に失敗しました（${res.status}）`);
+    }
     setSaving(false);
   };
 
