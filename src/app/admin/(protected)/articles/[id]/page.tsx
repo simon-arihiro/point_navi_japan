@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
+import Link from "next/link";
 import LogoFallback from "@/components/LogoFallback";
 import { renderMarkdown, ARTICLE_PROSE_CLASS, placeImageAtTop } from "@/lib/markdown";
 import { getArticleTypeLabel, getArticleTypeIcon, getArticleStatusLabel, getArticleStatusBadgeClass } from "@/lib/articleTypes";
@@ -584,19 +585,36 @@ export default function AdminArticleDetailPage() {
                     : "bg-green-600 text-white hover:bg-green-700"
                 }`}
               >
-                ✓ 公開する
+                ✓ 今すぐ公開する
+              </button>
+              <button
+                onClick={() => updateStatus("queued")}
+                disabled={saving || article.status === "queued" || article.status === "published"}
+                className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
+                  article.status === "queued" || article.status === "published"
+                    ? "bg-gray-100 text-gray-400 cursor-default"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
+              >
+                ⏱ 代発行待ちにする
               </button>
               <button
                 onClick={() => updateStatus("reviewing")}
-                disabled={saving || article.status !== "published"}
+                disabled={saving || article.status === "reviewing"}
                 className={`w-full py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  article.status !== "published"
+                  article.status === "reviewing"
                     ? "bg-gray-100 text-gray-400 cursor-default"
                     : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
                 }`}
               >
                 審査待ちに戻す
               </button>
+              {article.status === "queued" && (
+                <p className="text-xs text-gray-400 pt-1">
+                  定時発行タイマーが発火すると、代発行待ちの記事から更新日時の古いものから順に自動公開されます。
+                  <Link href="/admin/settings/publish-schedule" className="text-blue-600 hover:underline ml-1">タイマー設定を見る</Link>
+                </p>
+              )}
             </div>
           </div>
 

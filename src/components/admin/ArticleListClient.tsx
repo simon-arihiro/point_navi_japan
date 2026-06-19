@@ -52,7 +52,8 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
     const q = query.trim().toLowerCase();
     return articles.filter((a) => {
       if (status === "published" && a.status !== "published") return false;
-      if (status === "reviewing" && a.status === "published") return false;
+      if (status === "reviewing" && a.status !== "reviewing") return false;
+      if (status === "queued" && a.status !== "queued") return false;
       if (articleType === "introduction" && a.article_type !== "introduction") return false;
       if (articleType === "invitation" && a.article_type !== "invitation") return false;
       if (articleType === "related" && (a.article_type === "introduction" || a.article_type === "invitation")) return false;
@@ -84,6 +85,7 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
           >
             <option value="">すべて</option>
             <option value="published">公開中</option>
+            <option value="queued">代発行待ち</option>
             <option value="reviewing">審査待ち</option>
           </select>
         </div>

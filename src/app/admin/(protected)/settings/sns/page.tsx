@@ -83,6 +83,9 @@ export default function AdminSnsSettingsPage() {
           AI設定
         </Link>
         <span className="px-4 py-2 rounded-xl bg-white border border-gray-100 font-bold text-gray-900">SNS配信設定</span>
+        <Link href="/admin/settings/publish-schedule" className="px-4 py-2 rounded-xl text-gray-500 hover:bg-white border border-transparent hover:border-gray-100">
+          定時発行設定
+        </Link>
       </div>
 
       <p className="text-xs text-gray-400 mb-4">

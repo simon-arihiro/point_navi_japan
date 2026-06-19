@@ -58,6 +58,9 @@ export default function AdminSettingsPage() {
         <Link href="/admin/settings/sns" className="px-4 py-2 rounded-xl text-gray-500 hover:bg-white border border-transparent hover:border-gray-100">
           SNS配信設定
         </Link>
+        <Link href="/admin/settings/publish-schedule" className="px-4 py-2 rounded-xl text-gray-500 hover:bg-white border border-transparent hover:border-gray-100">
+          定時発行設定
+        </Link>
       </div>
 
       <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 space-y-6">

@@ -21,9 +21,13 @@ export function getArticleTypeBadgeClass(type: string): string {
 }
 
 export function getArticleStatusLabel(status: string): string {
-  return status === "published" ? "公開中" : "審査待ち";
+  if (status === "published") return "公開中";
+  if (status === "queued") return "代発行待ち";
+  return "審査待ち";
 }
 
 export function getArticleStatusBadgeClass(status: string): string {
-  return status === "published" ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700";
+  if (status === "published") return "bg-green-100 text-green-700";
+  if (status === "queued") return "bg-blue-100 text-blue-700";
+  return "bg-yellow-100 text-yellow-700";
 }

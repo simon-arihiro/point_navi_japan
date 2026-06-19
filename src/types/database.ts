@@ -1,6 +1,6 @@
 export type ServiceStatus = "active" | "inactive";
 export type ArticleType = "introduction" | "guide" | "faq" | "comparison" | "campaign" | "earnings" | "invitation";
-export type ArticleStatus = "draft" | "reviewing" | "published" | "rejected" | "archived";
+export type ArticleStatus = "draft" | "reviewing" | "queued" | "published" | "rejected" | "archived";
 export type EventType =
   | "page_view"
   | "service_view"
@@ -168,6 +168,18 @@ export interface SystemSettings {
 // プラットフォームごとのSNS配信設定（有効/無効・APIクレデンシャル）
 export type SnsCredentials = Record<string, string>;
 export type SnsPlatformSettings = Partial<Record<DistributionPlatform, { enabled: boolean; credentials: SnsCredentials }>>;
+
+// 定時発行タイマー（日本時間ベース）。代発行待ち（status=queued）の記事を更新日時の古い順に発行する
+export interface PublishSchedule {
+  id: string;
+  hour: number;
+  minute: number;
+  count: number;
+  enabled: boolean;
+  last_run_date: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export interface AiPrompt {
   id: string;
