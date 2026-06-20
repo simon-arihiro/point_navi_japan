@@ -32,9 +32,10 @@ export default function UpdateExistingArticlesButton() {
         type="button"
         onClick={handleClick}
         disabled={loading}
+        title="招待コードのタイトル表記・本文中の強調表示だけを一括更新します（文章自体は変更しません）"
         className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
       >
-        {loading ? "更新中..." : "既存記事を更新"}
+        {loading ? "更新中..." : "招待コードの表記を一括更新"}
       </button>
     </div>
   );

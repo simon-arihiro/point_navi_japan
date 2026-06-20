@@ -55,9 +55,10 @@ export default function AiCleanupAllButton() {
         type="button"
         onClick={handleClick}
         disabled={running}
+        title="公開中・公開待ち・審査待ちの全記事をAIで自然な文章に書き直します（サムネイル画像は保持されます）"
         className="text-sm font-medium px-4 py-2 rounded-xl border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
       >
-        {running ? "AI見直し中..." : "全記事をAIで一括見直し"}
+        {running ? "AI文体を修正中..." : "AI文体を一括修正"}
       </button>
     </div>
   );

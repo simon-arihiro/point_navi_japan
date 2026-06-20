@@ -66,13 +66,16 @@ export default async function AdminArticlesPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-black text-gray-900">記事管理</h1>
         <div className="flex items-center gap-2">
           <AiCleanupAllButton />
           <UpdateExistingArticlesButton />
         </div>
       </div>
+      <p className="text-xs text-gray-400 mb-6 text-right">
+        「AI文体を一括修正」＝既存記事の文章をAIで自然な表現に書き直す（サムネイル画像は保持）／「招待コードの表記を一括更新」＝招待コードの強調表示・タイトル表記のみを修正
+      </p>
 
       <ArticleListClient articles={rows} allCategories={(categories ?? []).map((c) => ({ id: c.id, name: c.name }))} />
     </div>
