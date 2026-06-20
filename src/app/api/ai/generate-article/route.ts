@@ -74,11 +74,12 @@ export async function POST(request: NextRequest) {
     let articleId: string;
 
     if (type === "introduction") {
-      title = `${service.name}を実際に使ってみた感想｜メリット・デメリット・始め方まとめ`;
       const generated = splitContentAndDescription(
         await generateTaskText("article", SYSTEM_PROMPT_BASE, buildIntroductionArticlePrompt(service, extraContext), visionImages)
       );
-      content = generated.content.replace(/^#\s+.+\n+/, "").trim(); // AIが誤ってh1タイトルを出力した場合の保険
+      const titleMatch = generated.content.match(/^#\s+(.+)/m);
+      title = titleMatch ? titleMatch[1].trim() : `${service.name}を実際に使ってみた感想｜メリット・デメリット・始め方まとめ`;
+      content = generated.content.replace(/^#\s+.+\n+/, "").trim();
       const description = generated.description;
 
       // 既存の introduction 記事があれば上書き

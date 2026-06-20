@@ -59,13 +59,21 @@ export default async function ArticlePage(
   const OWN_OTHERS_LIMIT = 4;
   const relatedServiceIds = (article.related_services ?? []).map((r: { service_id: string }) => r.service_id);
 
-  const [{ data: introArticle }, { data: ownOthers }, { data: comparedArticles }, { data: otherArticles }] = await Promise.all([
+  const [{ data: introArticle }, { data: invitationArticle }, { data: ownOthers }, { data: comparedArticles }, { data: otherArticles }] = await Promise.all([
     supabase
       .from("articles")
       .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
       .eq("primary_service_id", article.primary_service_id)
       .eq("status", "published")
       .eq("article_type", "introduction")
+      .maybeSingle(),
+    // 体験レビュー・攻略系の記事末尾に「招待コードを見る」CTAを出すため、同サービスの招待コード記事を取得する
+    supabase
+      .from("articles")
+      .select("slug, primary_service:services!articles_primary_service_id_fkey(categories:service_categories(category:categories(slug)))")
+      .eq("primary_service_id", article.primary_service_id)
+      .eq("status", "published")
+      .eq("article_type", "invitation")
       .maybeSingle(),
     supabase
       .from("articles")
@@ -116,6 +124,10 @@ export default async function ArticlePage(
 
   const service = article.primary_service;
   const tocItems = extractHeadings(article.content);
+
+  const invitationCategorySlug = (invitationArticle as { primary_service?: { categories?: { category?: { slug: string } | null }[] } } | null)
+    ?.primary_service?.categories?.[0]?.category?.slug ?? "all";
+  const invitationArticleHref = invitationArticle ? `/articles/${invitationCategorySlug}/${invitationArticle.slug}` : null;
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://jp-point-navi.com";
   const articleUrl = `${siteUrl}/articles/${categorySlug}/${articleSlug}`;
@@ -213,6 +225,20 @@ export default async function ArticlePage(
               className={ARTICLE_PROSE_CLASS}
               dangerouslySetInnerHTML={{ __html: renderMarkdown(article.content) }}
             />
+
+            {article.article_type !== "invitation" && invitationArticleHref && (
+              <Link
+                href={invitationArticleHref}
+                className="block mt-8 bg-green-50 border border-green-200 rounded-2xl p-5 hover:border-green-400 transition-colors"
+              >
+                <p className="font-bold text-green-800 text-sm">
+                  読んでみて気になったら、今すぐ登録しますか？
+                </p>
+                <p className="text-green-700 text-sm mt-1 underline">
+                  → {service?.name}の最新招待コード・特典をチェックする
+                </p>
+              </Link>
+            )}
 
             <p className="text-xs text-gray-400 mt-10 pt-6 border-t border-gray-100">
               ※本記事の情報は参考目的です。最新情報は各サービスの公式サイトをご確認ください。

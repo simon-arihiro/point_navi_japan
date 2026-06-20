@@ -125,9 +125,13 @@ export function buildIntroductionArticlePrompt(service: {
 ${service.referral_code ? `- 紹介コード: ${service.referral_code}` : ""}
 ${service.referral_link ? `- 紹介リンク: ${service.referral_link}` : ""}`;
 
+  const titleGuide = `最初の行に、以下の形式でタイトル（# ）を出力してください：
+# タイトル
+全サービス共通の固定文言（「〜を実際に使ってみた感想｜メリット・デメリット・始め方まとめ」等）をそのまま使い回さず、このサービス特有の痛点・隠れた利点・実測結果などを踏まえたフックのあるタイトルにすること（例：「◯◯は本当に稼げる？1ヶ月使った実測結果」「◯◯のポイント反映が遅いと言われる理由を検証」など）。30字程度を目安に、毎回言い回しを変えること。`;
+
   // 管理者が大綱（目次案）を指定している場合は、固定テンプレートを使わず大綱の関心領域＋最新情報をもとに見出し構成を自由に組み立てる
   if (extra?.userPrompt?.trim()) {
-    return `${buildExtraContextSection(extra)}「${service.name}」のサービス紹介記事の本文を書いてください。タイトル（h1 / # ）は不要です。本文は「## 」から始める見出しで構成してください。
+    return `${buildExtraContextSection(extra)}「${service.name}」のサービス紹介記事の本文を書いてください。${titleGuide}本文は「## 」から始める見出しで構成してください。
 
 ${serviceInfoLines}
 
@@ -143,7 +147,7 @@ ${serviceInfoLines}
 - 個人ブロガーの体験談として書く${DESCRIPTION_SUFFIX_INSTRUCTION}`;
   }
 
-  return `${buildExtraContextSection(extra)}「${service.name}」のサービス紹介記事の本文を書いてください。タイトル（h1 / # ）は不要です。本文は「## 」から始める見出しで構成してください。
+  return `${buildExtraContextSection(extra)}「${service.name}」のサービス紹介記事の本文を書いてください。${titleGuide}本文は「## 」から始める見出しで構成してください。
 
 ${serviceInfoLines}
 
@@ -262,6 +266,7 @@ export function buildRelatedArticlePrompt(
 - 1500〜2500字
 - 個人ブロガーの体験談として書く
 - 実用的で読者が行動したくなる内容
+- タイトルは「◯◯の使い方」のような無難な説明文で終わらせず、このサービス特有の痛点・疑問・実測結果を踏まえたフックのあるタイトルにすること（例：「◯◯の還元率は本当に高い？実際の獲得ポイントを検証」「◯◯でよくある質問、実際に問い合わせて確認した」など）。招待コード記事のタイトルとは語感が被らないようにすること
 
 最初の行にタイトル（# タイトル）を含めてください。${DESCRIPTION_SUFFIX_INSTRUCTION}`;
 }
