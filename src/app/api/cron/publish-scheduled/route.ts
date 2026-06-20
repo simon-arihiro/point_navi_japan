@@ -1,9 +1,10 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { NextRequest } from "next/server";
 
-// Vercel Cron: 日本時間の各時0分（UTC各時0分の9時間後）に呼び出し、その時刻に該当する定時発行タイマーを実行する
+// Vercel Cron: 日本時間の各時台に呼び出し、その時に該当する定時発行タイマーを実行する
 // vercel.json: 1時間ごとに24個のcronエントリを登録（同じpathでscheduleだけ異なる）
-// 分単位の細かいタイマーが必要な場合は、本エンドポイントを数分おきに叩く外部スケジューラ（cron-job.org等）からも安全に呼び出せる（許容ウィンドウ10分・同日二重発火防止つき）
+// Hobbyプランのcronは登録時刻から最大1時間のフレキシブルウィンドウ内で実行されるため、分単位での厳密な突き合わせはせず「時」のみで判定する
+// （分単位の細かいタイマーが必要な場合は、本エンドポイントを数分おきに叩く外部スケジューラ（cron-job.org等）からも安全に呼び出せる。同日二重発火防止つき）
 export async function POST(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -30,12 +31,9 @@ export async function POST(request: NextRequest) {
     return Response.json({ ok: false, error: scheduleError.message }, { status: 500 });
   }
 
-  // 許容ウィンドウ10分以内に予定時刻を迎えたタイマーのみ実行（Vercel hourly cronはminute=0で呼ばれるため、minute=0設定のタイマーが対象になる）
-  const dueSchedules = (schedules ?? []).filter((s) => currentMinute >= s.minute && currentMinute < s.minute + 10);
-
   const results: { schedule_id: string; published_count: number }[] = [];
 
-  for (const schedule of dueSchedules) {
+  for (const schedule of schedules ?? []) {
     const { data: queuedArticles } = await supabase
       .from("articles")
       .select("id")
