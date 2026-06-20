@@ -17,7 +17,6 @@ export default async function ArticlesPage() {
       .from("articles")
       .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
       .eq("status", "published")
-      .neq("article_type", "introduction")
       .order("published_at", { ascending: false })
       .limit(50),
     supabase.from("categories").select("*").order("name"),
