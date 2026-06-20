@@ -25,22 +25,26 @@ export default function SearchPageClient() {
       setLoading(true);
       const supabase = createClient();
       const q = `%${query}%`;
-      const [svcRes, artRes] = await Promise.all([
-        supabase
-          .from("services")
-          .select(`*, categories:service_categories(category:categories(*))`)
-          .eq("status", "active")
-          .or(`name.ilike.${q},description.ilike.${q}`)
-          .limit(12),
-        supabase
-          .from("articles")
-          .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
-          .eq("status", "published")
-          .neq("article_type", "introduction")
-          .or(`title.ilike.${q},description.ilike.${q}`)
-          .limit(9),
-      ]);
+      const svcRes = await supabase
+        .from("services")
+        .select(`*, categories:service_categories(category:categories(*))`)
+        .eq("status", "active")
+        .or(`name.ilike.${q},description.ilike.${q}`)
+        .limit(12);
       setServices(svcRes.data ?? []);
+
+      // タイトル・説明文にキーワードを含む記事に加え、検索でマッチしたサービスの記事は
+      // 紹介文・招待文・関連記事を問わずすべて表示する
+      const serviceIds = (svcRes.data ?? []).map((s: { id: string }) => s.id);
+      const orConditions = [`title.ilike.${q}`, `description.ilike.${q}`];
+      if (serviceIds.length > 0) orConditions.push(`primary_service_id.in.(${serviceIds.join(",")})`);
+
+      const artRes = await supabase
+        .from("articles")
+        .select("*, primary_service:services!articles_primary_service_id_fkey(name, slug, logo_url, logo_storage_path, official_url)")
+        .eq("status", "published")
+        .or(orConditions.join(","))
+        .limit(9);
       setArticles((artRes.data ?? []).filter((a: any) => a.primary_service));
       setLoading(false);
     }, 400);
