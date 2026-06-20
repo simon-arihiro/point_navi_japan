@@ -35,7 +35,7 @@ export default function ArticleListWithFilter({ articles }: { articles: ArticleW
               onClick={() => setFilter(tab.key)}
               className={`text-sm font-bold px-4 py-2 rounded-full border-2 transition-colors ${
                 active
-                  ? "bg-brand-600 text-white border-brand-600"
+                  ? "bg-brand-700 text-white border-brand-700"
                   : "bg-white text-gray-700 border-gray-300 hover:border-brand-300"
               }`}
             >
