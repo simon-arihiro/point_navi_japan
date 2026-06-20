@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import ArticleCard from "@/components/ArticleCard";
+import ArticleListWithFilter from "@/components/ArticleListWithFilter";
 import Sidebar from "@/components/Sidebar";
 import type { Metadata } from "next";
 
@@ -37,19 +37,7 @@ export default async function ArticlesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8">
           <div>
-            {articles.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {articles.map((a: any) => (
-                  <ArticleCard key={a.id} article={a} />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-20 text-gray-400">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/mascot/library/squirrel-empty-square.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
-                <p>記事はまだありません</p>
-              </div>
-            )}
+            <ArticleListWithFilter articles={articles} />
           </div>
 
           <aside>
