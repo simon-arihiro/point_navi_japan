@@ -25,20 +25,25 @@ export default function ArticleListWithFilter({ articles }: { articles: ArticleW
   return (
     <div>
       <div className="flex flex-wrap gap-2 mb-5">
-        {TABS.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            onClick={() => setFilter(tab.key)}
-            className={`text-sm font-bold px-4 py-2 rounded-full border transition-colors ${
-              filter === tab.key
-                ? "bg-brand-600 text-white border-brand-600"
-                : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
-            }`}
-          >
-            {tab.label}
-          </button>
-        ))}
+        {TABS.map((tab) => {
+          const count = articles.filter((a) => matchesFilter(a.article_type, tab.key)).length;
+          const active = filter === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setFilter(tab.key)}
+              className={`text-sm font-bold px-4 py-2 rounded-full border-2 transition-colors ${
+                active
+                  ? "bg-brand-600 text-white border-brand-600"
+                  : "bg-white text-gray-700 border-gray-300 hover:border-brand-300"
+              }`}
+            >
+              {tab.label}
+              <span className={`ml-1.5 ${active ? "text-brand-100" : "text-gray-400"}`}>({count})</span>
+            </button>
+          );
+        })}
       </div>
 
       {filtered.length > 0 ? (

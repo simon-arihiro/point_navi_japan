@@ -3,6 +3,7 @@ import { ArticleWithService } from "@/types/database";
 import LogoFallback from "./LogoFallback";
 import HighlightServiceName from "./HighlightServiceName";
 import { extractFirstImageUrl } from "@/lib/markdown";
+import { getArticleTypeLabel, getArticleTypeBadgeClass } from "@/lib/articleTypes";
 
 type Props = {
   article: ArticleWithService;
@@ -86,18 +87,23 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
   return (
     <Link href={href} className="group block">
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-gray-200 transition-all h-full">
-        {article.primary_service && (
-          <div className="flex items-center gap-2 mb-3">
-            <LogoFallback
-              name={article.primary_service.name}
-              logoUrl={article.primary_service.logo_url}
-              logoStoragePath={article.primary_service.logo_storage_path}
-              officialUrl={article.primary_service.official_url}
-              size={24}
-            />
-            <span className="text-xs text-gray-500">{article.primary_service.name}</span>
-          </div>
-        )}
+        <div className="flex items-center justify-between gap-2 mb-3">
+          {article.primary_service && (
+            <div className="flex items-center gap-2 min-w-0">
+              <LogoFallback
+                name={article.primary_service.name}
+                logoUrl={article.primary_service.logo_url}
+                logoStoragePath={article.primary_service.logo_storage_path}
+                officialUrl={article.primary_service.official_url}
+                size={24}
+              />
+              <span className="text-xs text-gray-500 truncate">{article.primary_service.name}</span>
+            </div>
+          )}
+          <span className={`text-xs font-bold px-2 py-0.5 rounded-full shrink-0 ${getArticleTypeBadgeClass(article.article_type)}`}>
+            {getArticleTypeLabel(article.article_type)}
+          </span>
+        </div>
         <h3 className="font-bold text-gray-900 text-sm leading-snug group-hover:text-brand-700 transition-colors line-clamp-2 mb-2">
           <HighlightServiceName title={article.title} serviceName={article.primary_service?.name} />
         </h3>
