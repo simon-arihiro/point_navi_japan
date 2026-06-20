@@ -5,7 +5,7 @@ import { NextRequest } from "next/server";
 // vercel.json: 1時間ごとに24個のcronエントリを登録（同じpathでscheduleだけ異なる）
 // Hobbyプランのcronは登録時刻から最大1時間のフレキシブルウィンドウ内で実行されるため、分単位での厳密な突き合わせはせず「時」のみで判定する
 // （分単位の細かいタイマーが必要な場合は、本エンドポイントを数分おきに叩く外部スケジューラ（cron-job.org等）からも安全に呼び出せる。同日二重発火防止つき）
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -53,3 +53,7 @@ export async function POST(request: NextRequest) {
 
   return Response.json({ ok: true, jst_time: `${currentHour}:${String(currentMinute).padStart(2, "0")}`, results });
 }
+
+// VercelのCronは実際にはGETでリクエストする。Run（手動実行）ボタンや外部スケジューラからのPOSTにも対応
+export const GET = handler;
+export const POST = handler;

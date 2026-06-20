@@ -3,7 +3,7 @@ import { NextRequest } from "next/server";
 
 // Vercel Cron: 3日ごとにSupabaseへ軽量クエリを送りプロジェクトの自動停止を防ぐ
 // vercel.json: "crons": [{"path": "/api/cron/keepalive", "schedule": "0 12 */3 * *"}]
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -22,3 +22,7 @@ export async function POST(request: NextRequest) {
   console.log("[keepalive] ok, categories count:", count);
   return Response.json({ ok: true, count });
 }
+
+// VercelのCronは実際にはGETでリクエストする。Run（手動実行）ボタンや外部スケジューラからのPOSTにも対応
+export const GET = handler;
+export const POST = handler;

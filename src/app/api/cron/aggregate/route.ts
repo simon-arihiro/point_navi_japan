@@ -4,7 +4,7 @@ import { NextRequest } from "next/server";
 
 // Vercel Cron: 毎日 JST 00:00（UTC 15:00）に呼び出し
 // vercel.json: "crons": [{"path": "/api/cron/aggregate", "schedule": "0 15 * * *"}]
-export async function POST(request: NextRequest) {
+async function handler(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
@@ -60,3 +60,7 @@ export async function POST(request: NextRequest) {
     purged: { services: purgedServices ?? 0, articles: purgedArticles ?? 0, categories: purgedCategories ?? 0 },
   });
 }
+
+// VercelのCronは実際にはGETでリクエストする。Run（手動実行）ボタンや外部スケジューラからのPOSTにも対応
+export const GET = handler;
+export const POST = handler;
