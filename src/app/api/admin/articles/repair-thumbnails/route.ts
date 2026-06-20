@@ -1,7 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { placeImageAtTop } from "@/lib/markdown";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 
 // AI一括文体修正等で先頭サムネイル画像が本文から消えてしまった記事を、featured_image_urlを使って復元する
+// placeImageAtTopは既存の先頭画像があれば置き換え、なければ先頭に追加するため、本文中の画像は常に1枚のみになる
 export async function POST() {
   const supabase = createAdminClient();
   const { data: articles, error } = await supabase
@@ -15,7 +17,7 @@ export async function POST() {
   let fixed = 0;
   for (const a of articles ?? []) {
     if (!a.content || !a.featured_image_url || a.content.includes(a.featured_image_url)) continue;
-    const newContent = `![${a.title}](${a.featured_image_url})\n\n${a.content.trimStart()}`;
+    const newContent = placeImageAtTop(a.content, a.title, a.featured_image_url);
     const { error: updateError } = await supabase.from("articles").update({ content: newContent }).eq("id", a.id);
     if (!updateError) fixed += 1;
   }
