@@ -6,7 +6,7 @@ import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
-  const { article_id, feedback, images } = await request.json();
+  const { article_id, feedback, images, keep_status } = await request.json();
   if (!article_id || !feedback) {
     return errorResponse(ErrorCode.VALIDATION_ERROR, "article_id と feedback は必須です");
   }
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     await supabase.from("articles").update({
       content: newContent,
       title,
-      status: "reviewing",
+      ...(keep_status ? {} : { status: "reviewing" }),
     }).eq("id", article_id);
 
     return Response.json({ ok: true });
