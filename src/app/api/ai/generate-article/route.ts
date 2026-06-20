@@ -13,6 +13,7 @@ import {
 } from "@/lib/ai/prompts";
 import { extractUrls, fetchWebContents } from "@/lib/ai/webContent";
 import { buildThumbnailPrompt, generateThumbnailImage, placeImageAtTop } from "@/lib/ai/thumbnail";
+import { extractFirstImageUrl } from "@/lib/markdown";
 import { GeminiQuotaExceededError } from "@/lib/ai/gemini";
 import { uploadArticleImage } from "@/lib/storage";
 import { errorResponse, ErrorCode } from "@/lib/errors";
@@ -172,31 +173,40 @@ export async function POST(request: NextRequest) {
       articleId = inserted!.id;
     }
 
+    // サムネイルは本文中に既に画像（添付画像やWeb参考画像など）が含まれていれば、それを最優先で使用する。
+    // AIによるサムネイル自動生成は、本文に画像が一枚もない場合のフォールバックとしてのみ実行する。
+    const existingImage = extractFirstImageUrl(content);
+    if (existingImage) {
+      await supabase.from("articles").update({ featured_image_url: existingImage }).eq("id", articleId);
+    }
+
     // アイキャッチ画像生成はGemini呼び出しのレート制限待ちもあり時間がかかるため、
     // レスポンスを先に返したうえでafter()内で実行する（失敗してもクライアントの記事生成自体は成功扱いのまま）
     after(async () => {
-      const { data: settings } = await supabase.from("system_settings").select("thumbnail_auto_generate").eq("id", 1).single();
-      if (settings?.thumbnail_auto_generate !== false) {
-        try {
-          const { data: defaultThumbnailPrompt } = await supabase.from("ai_prompts").select("content").eq("category", "thumbnail").eq("is_default", true).maybeSingle();
-          const thumbnailPrompt = buildThumbnailPrompt(service.name, type, title, defaultThumbnailPrompt?.content);
-          const thumbnailUrl = await generateThumbnailImage(thumbnailPrompt, service_id);
-          if (thumbnailUrl) {
-            const updatedContent = placeImageAtTop(content, title, thumbnailUrl);
-            await supabase.from("articles").update({ featured_image_url: thumbnailUrl, content: updatedContent }).eq("id", articleId);
+      if (!existingImage) {
+        const { data: settings } = await supabase.from("system_settings").select("thumbnail_auto_generate").eq("id", 1).single();
+        if (settings?.thumbnail_auto_generate !== false) {
+          try {
+            const { data: defaultThumbnailPrompt } = await supabase.from("ai_prompts").select("content").eq("category", "thumbnail").eq("is_default", true).maybeSingle();
+            const thumbnailPrompt = buildThumbnailPrompt(service.name, type, title, defaultThumbnailPrompt?.content);
+            const thumbnailUrl = await generateThumbnailImage(thumbnailPrompt, service_id);
+            if (thumbnailUrl) {
+              const updatedContent = placeImageAtTop(content, title, thumbnailUrl);
+              await supabase.from("articles").update({ featured_image_url: thumbnailUrl, content: updatedContent }).eq("id", articleId);
+            }
+          } catch (thumbErr) {
+            console.error("thumbnail generation failed:", thumbErr);
+            await supabase.from("admin_notifications").insert({
+              type: "image_failed",
+              payload: {
+                article_id: articleId,
+                service_id,
+                service_name: service.name,
+                reason: thumbErr instanceof GeminiQuotaExceededError ? "quota_exceeded" : "error",
+                detail: String(thumbErr),
+              },
+            });
           }
-        } catch (thumbErr) {
-          console.error("thumbnail generation failed:", thumbErr);
-          await supabase.from("admin_notifications").insert({
-            type: "image_failed",
-            payload: {
-              article_id: articleId,
-              service_id,
-              service_name: service.name,
-              reason: thumbErr instanceof GeminiQuotaExceededError ? "quota_exceeded" : "error",
-              detail: String(thumbErr),
-            },
-          });
         }
       }
 
