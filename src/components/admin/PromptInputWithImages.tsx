@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import { compressImage, CompressedImage } from "@/lib/imageCompress";
 
 export type PendingImage = CompressedImage;
@@ -15,18 +16,32 @@ type Props = {
   disabled?: boolean;
 };
 
-// ChatGPT風に、テキスト入力欄に画像をペーストして添付できる入力コンポーネント
+// ChatGPT風に、テキスト入力欄に画像をペースト or ボタンから選択して添付できる入力コンポーネント
+// （スマホはクリップボードへの画像コピーが難しいため、ファイル選択ボタンも併用する）
 export default function PromptInputWithImages({ value, onChange, images, onImagesChange, placeholder, disabled }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const addFiles = async (files: File[]) => {
+    if (files.length === 0) return;
+    const remaining = MAX_IMAGES - images.length;
+    const targets = files.slice(0, Math.max(0, remaining));
+    const compressed = await Promise.all(targets.map(compressImage));
+    onImagesChange([...images, ...compressed]);
+  };
+
   const handlePaste = async (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const items = Array.from(e.clipboardData?.items ?? []);
     const imageFiles = items.filter((item) => item.type.startsWith("image/")).map((item) => item.getAsFile()).filter((f): f is File => !!f);
     if (imageFiles.length === 0) return;
 
     e.preventDefault();
-    const remaining = MAX_IMAGES - images.length;
-    const targets = imageFiles.slice(0, Math.max(0, remaining));
-    const compressed = await Promise.all(targets.map(compressImage));
-    onImagesChange([...images, ...compressed]);
+    await addFiles(imageFiles);
+  };
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    await addFiles(files);
+    e.target.value = "";
   };
 
   const removeImage = (index: number) => {
@@ -62,7 +77,26 @@ export default function PromptInputWithImages({ value, onChange, images, onImage
         rows={6}
         className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 resize-none disabled:opacity-50"
       />
-      <p className="text-xs text-gray-400 mt-1">画像はコピー&ペーストで添付できます（最大{MAX_IMAGES}枚）</p>
+      <div className="flex items-center gap-2 mt-1">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={handleFileSelect}
+          disabled={disabled || images.length >= MAX_IMAGES}
+        />
+        <button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={disabled || images.length >= MAX_IMAGES}
+          className="text-xs font-bold text-red-600 border border-red-200 rounded-full px-3 py-1 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+        >
+          画像を選択
+        </button>
+        <p className="text-xs text-gray-400">コピー&ペースト、またはボタンから添付できます（最大{MAX_IMAGES}枚）</p>
+      </div>
     </div>
   );
 }
