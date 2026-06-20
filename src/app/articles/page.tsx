@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "記事一覧",
-  description: "招待コードの使い方からポイ活アプリの攻略・比較まで、りすくんが実際に使って書いた記事をまとめて紹介。モッピー・トリマ・freecashなど人気サービスの始め方やお得な裏ワザを解説しています。",
+  description: "招待コード・紹介コードの使い方、モッピー・トリマ・freecashなど人気ポイ活アプリの攻略法や比較レビューをまとめて紹介。実際に使ってみたお得な始め方・裏ワザを解説しています。",
   alternates: { canonical: "/articles" },
 };
 
@@ -31,7 +31,7 @@ export default async function ArticlesPage() {
       <div className="bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <h1 className="text-3xl font-black text-gray-900 mb-2">記事一覧</h1>
-          <p className="text-gray-500 text-sm">招待コードの使い方からポイ活アプリの攻略・比較まで、りすくんが実際に使って書いた記事をまとめて紹介。お得な始め方や裏ワザをチェックしよう。</p>
+          <p className="text-gray-500 text-sm">招待コード・紹介コードの使い方からポイ活アプリの攻略・比較まで、実際に使ってみたレビューをまとめて紹介。お得な始め方や裏ワザをチェックしよう。</p>
         </div>
       </div>
 
