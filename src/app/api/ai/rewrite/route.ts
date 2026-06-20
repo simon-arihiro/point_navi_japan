@@ -2,6 +2,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { generateTaskText } from "@/lib/ai/router";
 import { buildRewritePrompt, SYSTEM_PROMPT_BASE } from "@/lib/ai/prompts";
 import { uploadArticleImage } from "@/lib/storage";
+import { extractFirstImageUrl, placeImageAtTop } from "@/lib/markdown";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
@@ -26,7 +27,7 @@ export async function POST(request: NextRequest) {
         )).filter((url): url is string => !!url)
       : [];
 
-    const newContent = await generateTaskText(
+    let newContent = await generateTaskText(
       "article",
       SYSTEM_PROMPT_BASE,
       buildRewritePrompt(article.content, feedback, defaultPrompt?.content, imageUrls),
@@ -34,6 +35,13 @@ export async function POST(request: NextRequest) {
     );
     const titleMatch = newContent.match(/^#\s+(.+)/m);
     const title = titleMatch ? titleMatch[1].trim() : article.title;
+
+    // AIが指示を無視して先頭サムネイル画像を削除してしまうことがあるため、元記事の先頭画像が
+    // 書き直し後の本文から消えていた場合はコード側で先頭に復元する（一覧カードのサムネイル表示に必須）
+    const originalThumbnail = extractFirstImageUrl(article.content);
+    if (originalThumbnail && !newContent.includes(originalThumbnail)) {
+      newContent = placeImageAtTop(newContent, title, originalThumbnail);
+    }
 
     await supabase.from("articles").update({
       content: newContent,
