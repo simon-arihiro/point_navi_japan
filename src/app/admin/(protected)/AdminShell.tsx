@@ -6,6 +6,7 @@ import Link from "next/link";
 const NAV_ITEMS = [
   { href: "/admin", label: "ダッシュボード" },
   { href: "/admin/analytics", label: "アクセス分析" },
+  { href: "/admin/seo", label: "SEO分析" },
   { href: "/admin/services", label: "サービス" },
   { href: "/admin/articles", label: "記事" },
   { href: "/admin/categories", label: "カテゴリ" },

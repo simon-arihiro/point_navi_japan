@@ -34,6 +34,7 @@
 - **@supabase/ssr**: `createServerClient` はサーバーコンポーネント・Route Handler 用、`createBrowserClient` はクライアントコンポーネント用
 - **ANTHROPIC_API_KEY** 未設定時は AI 生成機能のみ失敗（サイト本体は正常動作）
 - **GEMINI_API_KEY** 未設定・無料枠上限時はサムネイル自動生成のみ失敗（記事生成自体は成功し、本文内の最初の画像にフォールバック）
+- **GOOGLE_SERVICE_ACCOUNT_KEY** / **GA4_PROPERTY_ID** / **GSC_SITE_URL** 未設定時は `/admin/seo` ページのGA4・Search Console連携部分のみ「未接続」表示になる（サイト本体・他のAdmin機能は正常動作）
 
 ## 外部サービス
 
@@ -79,6 +80,9 @@
 | `CRON_SECRET` | `dd48e776ebcfe52a48251c87483f3c0e02c2cf0ad75dd5af` |
 | `ANTHROPIC_API_KEY` | console.anthropic.com → API Keys（未取得） |
 | `GEMINI_API_KEY` | Google AI Studio (aistudio.google.com) → Get API key。記事サムネイル自動生成（`src/lib/ai/gemini.ts`）で使用。無料枠は1日あたりのモデル別リクエスト数に上限あり |
+| `GOOGLE_SERVICE_ACCOUNT_KEY` | Google Cloud Console → サービスアカウント作成 → JSON鍵をそのまま文字列として設定（GA4 Data API・Search Console APIで使用、`src/lib/google/`）。サービスアカウントのメールアドレスをGA4プロパティ（閲覧者権限）とSearch Console（ユーザー追加）の両方に許可する必要あり |
+| `GA4_PROPERTY_ID` | GA4管理画面 → プロパティ設定 → プロパティID（数字のみ） |
+| `GSC_SITE_URL` | Search Consoleで確認済みのプロパティURL（例: `https://jp-point-navi.com/` または `sc-domain:jp-point-navi.com`） |
 | `NEXT_PUBLIC_SITE_URL` | `https://jp-point-navi.com`（独自ドメイン接続後。接続前は Vercel デプロイ後に発行される `*.vercel.app` ドメイン） |
 
 ## DB マイグレーション
