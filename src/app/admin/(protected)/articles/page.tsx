@@ -4,6 +4,7 @@ import ArticleListClient from "@/components/admin/ArticleListClient";
 import UpdateExistingArticlesButton from "@/components/admin/UpdateExistingArticlesButton";
 import AiCleanupAllButton from "@/components/admin/AiCleanupAllButton";
 import RepairThumbnailsButton from "@/components/admin/RepairThumbnailsButton";
+import RepairImageMarkdownButton from "@/components/admin/RepairImageMarkdownButton";
 import type { Category } from "@/types/database";
 
 export const metadata: Metadata = { title: "記事管理" };
@@ -73,10 +74,11 @@ export default async function AdminArticlesPage() {
           <AiCleanupAllButton />
           <UpdateExistingArticlesButton />
           <RepairThumbnailsButton />
+          <RepairImageMarkdownButton />
         </div>
       </div>
       <p className="text-xs text-gray-400 mb-6 text-right">
-        「AI文体を一括修正」＝既存記事の文章をAIで自然な表現に書き直す（サムネイル画像は保持）／「招待コードの表記を一括更新」＝招待コードの強調表示・タイトル表記のみを修正／「消えたサムネイルを復元」＝AIの書き直しで本文から消えた先頭画像を復元
+        「AI文体を一括修正」＝既存記事の文章をAIで自然な表現に書き直す（サムネイル画像は保持）／「招待コードの表記を一括更新」＝招待コードの強調表示・タイトル表記のみを修正／「消えたサムネイルを復元」＝AIの書き直しで本文から消えた先頭画像を復元／「崩れた画像表示を修復」＝AIが画像Markdownを改行で分断してしまい表示されなくなった本文中の画像を修復
       </p>
 
       <ArticleListClient articles={rows} allCategories={(categories ?? []).map((c) => ({ id: c.id, name: c.name }))} />
