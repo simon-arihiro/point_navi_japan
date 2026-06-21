@@ -18,6 +18,20 @@ export const metadata: Metadata = {
   },
   description: "招待コード・お得な入会特典を実際に試した体験談をもとに正直レビュー。トリマ・Powl・モッピーなど人気ポイ活アプリの始め方・稼ぎ方をりすくんがわかりやすく解説。",
   keywords: "ポイ活, 招待コード, 招待リンク, ポイントサービス, トリマ, Powl, モッピー",
+  openGraph: {
+    type: "website",
+    siteName: "りすくんのポイナビ",
+    locale: "ja_JP",
+    title: "りすくんのポイナビ｜招待コード・ポイ活アプリを正直レビュー",
+    description: "招待コード・お得な入会特典を実際に試した体験談をもとに正直レビュー。トリマ・Powl・モッピーなど人気ポイ活アプリの始め方・稼ぎ方をりすくんがわかりやすく解説。",
+    images: ["/mascot/library/poinavi-header-banner-lg.png"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "りすくんのポイナビ｜招待コード・ポイ活アプリを正直レビュー",
+    description: "招待コード・お得な入会特典を実際に試した体験談をもとに正直レビュー。",
+    images: ["/mascot/library/poinavi-header-banner-lg.png"],
+  },
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

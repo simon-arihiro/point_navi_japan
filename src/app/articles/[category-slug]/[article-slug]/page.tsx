@@ -16,11 +16,28 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { "category-slug": categorySlug, "article-slug": articleSlug } = await props.params;
   const supabase = await createClient();
-  const { data: a } = await supabase.from("articles").select("title, description").eq("slug", articleSlug).single();
+  const { data: a } = await supabase
+    .from("articles")
+    .select("title, description, featured_image_url")
+    .eq("slug", articleSlug)
+    .single();
+  const ogImage = a?.featured_image_url ?? "/mascot/library/poinavi-header-banner-lg.png";
   return {
     title: a?.title ?? "記事",
     description: a?.description ?? "",
     alternates: { canonical: `/articles/${categorySlug}/${articleSlug}` },
+    openGraph: {
+      type: "article",
+      title: a?.title ?? "記事",
+      description: a?.description ?? "",
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: a?.title ?? "記事",
+      description: a?.description ?? "",
+      images: [ogImage],
+    },
   };
 }
 

@@ -14,11 +14,30 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { "category-slug": categorySlug, "service-slug": serviceSlug } = await props.params;
   const supabase = await createClient();
-  const { data: svc } = await supabase.from("services").select("name, description").eq("slug", serviceSlug).single();
+  const { data: svc } = await supabase
+    .from("services")
+    .select("name, description, logo_url, logo_storage_path")
+    .eq("slug", serviceSlug)
+    .single();
+  const ogImage = svc?.logo_storage_path
+    ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${svc.logo_storage_path}`
+    : svc?.logo_url ?? "/mascot/library/poinavi-header-banner-lg.png";
   return {
     title: svc?.name ?? "サービス詳細",
     description: svc?.description ?? "",
     alternates: { canonical: `/services/${categorySlug}/${serviceSlug}` },
+    openGraph: {
+      type: "website",
+      title: svc?.name ?? "サービス詳細",
+      description: svc?.description ?? "",
+      images: [ogImage],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: svc?.name ?? "サービス詳細",
+      description: svc?.description ?? "",
+      images: [ogImage],
+    },
   };
 }
 
