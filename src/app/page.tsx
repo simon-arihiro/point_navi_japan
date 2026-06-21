@@ -47,8 +47,7 @@ export default async function HomePage() {
     const rankedArticles = articles.map((a: any) => ({ ...a, pv: articleViewCounts.get(a.id) ?? 0 }));
     popularArticles = [...rankedArticles].sort((a, b) => b.pv - a.pv).slice(0, 10);
 
-    // 最新記事フィードはサービス詳細に統合表示される紹介記事を除く
-    latestArticles = articles.filter((a: any) => a.article_type !== "introduction").slice(0, 7);
+    latestArticles = articles.slice(0, 7);
     categories = categoriesRes.data ?? [];
   } catch {
     // Supabase 未接続時は空表示
