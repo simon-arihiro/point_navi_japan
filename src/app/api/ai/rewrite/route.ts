@@ -2,7 +2,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { generateTaskText } from "@/lib/ai/router";
 import { buildRewritePrompt, SYSTEM_PROMPT_BASE } from "@/lib/ai/prompts";
 import { uploadArticleImage } from "@/lib/storage";
-import { extractFirstImageUrl, placeImageAtTop } from "@/lib/markdown";
+import { extractFirstImageUrl, placeImageAtTop, repairBrokenImageMarkdown } from "@/lib/markdown";
 import { errorResponse, ErrorCode } from "@/lib/errors";
 import { NextRequest } from "next/server";
 
@@ -27,12 +27,12 @@ export async function POST(request: NextRequest) {
         )).filter((url): url is string => !!url)
       : [];
 
-    let newContent = await generateTaskText(
+    let newContent = repairBrokenImageMarkdown(await generateTaskText(
       "article",
       SYSTEM_PROMPT_BASE,
       buildRewritePrompt(article.content, feedback, defaultPrompt?.content, imageUrls),
       hasImages ? images : undefined
-    );
+    ));
     const titleMatch = newContent.match(/^#\s+(.+)/m);
     const title = titleMatch ? titleMatch[1].trim() : article.title;
 

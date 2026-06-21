@@ -13,7 +13,7 @@ import {
 } from "@/lib/ai/prompts";
 import { extractUrls, fetchWebContents } from "@/lib/ai/webContent";
 import { buildThumbnailPrompt, generateThumbnailImage, placeImageAtTop } from "@/lib/ai/thumbnail";
-import { extractFirstImageUrl } from "@/lib/markdown";
+import { extractFirstImageUrl, repairBrokenImageMarkdown } from "@/lib/markdown";
 import { GeminiQuotaExceededError } from "@/lib/ai/gemini";
 import { uploadArticleImage } from "@/lib/storage";
 import { errorResponse, ErrorCode } from "@/lib/errors";
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       );
       const titleMatch = generated.content.match(/^#\s+(.+)/m);
       title = titleMatch ? titleMatch[1].trim() : `${service.name}を実際に使ってみた感想｜メリット・デメリット・始め方まとめ`;
-      content = generated.content.replace(/^#\s+.+\n+/, "").trim();
+      content = repairBrokenImageMarkdown(generated.content.replace(/^#\s+.+\n+/, "").trim());
       const description = generated.description;
 
       // 既存の introduction 記事があれば上書き
@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
 
       const titleMatch = content.match(/^#\s+(.+)/m);
       title = titleMatch ? titleMatch[1].trim() : `${service.name}の招待コード・紹介特典まとめ`;
-      content = content.replace(/^#\s+.+\n+/, "").trim();
+      content = repairBrokenImageMarkdown(content.replace(/^#\s+.+\n+/, "").trim());
 
       // 既存の invitation 記事があれば上書き（1サービスにつき1記事）
       const { data: existing } = await supabase
@@ -156,7 +156,7 @@ export async function POST(request: NextRequest) {
       const generated = splitContentAndDescription(
         await generateTaskText("article", SYSTEM_PROMPT_BASE, buildRelatedArticlePrompt(service, type as any, extraContext), visionImages)
       );
-      content = generated.content;
+      content = repairBrokenImageMarkdown(generated.content);
       const description = generated.description;
 
       const titleMatch = content.match(/^#\s+(.+)/m);

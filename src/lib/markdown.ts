@@ -74,6 +74,16 @@ export function extractHeadings(content: string): TocItem[] {
   return headings;
 }
 
+// AIが ![alt]\n(url) のように alt と url の間で改行してしまい画像として認識されなくなるケースの救済。
+// 「![alt]」の直後（間に短い余計な1行が挟まる場合も含む）に続く「(url)」を1行の画像記法に結合する
+export function repairBrokenImageMarkdown(content: string): string {
+  if (!content) return content;
+  return content.replace(
+    /!\[([^\]]*)\]\s*\n+(?:[^\n(]{0,30}\n+)?\((https?:\/\/[^\s)]+)\)/g,
+    (_match, alt, url) => `![${alt}](${url})`
+  );
+}
+
 // 記事本文（Markdown）内で最初に登場する画像のURLを抽出する（カード等のサムネイル表示用）
 export function extractFirstImageUrl(content: string): string | null {
   const match = content?.match(/!\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/);
