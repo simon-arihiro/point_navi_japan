@@ -1,4 +1,4 @@
-import { marked, Parser } from "marked";
+import { marked, Parser, type Token } from "marked";
 
 // 見出し(h2/h3)にアンカー用のidを振るためのカウンター。renderMarkdown呼び出しごとにリセットする
 let headingCounter = 0;
@@ -90,11 +90,11 @@ export type FaqPair = { question: string; answer: string };
 export function extractFaqPairs(content: string): FaqPair[] {
   const tokens = marked.lexer(content ?? "");
   const pairs: FaqPair[] = [];
-  let current: { question: string; bodyTokens: typeof tokens } | null = null;
+  let current: { question: string; bodyTokens: Token[] } | null = null;
 
   const flush = () => {
     if (!current) return;
-    const html = Parser.parse(current.bodyTokens as Parameters<typeof Parser.parse>[0]);
+    const html = Parser.parse(current.bodyTokens);
     const answer = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
     if (answer) pairs.push({ question: current.question, answer });
     current = null;
