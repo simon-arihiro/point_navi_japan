@@ -35,6 +35,7 @@ export default function AdminTrashPage() {
   const [data, setData] = useState<TrashData | null>(null);
   const [loading, setLoading] = useState(true);
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [emptying, setEmptying] = useState(false);
 
   const load = () => {
     fetch("/api/admin/trash")
@@ -78,6 +79,19 @@ export default function AdminTrashPage() {
     setBusyKey(null);
   };
 
+  const handleEmptyAll = async () => {
+    if (!confirm("ゴミ箱内のすべてのアイテムを完全に削除しますか？関連データもすべて削除され、この操作は元に戻せません。")) return;
+    if (!confirm("本当に完全削除します。よろしいですか？")) return;
+    setEmptying(true);
+    const res = await fetch("/api/admin/trash", { method: "DELETE" });
+    if (res.ok) {
+      load();
+    } else {
+      alert("ゴミ箱の空にする処理に失敗しました");
+    }
+    setEmptying(false);
+  };
+
   if (loading) return <div className="text-gray-400 text-sm">読み込み中...</div>;
   if (!data) return <div className="text-red-600 text-sm">読み込みに失敗しました</div>;
 
@@ -90,7 +104,18 @@ export default function AdminTrashPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-2xl font-black text-gray-900 mb-2">ゴミ箱</h1>
+      <div className="flex items-start justify-between gap-4 mb-2">
+        <h1 className="text-2xl font-black text-gray-900">ゴミ箱</h1>
+        {totalCount > 0 && (
+          <button
+            onClick={handleEmptyAll}
+            disabled={emptying}
+            className="text-xs font-medium text-red-600 hover:text-red-800 border border-red-200 hover:bg-red-50 rounded-lg px-3 py-1.5 disabled:opacity-50 shrink-0"
+          >
+            {emptying ? "削除中..." : "ゴミ箱を空にする"}
+          </button>
+        )}
+      </div>
       <p className="text-sm text-gray-500 mb-8">
         削除されたアイテムは{TRASH_RETENTION_DAYS}日間ここに保管されます。期限を過ぎると自動的に完全削除されます。
       </p>
