@@ -4,11 +4,16 @@ import InvitationCodeTable from "@/components/InvitationCodeTable";
 import SearchBox from "@/components/SearchBox";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "招待コード一覧｜特典額を比較表でチェック",
-  description: "ポイ活サービスの招待コード・招待リンクを特典額付きの比較表でまとめて紹介。りすくんが実際に登録して受け取れた金額だけを厳選掲載しています。",
-  alternates: { canonical: "/invitations" },
-};
+export function generateMetadata(): Metadata {
+  const now = new Date();
+  const yearMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;
+
+  return {
+    title: `【${yearMonth}最新】招待コード一覧｜特典額を比較表でチェック`,
+    description: "ポイ活サービスの招待コード・招待リンクを特典額付きの比較表でまとめて紹介。りすくんが実際に登録して受け取れた金額だけを厳選掲載しています。",
+    alternates: { canonical: "/invitations" },
+  };
+}
 
 export default async function InvitationsPage() {
   const supabase = await createClient();
