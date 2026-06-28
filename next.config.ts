@@ -26,10 +26,32 @@ const nextConfig: NextConfig = {
       { source: `/articles/${oldSlug}`, destination: `/articles/${newSlug}`, permanent: true },
       { source: `/articles/${oldSlug}/:slug*`, destination: `/articles/${newSlug}/:slug*`, permanent: true },
     ]);
+
+    // AI生成記事のslugが `${service}-${type}-${timestamp}` 形式で収録されていたものを
+    // 意味のある `${service}-${type}` 形式へ301リダイレクトする（記事側は2階層目がslugのためカテゴリ階層をワイルドカードで吸収する）
+    const articleSlugFixes: [string, string][] = [
+      ["cashwalk-guide-1781185595130", "cashwalk-guide"],
+      ["cashwalk-faq-1781444680923", "cashwalk-faq"],
+      ["freecash-guide-1781998598897", "freecash-guide"],
+      ["moneywalk-guide-1781100277749", "moneywalk-guide"],
+      ["pointincome-guide-1781905874470", "pointincome-guide"],
+      ["townwifi-guide-1781519509366", "townwifi-guide"],
+      ["torima-guide-1781703282372", "torima-guide"],
+      ["poitama-guide-1781564185237", "poitama-guide"],
+      ["moppy-guide-1781566251638", "moppy-guide"],
+      ["moppy-faq-1781701348705", "moppy-faq"],
+    ];
+    const articleRedirects = articleSlugFixes.map(([oldSlug, newSlug]) => ({
+      source: `/articles/:cat/${oldSlug}`,
+      destination: `/articles/:cat/${newSlug}`,
+      permanent: true,
+    }));
+
     return [
       { source: "/hello-world", destination: "/", permanent: true },
       { source: "/category/:slug*", destination: "/articles", permanent: true },
       ...categoryRedirects,
+      ...articleRedirects,
     ];
   },
 };

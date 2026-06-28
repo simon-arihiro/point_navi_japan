@@ -17,6 +17,7 @@ import { extractFirstImageUrl, repairBrokenImageMarkdown } from "@/lib/markdown"
 import { GeminiQuotaExceededError } from "@/lib/ai/gemini";
 import { uploadArticleImage } from "@/lib/storage";
 import { errorResponse, ErrorCode } from "@/lib/errors";
+import { generateUniqueArticleSlug } from "@/lib/slug";
 import { NextRequest, after } from "next/server";
 import { ArticleType } from "@/types/database";
 
@@ -162,7 +163,7 @@ export async function POST(request: NextRequest) {
       const titleMatch = content.match(/^#\s+(.+)/m);
       title = titleMatch ? titleMatch[1].trim() : `${service.name}の${type}`;
 
-      const slug = `${service.slug}-${type}-${Date.now()}`;
+      const slug = await generateUniqueArticleSlug(supabase, `${service.slug}-${type}`);
       const { data: inserted } = await supabase.from("articles").insert({
         primary_service_id: service_id,
         title, slug, content,
