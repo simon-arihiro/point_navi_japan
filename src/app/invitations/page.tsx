@@ -5,8 +5,8 @@ import SearchBox from "@/components/SearchBox";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "招待コードおすすめ一覧｜お得な特典・キャンペーンまとめ",
-  description: "ポイ活サービスのおすすめ招待コード・招待リンクをまとめてご紹介。実際に使ってもらえた特典額やキャンペーン情報を厳選して掲載しています。",
+  title: "招待コード一覧｜特典額を比較表でチェック",
+  description: "ポイ活サービスの招待コード・招待リンクを特典額付きの比較表でまとめて紹介。りすくんが実際に登録して受け取れた金額だけを厳選掲載しています。",
   alternates: { canonical: "/invitations" },
 };
 
