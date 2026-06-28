@@ -6,7 +6,7 @@ import ArticleCard from "@/components/ArticleCard";
 import HighlightServiceName from "@/components/HighlightServiceName";
 import { SearchCard, CategoryCard } from "@/components/Sidebar";
 import TrackView from "@/components/TrackView";
-import { renderMarkdown, extractHeadings, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
+import { renderMarkdown, extractHeadings, extractFaqPairs, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
 import ArticleToc from "@/components/ArticleToc";
 import { getArticleViewCountsForIds } from "@/lib/analytics";
 import type { Metadata } from "next";
@@ -75,8 +75,8 @@ export default async function ArticlePage(
 
   // 関連記事：1番目は本サービスの紹介記事、2〜5番目は本サービスの他記事（PV降順）、
   // 続いて手動で関連付けたサービスの記事（PV降順）、残りは他サービスの記事（紹介記事含む、PV降順）で最大10件まで埋める
-  const RELATED_LIMIT = 5;
-  const OWN_OTHERS_LIMIT = 4;
+  const RELATED_LIMIT = 8;
+  const OWN_OTHERS_LIMIT = 6;
   const relatedServiceIds = (article.related_services ?? []).map((r: { service_id: string }) => r.service_id);
 
   const [{ data: introArticle }, { data: invitationArticle }, { data: ownOthers }, { data: comparedArticles }, { data: otherArticles }] = await Promise.all([
@@ -180,6 +180,19 @@ export default async function ArticlePage(
     mainEntityOfPage: { "@type": "WebPage", "@id": articleUrl },
   };
 
+  const faqPairs = article.article_type === "faq" ? extractFaqPairs(article.content) : [];
+  const faqJsonLd = faqPairs.length > 0
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faqPairs.map((pair) => ({
+          "@type": "Question",
+          name: pair.question,
+          acceptedAnswer: { "@type": "Answer", text: pair.answer },
+        })),
+      }
+    : null;
+
   return (
     <div>
       <script
@@ -190,6 +203,12 @@ export default async function ArticlePage(
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
+      {faqJsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+        />
+      )}
 
       {/* Breadcrumb */}
       <div className="bg-white border-b border-gray-100">

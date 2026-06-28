@@ -84,6 +84,38 @@ export function repairBrokenImageMarkdown(content: string): string {
   );
 }
 
+export type FaqPair = { question: string; answer: string };
+
+// FAQ記事のMarkdown本文から「## Q1. ...」形式の見出しとその直後の本文をQ&Aペアとして抽出する（FAQPage構造化データ用）
+export function extractFaqPairs(content: string): FaqPair[] {
+  const tokens = marked.lexer(content ?? "");
+  const pairs: FaqPair[] = [];
+  let current: { question: string; bodyTokens: typeof tokens } | null = null;
+
+  const flush = () => {
+    if (!current) return;
+    const html = Parser.parse(current.bodyTokens as Parameters<typeof Parser.parse>[0]);
+    const answer = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+    if (answer) pairs.push({ question: current.question, answer });
+    current = null;
+  };
+
+  for (const token of tokens) {
+    if (token.type === "heading" && /^Q\d*[.．]/.test(Parser.parseInline(token.tokens ?? []).replace(/<[^>]+>/g, "").trim())) {
+      flush();
+      const text = Parser.parseInline(token.tokens ?? []).replace(/<[^>]+>/g, "").trim();
+      current = { question: text, bodyTokens: [] };
+    } else if (token.type === "heading") {
+      flush();
+    } else if (current) {
+      current.bodyTokens.push(token);
+    }
+  }
+  flush();
+
+  return pairs;
+}
+
 // 記事本文（Markdown）内で最初に登場する画像のURLを抽出する（カード等のサムネイル表示用）
 export function extractFirstImageUrl(content: string): string | null {
   const match = content?.match(/!\[[^\]]*\]\((https?:\/\/[^\s)]+)\)/);
