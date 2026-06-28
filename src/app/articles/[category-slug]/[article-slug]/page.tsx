@@ -14,18 +14,21 @@ import type { Metadata } from "next";
 export async function generateMetadata(
   props: PageProps<"/articles/[category-slug]/[article-slug]">
 ): Promise<Metadata> {
-  const { "category-slug": categorySlug, "article-slug": articleSlug } = await props.params;
+  const { "article-slug": articleSlug } = await props.params;
   const supabase = await createClient();
   const { data: a } = await supabase
     .from("articles")
-    .select("title, description, featured_image_url")
+    .select("title, description, featured_image_url, primary_service:services!articles_primary_service_id_fkey(categories:service_categories(category:categories(slug)))")
     .eq("slug", articleSlug)
     .single();
   const ogImage = a?.featured_image_url ?? "/mascot/library/poinavi-header-banner-lg.png";
+  // canonicalはURLの:category-slugパラメータに関わらず、記事が実際に属するカテゴリ（複数経路でアクセス可能なため重複コンテンツ防止）に固定する
+  const canonicalCategorySlug = (a?.primary_service as unknown as { categories?: { category?: { slug: string } | null }[] } | null)
+    ?.categories?.[0]?.category?.slug ?? "all";
   return {
     title: a?.title ?? "記事",
     description: a?.description ?? "",
-    alternates: { canonical: `/articles/${categorySlug}/${articleSlug}` },
+    alternates: { canonical: `/articles/${canonicalCategorySlug}/${articleSlug}` },
     openGraph: {
       type: "article",
       title: a?.title ?? "記事",
