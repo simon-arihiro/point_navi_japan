@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArticleWithService } from "@/types/database";
 import LogoFallback from "./LogoFallback";
 import { getAutoColor } from "@/lib/autoColor";
+import { trackGaEvent } from "@/lib/gtag";
 
 type Props = {
   article: ArticleWithService;
@@ -90,6 +92,7 @@ function hexToRgba(hex: string, alpha: number) {
 // 色付きヘッダー（サービス名＋ロゴ）＋訴求文＋招待コード/リンク＋記事タイトル＋公開日 を同じレイアウトで表示する
 export default function InvitationCard({ article, categorySlug }: Props) {
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
   const svc = article.primary_service as any;
   const cat = categorySlug ?? svc?.categories?.[0]?.category?.slug ?? "all";
   const href = `/articles/${cat}/${article.slug}`;
@@ -168,18 +171,32 @@ export default function InvitationCard({ article, categorySlug }: Props) {
             <p className="text-sm text-gray-900 font-bold leading-snug line-clamp-2">{bonusContent}</p>
           )}
 
-          {/* 紹介コード（一行表記） */}
+          {/* 紹介コード（一行表記）＋コピーボタン */}
           <div
-            className="rounded-lg px-2.5 py-1.5 text-center"
+            className="rounded-lg px-2.5 py-1.5"
             style={{ backgroundColor: hexToRgba(bgColor, 0.1) }}
           >
             {svc?.referral_code ? (
-              <p className="text-xs font-bold text-gray-800 truncate">
-                紹介コード{" "}
-                <span className="font-mono tracking-wider text-red-600 font-black">{svc.referral_code}</span>
-              </p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-xs font-bold text-gray-800 truncate">
+                  紹介コード{" "}
+                  <span className="font-mono tracking-wider text-red-600 font-black">{svc.referral_code}</span>
+                </p>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    navigator.clipboard.writeText(svc.referral_code);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                    trackGaEvent("copy_invitation_code", { service_name: svc.name, service_id: svc.id });
+                  }}
+                  className="shrink-0 text-[11px] font-bold px-2 py-0.5 rounded bg-blue-600 text-white hover:bg-blue-700 active:scale-95 transition-all"
+                >
+                  {copied ? "コピー済み" : "コピー"}
+                </button>
+              </div>
             ) : (
-              <p className="text-xs font-bold text-gray-700">招待リンクから登録でお得！</p>
+              <p className="text-xs font-bold text-gray-700 text-center">招待リンクから登録でお得！</p>
             )}
           </div>
 
