@@ -137,6 +137,15 @@ export function placeImageAtTop(content: string, title: string, newUrl: string):
   return `${image}\n\n${trimmed}`;
 }
 
+// 記事タイトル内の「YYYY年M月最新」を現在の年月に自動更新する（DB保存値は生成時のまま）
+export function refreshTitleDate(title: string): string {
+  if (!title) return title;
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  return title.replace(/【\d{4}年\d{1,2}月最新】/g, `【${year}年${month}月最新】`);
+}
+
 // 記事本文（Markdown→HTML）の見た目を統一するためのprose設定。
 // サイトの琥珀×ネイビー基調に合わせて見出し・リンク・引用の色を調整している。
 export const ARTICLE_PROSE_CLASS =

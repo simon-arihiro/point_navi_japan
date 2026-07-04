@@ -7,6 +7,7 @@ import { ArticleWithService } from "@/types/database";
 import LogoFallback from "./LogoFallback";
 import { getAutoColor } from "@/lib/autoColor";
 import { trackGaEvent } from "@/lib/gtag";
+import { refreshTitleDate } from "@/lib/markdown";
 
 type Props = {
   article: ArticleWithService;
@@ -206,7 +207,7 @@ export default function InvitationCard({ article, categorySlug }: Props) {
       </div>
     </div>
     <Link href={href} className="text-base text-gray-700 font-bold leading-snug line-clamp-2 mt-2 px-1 hover:underline">
-      {article.title}
+      {refreshTitleDate(article.title)}
     </Link>
     </div>
   );

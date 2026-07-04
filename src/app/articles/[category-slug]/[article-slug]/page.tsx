@@ -6,7 +6,7 @@ import ArticleCard from "@/components/ArticleCard";
 import HighlightServiceName from "@/components/HighlightServiceName";
 import { SearchCard, CategoryCard } from "@/components/Sidebar";
 import TrackView from "@/components/TrackView";
-import { renderMarkdown, extractHeadings, extractFaqPairs, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
+import { renderMarkdown, extractHeadings, extractFaqPairs, ARTICLE_PROSE_CLASS, refreshTitleDate } from "@/lib/markdown";
 import ArticleToc from "@/components/ArticleToc";
 import { getArticleViewCountsForIds } from "@/lib/analytics";
 import type { Metadata } from "next";
@@ -26,18 +26,18 @@ export async function generateMetadata(
   const canonicalCategorySlug = (a?.primary_service as unknown as { categories?: { category?: { slug: string } | null }[] } | null)
     ?.categories?.[0]?.category?.slug ?? "all";
   return {
-    title: a?.title ?? "記事",
+    title: refreshTitleDate(a?.title ?? "記事"),
     description: a?.description ?? "",
     alternates: { canonical: `/articles/${canonicalCategorySlug}/${articleSlug}` },
     openGraph: {
       type: "article",
-      title: a?.title ?? "記事",
+      title: refreshTitleDate(a?.title ?? "記事"),
       description: a?.description ?? "",
       images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
-      title: a?.title ?? "記事",
+      title: refreshTitleDate(a?.title ?? "記事"),
       description: a?.description ?? "",
       images: [ogImage],
     },
@@ -166,7 +166,7 @@ export default async function ArticlePage(
   const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
-    headline: article.title,
+    headline: refreshTitleDate(article.title),
     description: article.description ?? undefined,
     image: [imageUrl],
     datePublished: article.published_at ?? article.created_at,
