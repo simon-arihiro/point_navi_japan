@@ -70,6 +70,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="ja" className={notoSansJP.className}>
       <head>
         <GoogleAnalytics />
+        {/* Google AdSense */}
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3207349828641600" crossOrigin="anonymous" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(siteJsonLd) }}
