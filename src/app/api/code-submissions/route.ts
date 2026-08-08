@@ -22,6 +22,8 @@ export async function GET(request: NextRequest) {
   const serviceId = searchParams.get("service_id");
   const limit = Math.min(parseInt(searchParams.get("limit") ?? "50"), 100);
 
+  const keyword = searchParams.get("keyword");
+
   const supabase = createAdminClient();
   let query = supabase
     .from("code_submissions")
@@ -30,6 +32,7 @@ export async function GET(request: NextRequest) {
     .limit(limit);
 
   if (serviceId) query = query.eq("service_id", serviceId);
+  if (keyword) query = query.or(`referral_code.ilike.%${keyword}%,comment.ilike.%${keyword}%`);
 
   const { data, error } = await query;
   if (error) return Response.json({ error: error.message }, { status: 500 });

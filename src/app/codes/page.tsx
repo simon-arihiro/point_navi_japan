@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import CodeBoard from "./CodeBoard";
 
@@ -7,16 +6,9 @@ export const metadata: Metadata = {
   description: "みんなが投稿した招待コードを検索・コピーできる掲示板です。ポイ活サービスの招待コードをシェアしよう！",
 };
 
-export default async function CodesPage() {
-  const supabase = await createClient();
+type SearchParams = Promise<{ q?: string }>;
 
-  // 投稿可能なサービス一覧（activeかつ招待コードがあるもの）
-  const { data: services } = await supabase
-    .from("services")
-    .select("id, name, logo_url, logo_storage_path, slug")
-    .eq("status", "active")
-    .is("deleted_at", null)
-    .order("name");
-
-  return <CodeBoard services={services ?? []} />;
+export default async function CodesPage({ searchParams }: { searchParams: SearchParams }) {
+  const { q } = await searchParams;
+  return <CodeBoard searchQuery={q} />;
 }
