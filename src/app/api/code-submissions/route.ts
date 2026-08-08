@@ -60,6 +60,37 @@ export async function POST(request: NextRequest) {
   if (!comment?.trim()) return Response.json({ error: "コメントを入力してください" }, { status: 400 });
   if (comment.trim().length > 500) return Response.json({ error: "コメントは500文字以内にしてください" }, { status: 400 });
 
+  // スパムフィルター
+  const c = comment.trim();
+
+  // LINE / Telegram / WeChat 等の連絡先
+  const contactPatterns = [
+    /line\s*(id|ID|Id)?[\s:：＝=@＠]+\S+/i,
+    /@[a-zA-Z0-9_.]{3,}/,           // @xxx 形式のLINE IDなど
+    /telegram[\s:：]+\S+/i,
+    /wechat[\s:：]+\S+/i,
+    /微信[\s:：]*\S+/,
+    /ライン[\s:：＝]+\S+/,
+    /lineid[\s:：＝]*/i,
+  ];
+  for (const pat of contactPatterns) {
+    if (pat.test(c)) {
+      return Response.json({ error: "連絡先情報の投稿はご遠慮ください" }, { status: 400 });
+    }
+  }
+
+  // 純粋な記号・繰り返し文字（意味のない投稿）
+  const meaninglessPatterns = [
+    /^[^\p{L}\p{N}]+$/u,                    // 文字・数字を一切含まない（記号のみ）
+    /(.)\1{9,}/u,                            // 同じ文字が10回以上連続
+    /^[\s　。、！？!?.…・\-_=+*#@]+$/u,    // 句読点・記号だけ
+  ];
+  for (const pat of meaninglessPatterns) {
+    if (pat.test(c)) {
+      return Response.json({ error: "有効なコメントを入力してください" }, { status: 400 });
+    }
+  }
+
   const db = getClient();
 
   // レート制限チェック（RLS無効なのでanon keyで読める）
