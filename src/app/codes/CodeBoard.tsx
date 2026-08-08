@@ -215,7 +215,7 @@ export default function CodeBoard({ services }: Props) {
                       name={s.service.name}
                       logoUrl={s.service.logo_url}
                       logoStoragePath={s.service.logo_storage_path}
-                      officialUrl={null}
+                      officialUrl={undefined}
                       size={32}
                       className="shrink-0"
                     />
