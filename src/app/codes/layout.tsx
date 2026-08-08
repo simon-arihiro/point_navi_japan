@@ -49,18 +49,25 @@ export default async function CodesLayout({ children }: { children: React.ReactN
   const { services, recent, ranking } = await getBoardStats();
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
       <div className="flex gap-6 items-start">
-        {/* 左サイドバー */}
+        {/* 左サイドバー（内部でPC/モバイル切り替え済み） */}
         <BoardLeftNav services={services} />
 
         {/* メインコンテンツ */}
         <main className="flex-1 min-w-0">
           {children}
+
+          {/* 右サイドバー（モバイルではメインコンテンツの下） */}
+          <div className="lg:hidden mt-6">
+            <BoardRightSidebar recent={recent} ranking={ranking} />
+          </div>
         </main>
 
-        {/* 右サイドバー */}
-        <BoardRightSidebar recent={recent} ranking={ranking} />
+        {/* 右サイドバー（PC only） */}
+        <div className="hidden lg:block">
+          <BoardRightSidebar recent={recent} ranking={ranking} />
+        </div>
       </div>
     </div>
   );
