@@ -47,27 +47,34 @@ export default function ContactForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6 bg-white rounded-2xl p-8 shadow-sm border border-gray-100">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">お名前</label>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+          お名前
+          <span className="text-xs font-normal text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">任意</span>
+        </label>
         <input
           type="text"
-          required
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">メールアドレス</label>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+          メールアドレス
+          <span className="text-xs font-normal text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">任意</span>
+        </label>
         <input
           type="email"
-          required
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500"
         />
       </div>
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">お問い合わせ内容</label>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-1">
+          お問い合わせ内容
+          <span className="text-xs font-normal text-white bg-red-500 px-1.5 py-0.5 rounded">必須</span>
+        </label>
         <textarea
           rows={6}
           required
