@@ -47,7 +47,7 @@ export default function BoardRightSidebar({ recent, ranking, searchOnly }: Props
     }
   };
 
-  const SearchBox = () => (
+  const searchForm = (
     <form onSubmit={handleSearch} className="flex gap-0">
       <input
         type="text"
@@ -68,7 +68,7 @@ export default function BoardRightSidebar({ recent, ranking, searchOnly }: Props
   );
 
   if (searchOnly) {
-    return <SearchBox />;
+    return searchForm;
   }
 
   return (
@@ -77,7 +77,7 @@ export default function BoardRightSidebar({ recent, ranking, searchOnly }: Props
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="bg-gray-700 text-white text-sm font-bold px-4 py-2.5">検索</div>
         <div className="p-3">
-          <SearchBox />
+          {searchForm}
         </div>
       </div>
 
