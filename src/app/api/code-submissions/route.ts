@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
   if (recentPost) {
     const wait = Math.ceil((new Date(recentPost.created_at).getTime() + RATE_LIMIT_SECONDS * 1000 - Date.now()) / 1000);
     return Response.json(
-      { error: `連続投稿はできません。あと${wait}秒待ってから投稿してください。` },
+      { error: "連続投稿はできません。しばらく待ってから投稿してください。" },
       { status: 429 }
     );
   }
