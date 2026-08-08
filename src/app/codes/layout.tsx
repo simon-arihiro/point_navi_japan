@@ -50,9 +50,16 @@ export default async function CodesLayout({ children }: { children: React.ReactN
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      {/* モバイル専用: サービスメニューアコーディオン（flexの外に配置） */}
+      <div className="lg:hidden">
+        <BoardLeftNav services={services} mobileOnly />
+      </div>
+
       <div className="flex gap-6 items-start">
-        {/* 左サイドバー（内部でPC/モバイル切り替え済み） */}
-        <BoardLeftNav services={services} />
+        {/* 左サイドバー（PC only） */}
+        <div className="hidden lg:block">
+          <BoardLeftNav services={services} />
+        </div>
 
         {/* メインコンテンツ */}
         <main className="flex-1 min-w-0">

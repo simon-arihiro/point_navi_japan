@@ -15,9 +15,9 @@ type Service = {
   submission_count: number;
 };
 
-type Props = { services: Service[] };
+type Props = { services: Service[]; mobileOnly?: boolean };
 
-export default function BoardLeftNav({ services }: Props) {
+export default function BoardLeftNav({ services, mobileOnly }: Props) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -65,22 +65,9 @@ export default function BoardLeftNav({ services }: Props) {
     </ul>
   );
 
-  return (
-    <>
-      {/* デスクトップ */}
-      <aside className="hidden lg:block w-56 shrink-0">
-        <div className="bg-white rounded-xl border border-gray-100 shadow-sm sticky top-24">
-          <div className="bg-brand-600 text-white text-sm font-bold px-4 py-2.5 rounded-t-xl">
-            サービスメニュー
-          </div>
-          <div className="py-2 px-1 max-h-[70vh] overflow-y-auto">
-            <NavList />
-          </div>
-        </div>
-      </aside>
-
-      {/* モバイル: アコーディオン */}
-      <div className="lg:hidden mb-4">
+  if (mobileOnly) {
+    return (
+      <div className="mb-4">
         <button
           onClick={() => setOpen((v) => !v)}
           className="w-full flex items-center justify-between bg-brand-600 text-white text-sm font-bold px-4 py-2.5 rounded-xl"
@@ -96,6 +83,19 @@ export default function BoardLeftNav({ services }: Props) {
           </div>
         )}
       </div>
-    </>
+    );
+  }
+
+  return (
+    <aside className="w-56 shrink-0">
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm sticky top-24">
+        <div className="bg-brand-600 text-white text-sm font-bold px-4 py-2.5 rounded-t-xl">
+          サービスメニュー
+        </div>
+        <div className="py-2 px-1 max-h-[70vh] overflow-y-auto">
+          <NavList />
+        </div>
+      </div>
+    </aside>
   );
 }
