@@ -131,6 +131,9 @@ export default async function HomePage() {
                     <RankingListItem key={svc.id} service={svc} categorySlug={svc.categories?.[0]?.category?.slug} rank={i + 1} />
                   ))}
                 </div>
+                <Link href="/services" className="block text-center text-brand-warm-600 font-medium text-sm hover:underline mt-3 pt-3 border-t border-gray-50">
+                  サービスをすべて見る →
+                </Link>
               </div>
             )}
 
