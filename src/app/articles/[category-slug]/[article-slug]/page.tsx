@@ -279,6 +279,24 @@ export default async function ArticlePage(
               </Link>
             )}
 
+            {/* 掲示板への内部リンク */}
+            {service?.slug && (
+              <Link
+                href={`/codes/${service.slug}`}
+                className="flex items-center gap-4 mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 hover:bg-amber-100 transition-colors"
+              >
+                <div className="text-2xl shrink-0">💬</div>
+                <div>
+                  <p className="font-bold text-amber-900 text-sm">
+                    {service.name}の招待コード掲示板
+                  </p>
+                  <p className="text-amber-700 text-xs mt-0.5">
+                    みんなが投稿した最新の招待コード・紹介コードをチェック →
+                  </p>
+                </div>
+              </Link>
+            )}
+
             <p className="text-xs text-gray-400 mt-10 pt-6 border-t border-gray-100">
               ※本記事の情報は参考目的です。最新情報は各サービスの公式サイトをご確認ください。
             </p>
@@ -297,6 +315,20 @@ export default async function ArticlePage(
             <SearchCard />
 
             {service && <ConversionArea service={service} />}
+
+            {/* 掲示板リンク（サイドバー） */}
+            {service?.slug && (
+              <Link
+                href={`/codes/${service.slug}`}
+                className="flex items-center gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:border-brand-200 hover:bg-brand-50 transition-colors"
+              >
+                <span className="text-xl shrink-0">💬</span>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-gray-700 truncate">{service.name} 招待コード掲示板</p>
+                  <p className="text-xs text-brand-600 mt-0.5">みんなの最新コードを見る →</p>
+                </div>
+              </Link>
+            )}
 
             {related.length > 0 && (
               <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
