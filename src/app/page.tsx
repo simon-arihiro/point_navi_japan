@@ -69,7 +69,7 @@ export default async function HomePage() {
               実際に使ってみた体験をもとに、お得なポイ活サービスをわかりやすく紹介しています。
             </p>
             <div className="flex flex-wrap gap-3">
-              <Link href="/invitations" className="flex items-center gap-2 bg-brand-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-brand-700 transition-colors shadow-sm">
+              <Link href="/invitations" className="flex items-center gap-2 bg-white text-brand-700 font-bold px-5 py-3 rounded-xl border-2 border-brand-300 hover:bg-brand-50 transition-colors shadow-sm">
                 <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
                 招待コードおすすめ
               </Link>
