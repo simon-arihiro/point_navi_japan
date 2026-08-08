@@ -65,7 +65,7 @@ export default function Header({ categories = [] }: Props) {
             </Link>
 
             <Link href="/codes" className={navLinkClass("/codes")}>
-              掲示板
+              招待コードまとめ掲示板
             </Link>
 
             {/* サービス一覧 + ドロップダウン */}
