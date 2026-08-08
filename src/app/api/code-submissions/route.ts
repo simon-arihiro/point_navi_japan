@@ -1,0 +1,85 @@
+import { createAdminClient } from "@/lib/supabase/server";
+import { NextRequest } from "next/server";
+import { createHash } from "crypto";
+
+// レート制限: 同一IPから1分間に1回まで
+const RATE_LIMIT_SECONDS = 60;
+
+function hashIp(ip: string): string {
+  return createHash("sha256").update(ip + process.env.CRON_SECRET).digest("hex").slice(0, 32);
+}
+
+function getClientIp(req: NextRequest): string {
+  return (
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    req.headers.get("x-real-ip") ??
+    "unknown"
+  );
+}
+
+export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const serviceId = searchParams.get("service_id");
+  const limit = Math.min(parseInt(searchParams.get("limit") ?? "50"), 100);
+
+  const supabase = createAdminClient();
+  let query = supabase
+    .from("code_submissions")
+    .select("id, service_id, nickname, referral_code, comment, created_at, service:services!code_submissions_service_id_fkey(name, logo_url, logo_storage_path)")
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (serviceId) query = query.eq("service_id", serviceId);
+
+  const { data, error } = await query;
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ submissions: data ?? [] });
+}
+
+export async function POST(request: NextRequest) {
+  const ip = getClientIp(request);
+  const ipHash = hashIp(ip);
+
+  const { service_id, nickname, referral_code, comment } = await request.json();
+
+  // バリデーション
+  if (!service_id) return Response.json({ error: "サービスを選択してください" }, { status: 400 });
+  if (!referral_code?.trim()) return Response.json({ error: "招待コードを入力してください" }, { status: 400 });
+  if (referral_code.trim().length > 100) return Response.json({ error: "招待コードが長すぎます" }, { status: 400 });
+  if (comment && comment.length > 200) return Response.json({ error: "コメントは200文字以内にしてください" }, { status: 400 });
+
+  const supabase = createAdminClient();
+
+  // レート制限チェック: 同一IPの最終投稿時刻を確認
+  const since = new Date(Date.now() - RATE_LIMIT_SECONDS * 1000).toISOString();
+  const { data: recent } = await supabase
+    .from("code_submissions")
+    .select("created_at")
+    .eq("ip_hash", ipHash)
+    .gte("created_at", since)
+    .limit(1)
+    .single();
+
+  if (recent) {
+    const wait = Math.ceil((new Date(recent.created_at).getTime() + RATE_LIMIT_SECONDS * 1000 - Date.now()) / 1000);
+    return Response.json(
+      { error: `連続投稿はできません。あと${wait}秒待ってから投稿してください。` },
+      { status: 429 }
+    );
+  }
+
+  // サービスが存在するか確認
+  const { data: service } = await supabase.from("services").select("id").eq("id", service_id).eq("status", "active").single();
+  if (!service) return Response.json({ error: "サービスが見つかりません" }, { status: 404 });
+
+  const { data, error } = await supabase.from("code_submissions").insert({
+    service_id,
+    nickname: nickname?.trim() || "ななしの投稿者",
+    referral_code: referral_code.trim(),
+    comment: comment?.trim() || null,
+    ip_hash: ipHash,
+  }).select("id").single();
+
+  if (error) return Response.json({ error: error.message }, { status: 500 });
+  return Response.json({ ok: true, id: data.id });
+}
