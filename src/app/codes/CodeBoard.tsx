@@ -61,8 +61,18 @@ export default function CodeBoard({ service, searchQuery }: Props) {
     if (searchQuery) params.set("keyword", searchQuery);
     const res = await fetch(`/api/code-submissions?${params}`);
     const data = await res.json();
-    setSubmissions(data.submissions ?? []);
+    const results = data.submissions ?? [];
+    setSubmissions(results);
     setLoading(false);
+
+    // 検索キーワードで結果がなかった場合はログに記録
+    if (searchQuery && results.length === 0) {
+      fetch("/api/search-no-results", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ keyword: searchQuery, page: "codes" }),
+      }).catch(() => {});
+    }
   }, [service?.id, searchQuery]);
 
   useEffect(() => { fetchSubmissions(); }, [fetchSubmissions]);
@@ -221,10 +231,20 @@ export default function CodeBoard({ service, searchQuery }: Props) {
         {loading ? (
           <div className="text-center py-12 text-gray-400 text-sm">読み込み中...</div>
         ) : submissions.length === 0 ? (
-          <div className="text-center py-12 text-gray-400">
-            <p className="text-3xl mb-2">📭</p>
-            <p className="text-sm">
-              {searchQuery ? "検索結果が見つかりませんでした。" : "まだ投稿がありません。最初に招待コードをシェアしよう！"}
+          <div className="text-center py-10 text-gray-400">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={searchQuery
+                ? "/mascot/library/squirrel-magnifier-coins-search.png"
+                : "/mascot/library/squirrel-empty-box-question.png"}
+              alt=""
+              className="w-28 h-auto mx-auto mb-3 opacity-90"
+            />
+            <p className="text-sm font-bold text-gray-500">
+              {searchQuery ? `「${searchQuery}」の結果が見つかりませんでした` : "まだ投稿がありません"}
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              {searchQuery ? "別のキーワードで検索してみてください" : "最初に招待コードをシェアしよう！"}
             </p>
           </div>
         ) : (
