@@ -15,11 +15,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq("status", "active")
     .single();
 
-  if (!service) return { title: "招待コード掲示板" };
+  if (!service) return { title: "招待コード掲示板まとめ" };
 
   return {
-    title: `${service.name} 招待コード掲示板`,
-    description: `${service.name}の招待コードを投稿・検索できる掲示板です。ポイント獲得やフレンド募集にご活用ください。`,
+    title: `${service.name}の招待コード・紹介コード掲示板まとめ｜最新コードをゲット`,
+    description: `${service.name}の招待コード・紹介コードを投稿・検索できる掲示板まとめ。新規登録でポイントがもらえる最新コードを探そう！コピーしてお得に始めよう。`,
+    keywords: [`${service.name}`, `${service.name} 招待コード`, `${service.name} 紹介コード`, "招待コード掲示板", "ポイ活"],
+    openGraph: {
+      title: `${service.name}の招待コード・紹介コード掲示板まとめ`,
+      description: `${service.name}の最新招待コードを検索・コピーできます。新規登録でポイントがもらえるお得なコードを探そう！`,
+      type: "website",
+      url: `https://jp-point-navi.com/codes/${slug}`,
+    },
+    alternates: {
+      canonical: `https://jp-point-navi.com/codes/${slug}`,
+    },
   };
 }
 
@@ -37,5 +47,29 @@ export default async function ServiceBoardPage({ params }: Props) {
 
   if (!service) notFound();
 
-  return <CodeBoard service={service} />;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": `${service.name}の招待コード・紹介コード掲示板まとめ`,
+    "description": `${service.name}の招待コード・紹介コードを投稿・検索できる掲示板。新規登録でポイントがもらえる最新コードをコピーして活用しよう。`,
+    "url": `https://jp-point-navi.com/codes/${slug}`,
+    "breadcrumb": {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://jp-point-navi.com" },
+        { "@type": "ListItem", "position": 2, "name": "招待コード掲示板まとめ", "item": "https://jp-point-navi.com/codes" },
+        { "@type": "ListItem", "position": 3, "name": `${service.name} 招待コード`, "item": `https://jp-point-navi.com/codes/${slug}` },
+      ]
+    }
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <CodeBoard service={service} />
+    </>
+  );
 }

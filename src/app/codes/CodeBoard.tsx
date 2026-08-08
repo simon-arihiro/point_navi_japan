@@ -115,12 +115,12 @@ export default function CodeBoard({ service, searchQuery }: Props) {
                 ? `${service.name} 招待コード掲示板`
                 : searchQuery
                 ? `「${searchQuery}」の検索結果`
-                : "招待コード掲示板"}
+                : "招待コード掲示板まとめ"}
             </h1>
             <p className="text-xs text-gray-500 mt-0.5">
               {isServicePage
-                ? `${service.name}の招待コードを投稿・検索できる掲示板です。ポイント獲得やフレンド募集に活用できます。`
-                : "みんなの招待コードをシェアしよう！気になるコードはコピーして登録に使えます。"}
+                ? `${service.name}の招待コード・紹介コードを投稿・検索できる掲示板です。ポイント獲得やフレンド募集に活用できます。`
+                : "CashwalkやPoint Incomeなどポイ活アプリの招待コード・紹介コードをシェアしよう！コピーして登録に使えます。"}
             </p>
           </div>
         </div>
