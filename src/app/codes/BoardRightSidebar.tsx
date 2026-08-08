@@ -20,11 +20,6 @@ type RankingService = {
   submission_count: number;
 };
 
-type Props = {
-  recent: RecentPost[];
-  ranking: RankingService[];
-};
-
 function formatDate(iso: string) {
   const d = new Date(iso);
   const now = new Date();
@@ -35,7 +30,13 @@ function formatDate(iso: string) {
   return d.toLocaleDateString("ja-JP");
 }
 
-export default function BoardRightSidebar({ recent, ranking }: Props) {
+type Props = {
+  recent: RecentPost[];
+  ranking: RankingService[];
+  searchOnly?: boolean;
+};
+
+export default function BoardRightSidebar({ recent, ranking, searchOnly }: Props) {
   const [query, setQuery] = useState("");
   const router = useRouter();
 
@@ -46,29 +47,37 @@ export default function BoardRightSidebar({ recent, ranking }: Props) {
     }
   };
 
+  const SearchBox = () => (
+    <form onSubmit={handleSearch} className="flex gap-0">
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="サービス名を検索"
+        className="flex-1 border border-gray-200 rounded-l-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+      />
+      <button
+        type="submit"
+        className="bg-blue-600 text-white px-3 py-2 rounded-r-xl hover:bg-blue-700 transition-colors shrink-0"
+      >
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </button>
+    </form>
+  );
+
+  if (searchOnly) {
+    return <SearchBox />;
+  }
+
   return (
     <aside className="w-full lg:w-60 shrink-0 space-y-4">
       {/* 検索 */}
       <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="bg-gray-700 text-white text-sm font-bold px-4 py-2.5">検索</div>
         <div className="p-3">
-          <form onSubmit={handleSearch} className="flex gap-1">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="コードを検索..."
-              className="flex-1 border border-gray-200 rounded-lg px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
-            />
-            <button
-              type="submit"
-              className="bg-brand-600 text-white px-3 py-1.5 rounded-lg text-sm hover:bg-brand-700 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </button>
-          </form>
+          <SearchBox />
         </div>
       </div>
 

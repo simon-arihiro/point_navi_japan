@@ -63,9 +63,14 @@ export default async function CodesLayout({ children }: { children: React.ReactN
 
         {/* メインコンテンツ */}
         <main className="flex-1 min-w-0">
+          {/* 検索ボックス（モバイルのみ、コンテンツ上部） */}
+          <div className="lg:hidden mb-4">
+            <BoardRightSidebar recent={recent} ranking={ranking} searchOnly />
+          </div>
+
           {children}
 
-          {/* 右サイドバー（モバイルではメインコンテンツの下） */}
+          {/* 右サイドバー残り（モバイルではメインコンテンツの下） */}
           <div className="lg:hidden mt-6">
             <BoardRightSidebar recent={recent} ranking={ranking} />
           </div>
