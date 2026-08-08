@@ -33,12 +33,12 @@ async function getBoardStats() {
     .from("code_submissions")
     .select("id, service_id, nickname, referral_code, created_at, service:services!code_submissions_service_id_fkey(name, slug)")
     .order("created_at", { ascending: false })
-    .limit(10);
+    .limit(8);
 
   const ranking = [...servicesWithCount]
     .filter((s) => s.submission_count > 0)
     .sort((a, b) => b.submission_count - a.submission_count)
-    .slice(0, 5);
+    .slice(0, 8);
 
   // Supabaseはリレーションを配列で返すが実際は単一オブジェクト
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
