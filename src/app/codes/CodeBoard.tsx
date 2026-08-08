@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import LogoFallback from "@/components/LogoFallback";
 
 type Service = {
@@ -237,9 +238,12 @@ export default function CodeBoard({ service, searchQuery }: Props) {
                   <span className="text-xs text-gray-400 ml-auto">{formatDate(s.created_at)}</span>
                   <span className="text-xs text-gray-300 font-mono">ID : {shortId(s.id)}</span>
                 </div>
-                {/* サービス名（トップページのみ） */}
+                {/* サービス名（トップページ・検索結果のみ） — クリックでサービス掲示板へ */}
                 {!isServicePage && s.service && (
-                  <div className="flex items-center gap-1.5 mb-2 ml-8">
+                  <Link
+                    href={`/codes/${s.service.slug}`}
+                    className="flex items-center gap-1.5 mb-2 ml-8 w-fit hover:opacity-75 transition-opacity"
+                  >
                     <LogoFallback
                       name={s.service.name}
                       logoUrl={s.service.logo_url}
@@ -248,8 +252,8 @@ export default function CodeBoard({ service, searchQuery }: Props) {
                       size={16}
                       className="shrink-0"
                     />
-                    <span className="text-xs font-bold text-brand-700">{s.service.name}</span>
-                  </div>
+                    <span className="text-xs font-bold text-brand-700 underline underline-offset-2">{s.service.name}</span>
+                  </Link>
                 )}
                 {/* コメント本文 */}
                 <p className="text-sm text-gray-700 ml-8 leading-relaxed whitespace-pre-wrap">
