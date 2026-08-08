@@ -1,6 +1,16 @@
 import { createAdminClient } from "@/lib/supabase/server";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
 import { createHash } from "crypto";
+
+// anon keyで操作するクライアント（RLS INSERT policy対応）
+function createAnonClient() {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false } }
+  );
+}
 
 // レート制限: 同一IPから1分間に1回まで
 const RATE_LIMIT_SECONDS = 60;
@@ -52,6 +62,7 @@ export async function POST(request: NextRequest) {
   if (comment.trim().length > 500) return Response.json({ error: "コメントは500文字以内にしてください" }, { status: 400 });
 
   const supabase = createAdminClient();
+  const anonClient = createAnonClient();
 
   // レート制限チェック
   const since = new Date(Date.now() - RATE_LIMIT_SECONDS * 1000).toISOString();
@@ -75,8 +86,8 @@ export async function POST(request: NextRequest) {
   const { data: service } = await supabase.from("services").select("id").eq("id", service_id).eq("status", "active").single();
   if (!service) return Response.json({ error: "サービスが見つかりません" }, { status: 404 });
 
-  // 投稿
-  const { data, error } = await supabase.from("code_submissions").insert({
+  // 投稿（anon key + INSERT policy で実行）
+  const { data, error } = await anonClient.from("code_submissions").insert({
     service_id,
     nickname: nickname?.trim() || "ななしの投稿者",
     referral_code: "", // コメント内に含める形式のため空文字
@@ -86,7 +97,7 @@ export async function POST(request: NextRequest) {
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
 
-  // 最大10件を超えたら最古の投稿を削除
+  // 最大10件を超えたら最古の投稿を削除（admin権限で実行）
   const { data: allPosts } = await supabase
     .from("code_submissions")
     .select("id, created_at")
