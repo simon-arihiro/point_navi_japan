@@ -242,17 +242,18 @@ export default function CodeBoard({ service, searchQuery }: Props) {
                 {!isServicePage && s.service && (
                   <Link
                     href={`/codes/${s.service.slug}`}
-                    className="flex items-center gap-1.5 mb-2 ml-8 w-fit hover:opacity-75 transition-opacity"
+                    className="flex items-center gap-2 mb-3 ml-8 px-3 py-2 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 transition-colors w-fit max-w-xs"
                   >
                     <LogoFallback
                       name={s.service.name}
                       logoUrl={s.service.logo_url}
                       logoStoragePath={s.service.logo_storage_path}
                       officialUrl={undefined}
-                      size={16}
+                      size={20}
                       className="shrink-0"
                     />
-                    <span className="text-xs font-bold text-brand-700 underline underline-offset-2">{s.service.name}</span>
+                    <span className="text-sm font-bold text-brand-700">{s.service.name}</span>
+                    <span className="text-xs text-brand-500 ml-1">掲示板へ →</span>
                   </Link>
                 )}
                 {/* コメント本文 */}
