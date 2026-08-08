@@ -11,6 +11,7 @@ type Service = {
   slug: string;
   logo_url: string | null;
   logo_storage_path: string | null;
+  official_url?: string | null;
   submission_count: number;
 };
 
@@ -50,7 +51,7 @@ export default function BoardLeftNav({ services }: Props) {
               name={s.name}
               logoUrl={s.logo_url}
               logoStoragePath={s.logo_storage_path}
-              officialUrl={undefined}
+              officialUrl={s.official_url ?? undefined}
               size={20}
               className="shrink-0"
             />

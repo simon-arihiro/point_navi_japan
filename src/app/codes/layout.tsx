@@ -19,7 +19,7 @@ async function getBoardStats() {
 
   const { data: services } = await supabase
     .from("services")
-    .select("id, name, slug, logo_url, logo_storage_path")
+    .select("id, name, slug, logo_url, logo_storage_path, official_url")
     .eq("status", "active")
     .is("deleted_at", null)
     .order("name");
