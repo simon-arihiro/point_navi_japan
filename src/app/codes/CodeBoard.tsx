@@ -120,7 +120,7 @@ export default function CodeBoard({ service, searchQuery }: Props) {
             <p className="text-xs text-gray-500 mt-0.5">
               {isServicePage
                 ? `${service.name}の招待コード・紹介コードを投稿・検索できる掲示板です。ポイント獲得やフレンド募集に活用できます。`
-                : "CashwalkやPoint Incomeなどポイ活アプリの招待コード・紹介コードをシェアしよう！コピーして登録に使えます。"}
+                : "ポイ活・副業アプリの招待コード・紹介コードをみんなでシェアする掲示板です。新規登録時にコードを入力するとポイントや特典がもらえます。気になるコードをコピーして活用しよう！"}
             </p>
           </div>
         </div>
