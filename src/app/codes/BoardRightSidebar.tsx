@@ -81,11 +81,10 @@ export default function BoardRightSidebar({ recent, ranking }: Props) {
               <li key={p.id}>
                 <Link
                   href={`/codes/${p.service?.slug ?? ""}`}
-                  className="flex flex-col px-3 py-2 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 transition-colors"
                 >
                   <span className="text-xs font-bold text-brand-700 truncate">{p.service?.name}</span>
-                  <span className="text-xs text-gray-500 font-mono truncate">{p.referral_code}</span>
-                  <span className="text-[10px] text-gray-400">{formatDate(p.created_at)}</span>
+                  <span className="text-[10px] text-gray-400 shrink-0">{formatDate(p.created_at)}</span>
                 </Link>
               </li>
             ))}
