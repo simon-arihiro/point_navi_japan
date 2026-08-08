@@ -68,9 +68,14 @@ export default async function HomePage() {
             <p className="text-slate-600 text-base leading-relaxed mb-8">
               実際に使ってみた体験をもとに、お得なポイ活サービスをわかりやすく紹介しています。
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/services" className="bg-slate-900 text-white font-bold px-6 py-3 rounded-xl hover:bg-slate-800 transition-colors">
-                サービス一覧を見る
+            <div className="flex flex-wrap gap-3">
+              <Link href="/invitations" className="flex items-center gap-2 bg-brand-600 text-white font-bold px-5 py-3 rounded-xl hover:bg-brand-700 transition-colors shadow-sm">
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
+                招待コードおすすめ
+              </Link>
+              <Link href="/codes" className="flex items-center gap-2 bg-white text-brand-700 font-bold px-5 py-3 rounded-xl border-2 border-brand-300 hover:bg-brand-50 transition-colors shadow-sm">
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2v-8a2 2 0 012-2h2m10-4H7a2 2 0 00-2 2v0a2 2 0 002 2h10a2 2 0 002-2v0a2 2 0 00-2-2z" /></svg>
+                招待コードまとめ掲示板
               </Link>
             </div>
           </div>
