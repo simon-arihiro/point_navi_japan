@@ -320,12 +320,18 @@ export default async function ArticlePage(
             {service?.slug && (
               <Link
                 href={`/codes/${service.slug}`}
-                className="flex items-center gap-3 bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:border-brand-200 hover:bg-brand-50 transition-colors"
+                className="block bg-gradient-to-br from-brand-500 to-brand-700 rounded-2xl p-5 shadow-md hover:shadow-lg hover:brightness-105 transition-all"
               >
-                <span className="text-xl shrink-0">💬</span>
-                <div className="min-w-0">
-                  <p className="text-xs font-bold text-gray-700 truncate">{service.name} 招待コード掲示板</p>
-                  <p className="text-xs text-brand-600 mt-0.5">みんなの最新コードを見る →</p>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-2xl">💬</span>
+                  <span className="text-white font-black text-sm">{service.name}</span>
+                </div>
+                <p className="text-white font-black text-base leading-snug mb-1">
+                  招待コード掲示板
+                </p>
+                <p className="text-brand-100 text-xs mb-3">みんなの最新コードをチェック！</p>
+                <div className="bg-white text-brand-700 font-black text-sm text-center py-2 rounded-xl">
+                  最新コードを見る →
                 </div>
               </Link>
             )}
