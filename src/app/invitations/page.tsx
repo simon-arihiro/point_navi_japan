@@ -9,12 +9,12 @@ export function generateMetadata(): Metadata {
   const yearMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;
 
   return {
-    title: `【${yearMonth}最新】ポイ活アプリの招待コード・紹介コードおすすめ一覧｜新規登録で特典ゲット`,
-    description: `${yearMonth}更新。ポイ活・副業アプリの招待コード・紹介コードをまとめて比較。tiktok・チャデポ・Cashwalk・ンポポなど人気サービスの招待コードを一覧表で紹介。新規登録ボーナスで最大数千円相当のポイントがもらえます。`,
+    title: `【${yearMonth}最新】ポイ活アプリの招待コードおすすめ一覧｜新規登録で特典ゲット`,
+    description: `${yearMonth}更新。ポイ活・副業アプリの招待コードをまとめて比較。tiktok・チャデポ・Cashwalk・ンポポなど人気サービスの招待コードを一覧表で紹介。新規登録ボーナスで最大数千円相当のポイントがもらえます。`,
     alternates: { canonical: "/invitations" },
     keywords: ["招待コード", "紹介コード", "ポイ活", "招待コード一覧", "ポイ活アプリ 招待コード", "紹介コード おすすめ", "新規登録 特典"],
     openGraph: {
-      title: `【${yearMonth}最新】ポイ活アプリの招待コード・紹介コードおすすめ一覧`,
+      title: `【${yearMonth}最新】ポイ活アプリの招待コードおすすめ一覧`,
       description: "人気ポイ活アプリの招待コードをまとめて比較。新規登録で特典ゲット！",
       type: "website",
     },
@@ -23,7 +23,7 @@ export function generateMetadata(): Metadata {
 
 const faqItems = [
   {
-    q: "招待コード・紹介コードとは何ですか？",
+    q: "招待コードとは何ですか？",
     a: "招待コード（紹介コード）とは、ポイ活アプリなどに新規登録する際に入力することで、登録者と紹介者の両方が特典（ポイント・ボーナス）を受け取れる特別なコードです。多くのサービスで数百〜数千円相当のボーナスがもらえます。",
   },
   {
@@ -82,8 +82,8 @@ export default async function InvitationsPage() {
         "@type": "WebPage",
         "@id": "https://jp-point-navi.com/invitations",
         "url": "https://jp-point-navi.com/invitations",
-        "name": `【${yearMonth}最新】ポイ活アプリの招待コード・紹介コードおすすめ一覧`,
-        "description": "ポイ活・副業アプリの招待コード・紹介コードを一覧で比較。新規登録で特典ゲット。",
+        "name": `【${yearMonth}最新】ポイ活アプリの招待コードおすすめ一覧`,
+        "description": "ポイ活・副業アプリの招待コードを一覧で比較。新規登録で特典ゲット。",
         "breadcrumb": {
           "@type": "BreadcrumbList",
           "itemListElement": [
@@ -113,7 +113,7 @@ export default async function InvitationsPage() {
             <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-8">
               <div>
                 <p className="text-xs text-gray-400 mb-1">ホーム &gt; 招待コードおすすめ一覧</p>
-                <h1 className="text-3xl font-black text-gray-900 mb-2">🎁 招待コード・紹介コードおすすめ一覧</h1>
+                <h1 className="text-3xl font-black text-gray-900 mb-2">🎁 招待コードおすすめ一覧</h1>
                 <p className="text-gray-500 text-sm">ポイ活・副業アプリの招待コードを比較表でまとめてご紹介。新規登録で特典ゲット！</p>
               </div>
               <div className="w-full lg:w-80 shrink-0">
@@ -135,7 +135,7 @@ export default async function InvitationsPage() {
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
             <h2 className="font-black text-gray-900 text-base mb-3">📖 このページについて</h2>
             <p className="text-sm text-gray-600 leading-relaxed mb-3">
-              このページでは、<strong>ポイ活・副業アプリの招待コード・紹介コード</strong>を特典額付きの比較表でまとめています。
+              このページでは、<strong>ポイ活・副業アプリの招待コード</strong>を特典額付きの比較表でまとめています。
               新規登録時に招待コードを入力するだけで、数百〜数千円相当のポイントやボーナスがもらえます。
             </p>
             <p className="text-sm text-gray-600 leading-relaxed mb-3">
@@ -150,7 +150,7 @@ export default async function InvitationsPage() {
           </div>
 
           {/* コード一覧表 */}
-          <h2 className="font-black text-gray-900 text-base mb-3">📋 招待コード・紹介コードおすすめ一覧表（{yearMonth}最新）</h2>
+          <h2 className="font-black text-gray-900 text-base mb-3">📋 招待コードおすすめ一覧表（{yearMonth}最新）</h2>
           <InvitationCodeTable rows={codeRows} />
 
           {/* 掲示板への誘導バナー */}
@@ -184,7 +184,7 @@ export default async function InvitationsPage() {
 
           {/* FAQ */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
-            <h2 className="font-black text-gray-900 text-lg mb-5">❓ 招待コード・紹介コードよくある質問</h2>
+            <h2 className="font-black text-gray-900 text-lg mb-5">❓ 招待コードよくある質問</h2>
             <div className="space-y-3">
               {faqItems.map((item, i) => (
                 <details key={i} className="border border-gray-100 rounded-xl overflow-hidden group">
