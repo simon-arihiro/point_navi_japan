@@ -52,6 +52,30 @@ export async function getGa4Summary(days: number): Promise<Ga4Summary | null> {
   };
 }
 
+export type Ga4DailyRow = { date: string; views: number; sessions: number };
+
+export async function getGa4DailyPageViews(days: number): Promise<Ga4DailyRow[] | null> {
+  const propertyId = process.env.GA4_PROPERTY_ID;
+  const client = getClient();
+  if (!client || !propertyId) return null;
+
+  const res = await client.properties.runReport({
+    property: `properties/${propertyId}`,
+    requestBody: {
+      dateRanges: [{ startDate: `${days}daysAgo`, endDate: "today" }],
+      dimensions: [{ name: "date" }],
+      metrics: [{ name: "screenPageViews" }, { name: "sessions" }],
+      orderBys: [{ dimension: { dimensionName: "date" }, desc: false }],
+    },
+  });
+
+  return (res.data.rows ?? []).map((row) => ({
+    date: row.dimensionValues?.[0]?.value ?? "",
+    views: Number(row.metricValues?.[0]?.value ?? 0),
+    sessions: Number(row.metricValues?.[1]?.value ?? 0),
+  }));
+}
+
 export async function getGa4TopPages(days: number, limit = 50): Promise<Ga4PageRow[] | null> {
   const propertyId = process.env.GA4_PROPERTY_ID;
   const client = getClient();

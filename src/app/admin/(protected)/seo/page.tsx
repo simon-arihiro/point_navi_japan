@@ -8,9 +8,12 @@ type GscSummary = { clicks: number; impressions: number; ctr: number; position: 
 type GscQueryRow = { query: string; clicks: number; impressions: number; ctr: number; position: number };
 type GscPageRow = { page: string; clicks: number; impressions: number; ctr: number; position: number };
 
+type Ga4DailyRow = { date: string; views: number; sessions: number };
+
 type SeoData = {
   ga4Summary: Ga4Summary | null;
   ga4TopPages: Ga4PageRow[] | null;
+  ga4Daily: Ga4DailyRow[] | null;
   gscSummary: GscSummary | null;
   gscTopQueries: GscQueryRow[] | null;
   gscTopPages: GscPageRow[] | null;
@@ -45,6 +48,71 @@ function isOpportunity(row: GscQueryRow | GscPageRow) {
 
 function shortPath(url: string) {
   try { return new URL(url).pathname; } catch { return url; }
+}
+
+function PvChart({ data }: { data: Ga4DailyRow[] }) {
+  if (!data || data.length === 0) return null;
+  const W = 800, H = 200, PAD = { top: 16, right: 16, bottom: 32, left: 48 };
+  const innerW = W - PAD.left - PAD.right;
+  const innerH = H - PAD.top - PAD.bottom;
+  const maxViews = Math.max(...data.map((d) => d.views), 1);
+  const xs = data.map((_, i) => PAD.left + (i / Math.max(data.length - 1, 1)) * innerW);
+  const ys = data.map((d) => PAD.top + (1 - d.views / maxViews) * innerH);
+  const polyline = xs.map((x, i) => `${x},${ys[i]}`).join(" ");
+  const area = `M${xs[0]},${ys[0]} ` + xs.slice(1).map((x, i) => `L${x},${ys[i + 1]}`).join(" ") + ` L${xs[xs.length - 1]},${PAD.top + innerH} L${xs[0]},${PAD.top + innerH} Z`;
+
+  // Y axis labels
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map((t) => ({
+    y: PAD.top + (1 - t) * innerH,
+    label: Math.round(maxViews * t).toLocaleString(),
+  }));
+
+  // X axis: show ~6 evenly spaced dates
+  const xStep = Math.max(1, Math.floor(data.length / 6));
+  const xTicks = data.filter((_, i) => i % xStep === 0 || i === data.length - 1).map((d, _, arr) => {
+    const idx = data.indexOf(d);
+    return { x: xs[idx], label: d.date.slice(4, 6) + "/" + d.date.slice(6, 8) };
+  });
+
+  // Sessions line
+  const maxSessions = Math.max(...data.map((d) => d.sessions), 1);
+  const ys2 = data.map((d) => PAD.top + (1 - d.sessions / maxSessions) * innerH);
+  const polyline2 = xs.map((x, i) => `${x},${ys2[i]}`).join(" ");
+
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="font-bold text-gray-900 text-sm">📈 PVトレンド（日別）</h2>
+        <div className="flex items-center gap-4 text-xs text-gray-500">
+          <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-brand-500"></span>ページビュー</span>
+          <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-amber-400"></span>セッション数</span>
+        </div>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" style={{ maxHeight: 200 }}>
+        {/* Y grid + labels */}
+        {yTicks.map((t) => (
+          <g key={t.y}>
+            <line x1={PAD.left} y1={t.y} x2={PAD.left + innerW} y2={t.y} stroke="#f0f0f0" strokeWidth="1" />
+            <text x={PAD.left - 6} y={t.y + 4} textAnchor="end" fontSize="10" fill="#9ca3af">{t.label}</text>
+          </g>
+        ))}
+        {/* Area fill */}
+        <path d={area} fill="rgba(99,102,241,0.08)" />
+        {/* PV line */}
+        <polyline points={polyline} fill="none" stroke="#6366f1" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        {/* Sessions line */}
+        <polyline points={polyline2} fill="none" stroke="#fbbf24" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" strokeDasharray="4 2" />
+        {/* X labels */}
+        {xTicks.map((t) => (
+          <text key={t.x} x={t.x} y={H - 6} textAnchor="middle" fontSize="10" fill="#9ca3af">{t.label}</text>
+        ))}
+        {/* Dots on PV line */}
+        {data.length <= 31 && xs.map((x, i) => (
+          <circle key={i} cx={x} cy={ys[i]} r="2.5" fill="#6366f1" />
+        ))}
+      </svg>
+    </div>
+  );
 }
 
 export default function AdminSeoPage() {
@@ -98,6 +166,11 @@ export default function AdminSeoPage() {
 
       {!loading && data && (
         <>
+          {/* PVトレンドチャート */}
+          {data.ga4Daily && data.ga4Daily.length > 0 && (
+            <PvChart data={data.ga4Daily} />
+          )}
+
           {/* GA4サマリー */}
           <h2 className="font-bold text-gray-700 text-sm mb-3 uppercase tracking-wide">Google Analytics（GA4）</h2>
           {data.ga4Summary ? (
