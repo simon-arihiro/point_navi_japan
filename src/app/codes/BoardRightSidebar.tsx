@@ -58,7 +58,7 @@ export default function BoardRightSidebar({ recent, ranking, searchOnly }: Props
       />
       <button
         type="submit"
-        className="bg-blue-600 text-white px-3 rounded-r-xl hover:bg-blue-700 transition-colors shrink-0 flex items-center justify-center"
+        className="bg-blue-600 text-white px-3 min-w-[40px] rounded-r-xl hover:bg-blue-700 transition-colors shrink-0 flex items-center justify-center"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
