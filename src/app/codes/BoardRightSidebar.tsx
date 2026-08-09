@@ -74,8 +74,8 @@ export default function BoardRightSidebar({ recent, ranking, searchOnly }: Props
   return (
     <aside className="w-full lg:w-60 shrink-0 space-y-4">
       {/* 検索 */}
-      <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <div className="bg-gray-700 text-white text-sm font-bold px-4 py-2.5">検索</div>
+      <div className="bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div className="bg-gray-700 text-white text-sm font-bold px-4 py-2.5 rounded-t-xl">検索</div>
         <div className="p-3">
           {searchForm}
         </div>
