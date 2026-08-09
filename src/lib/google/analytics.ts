@@ -52,7 +52,7 @@ export async function getGa4Summary(days: number): Promise<Ga4Summary | null> {
   };
 }
 
-export type Ga4DailyRow = { date: string; views: number; sessions: number };
+export type Ga4DailyRow = { date: string; views: number; sessions: number; activeUsers: number };
 
 export async function getGa4DailyPageViews(days: number): Promise<Ga4DailyRow[] | null> {
   const propertyId = process.env.GA4_PROPERTY_ID;
@@ -64,7 +64,7 @@ export async function getGa4DailyPageViews(days: number): Promise<Ga4DailyRow[] 
     requestBody: {
       dateRanges: [{ startDate: `${days}daysAgo`, endDate: "today" }],
       dimensions: [{ name: "date" }],
-      metrics: [{ name: "screenPageViews" }, { name: "sessions" }],
+      metrics: [{ name: "screenPageViews" }, { name: "sessions" }, { name: "activeUsers" }],
       orderBys: [{ dimension: { dimensionName: "date" }, desc: false }],
     },
   });
@@ -73,6 +73,7 @@ export async function getGa4DailyPageViews(days: number): Promise<Ga4DailyRow[] 
     date: row.dimensionValues?.[0]?.value ?? "",
     views: Number(row.metricValues?.[0]?.value ?? 0),
     sessions: Number(row.metricValues?.[1]?.value ?? 0),
+    activeUsers: Number(row.metricValues?.[2]?.value ?? 0),
   }));
 }
 

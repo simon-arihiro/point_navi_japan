@@ -8,7 +8,7 @@ type GscSummary = { clicks: number; impressions: number; ctr: number; position: 
 type GscQueryRow = { query: string; clicks: number; impressions: number; ctr: number; position: number };
 type GscPageRow = { page: string; clicks: number; impressions: number; ctr: number; position: number };
 
-type Ga4DailyRow = { date: string; views: number; sessions: number };
+type Ga4DailyRow = { date: string; views: number; sessions: number; activeUsers: number };
 
 type SeoData = {
   ga4Summary: Ga4Summary | null;
@@ -50,65 +50,114 @@ function shortPath(url: string) {
   try { return new URL(url).pathname; } catch { return url; }
 }
 
+type ChartMetric = "views" | "sessions" | "activeUsers";
+
+const CHART_METRICS: { key: ChartMetric; label: string; color: string; dasharray?: string }[] = [
+  { key: "views", label: "ページビュー", color: "#6366f1" },
+  { key: "sessions", label: "セッション数", color: "#fbbf24" },
+  { key: "activeUsers", label: "アクティブユーザー", color: "#10b981" },
+];
+
 function PvChart({ data }: { data: Ga4DailyRow[] }) {
+  const [primary, setPrimary] = useState<ChartMetric>("views");
+  const [secondary, setSecondary] = useState<ChartMetric | "none">("sessions");
+
   if (!data || data.length === 0) return null;
   const W = 800, H = 200, PAD = { top: 16, right: 16, bottom: 32, left: 48 };
   const innerW = W - PAD.left - PAD.right;
   const innerH = H - PAD.top - PAD.bottom;
-  const maxViews = Math.max(...data.map((d) => d.views), 1);
+
   const xs = data.map((_, i) => PAD.left + (i / Math.max(data.length - 1, 1)) * innerW);
-  const ys = data.map((d) => PAD.top + (1 - d.views / maxViews) * innerH);
+
+  const maxPrimary = Math.max(...data.map((d) => d[primary]), 1);
+  const ys = data.map((d) => PAD.top + (1 - d[primary] / maxPrimary) * innerH);
   const polyline = xs.map((x, i) => `${x},${ys[i]}`).join(" ");
   const area = `M${xs[0]},${ys[0]} ` + xs.slice(1).map((x, i) => `L${x},${ys[i + 1]}`).join(" ") + ` L${xs[xs.length - 1]},${PAD.top + innerH} L${xs[0]},${PAD.top + innerH} Z`;
 
-  // Y axis labels
+  const primaryMeta = CHART_METRICS.find((m) => m.key === primary)!;
+
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map((t) => ({
     y: PAD.top + (1 - t) * innerH,
-    label: Math.round(maxViews * t).toLocaleString(),
+    label: Math.round(maxPrimary * t).toLocaleString(),
   }));
 
-  // X axis: show ~6 evenly spaced dates
   const xStep = Math.max(1, Math.floor(data.length / 6));
-  const xTicks = data.filter((_, i) => i % xStep === 0 || i === data.length - 1).map((d, _, arr) => {
-    const idx = data.indexOf(d);
-    return { x: xs[idx], label: d.date.slice(4, 6) + "/" + d.date.slice(6, 8) };
-  });
+  const xTicks = data
+    .map((d, i) => ({ d, i }))
+    .filter(({ i }) => i % xStep === 0 || i === data.length - 1)
+    .map(({ d, i }) => ({ x: xs[i], label: d.date.slice(4, 6) + "/" + d.date.slice(6, 8) }));
 
-  // Sessions line
-  const maxSessions = Math.max(...data.map((d) => d.sessions), 1);
-  const ys2 = data.map((d) => PAD.top + (1 - d.sessions / maxSessions) * innerH);
-  const polyline2 = xs.map((x, i) => `${x},${ys2[i]}`).join(" ");
+  let secondaryPolyline: string | null = null;
+  let secondaryColor = "";
+  if (secondary !== "none") {
+    const maxSec = Math.max(...data.map((d) => d[secondary]), 1);
+    const ys2 = data.map((d) => PAD.top + (1 - d[secondary] / maxSec) * innerH);
+    secondaryPolyline = xs.map((x, i) => `${x},${ys2[i]}`).join(" ");
+    secondaryColor = CHART_METRICS.find((m) => m.key === secondary)!.color;
+  }
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-6">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-bold text-gray-900 text-sm">📈 PVトレンド（日別）</h2>
-        <div className="flex items-center gap-4 text-xs text-gray-500">
-          <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-brand-500"></span>ページビュー</span>
-          <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-amber-400"></span>セッション数</span>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <h2 className="font-bold text-gray-900 text-sm">📈 トレンド（日別）</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Primary metric selector */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-gray-500 shrink-0">主軸：</span>
+            <div className="flex rounded-lg overflow-hidden border border-gray-200 text-xs">
+              {CHART_METRICS.map((m) => (
+                <button
+                  key={m.key}
+                  onClick={() => { setPrimary(m.key); if (secondary === m.key) setSecondary("none"); }}
+                  className={`px-2.5 py-1 font-bold transition-colors ${primary === m.key ? "text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+                  style={primary === m.key ? { backgroundColor: m.color } : {}}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          {/* Secondary metric selector */}
+          <div className="flex items-center gap-1.5">
+            <span className="text-xs text-gray-500 shrink-0">比較：</span>
+            <div className="flex rounded-lg overflow-hidden border border-gray-200 text-xs">
+              <button
+                onClick={() => setSecondary("none")}
+                className={`px-2.5 py-1 font-bold transition-colors ${secondary === "none" ? "bg-gray-700 text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+              >
+                なし
+              </button>
+              {CHART_METRICS.filter((m) => m.key !== primary).map((m) => (
+                <button
+                  key={m.key}
+                  onClick={() => setSecondary(m.key)}
+                  className={`px-2.5 py-1 font-bold transition-colors ${secondary === m.key ? "text-white" : "bg-white text-gray-500 hover:bg-gray-50"}`}
+                  style={secondary === m.key ? { backgroundColor: m.color } : {}}
+                >
+                  {m.label}
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
       <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto" style={{ maxHeight: 200 }}>
-        {/* Y grid + labels */}
         {yTicks.map((t) => (
           <g key={t.y}>
             <line x1={PAD.left} y1={t.y} x2={PAD.left + innerW} y2={t.y} stroke="#f0f0f0" strokeWidth="1" />
             <text x={PAD.left - 6} y={t.y + 4} textAnchor="end" fontSize="10" fill="#9ca3af">{t.label}</text>
           </g>
         ))}
-        {/* Area fill */}
-        <path d={area} fill="rgba(99,102,241,0.08)" />
-        {/* PV line */}
-        <polyline points={polyline} fill="none" stroke="#6366f1" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
-        {/* Sessions line */}
-        <polyline points={polyline2} fill="none" stroke="#fbbf24" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" strokeDasharray="4 2" />
-        {/* X labels */}
+        <path d={area} fill={primaryMeta.color + "14"} />
+        <polyline points={polyline} fill="none" stroke={primaryMeta.color} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" />
+        {secondaryPolyline && (
+          <polyline points={secondaryPolyline} fill="none" stroke={secondaryColor} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" strokeDasharray="4 2" />
+        )}
         {xTicks.map((t) => (
           <text key={t.x} x={t.x} y={H - 6} textAnchor="middle" fontSize="10" fill="#9ca3af">{t.label}</text>
         ))}
-        {/* Dots on PV line */}
         {data.length <= 31 && xs.map((x, i) => (
-          <circle key={i} cx={x} cy={ys[i]} r="2.5" fill="#6366f1" />
+          <circle key={i} cx={x} cy={ys[i]} r="2.5" fill={primaryMeta.color} />
         ))}
       </svg>
     </div>
