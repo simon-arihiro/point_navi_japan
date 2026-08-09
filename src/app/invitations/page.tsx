@@ -9,11 +9,40 @@ export function generateMetadata(): Metadata {
   const yearMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;
 
   return {
-    title: `【${yearMonth}最新】招待コード一覧｜特典額を比較表でチェック`,
-    description: "ポイ活サービスの招待コード・招待リンクを特典額付きの比較表でまとめて紹介。りすくんが実際に登録して受け取れた金額だけを厳選掲載しています。",
+    title: `【${yearMonth}最新】ポイ活アプリの招待コード・紹介コードおすすめ一覧｜新規登録で特典ゲット`,
+    description: `${yearMonth}更新。ポイ活・副業アプリの招待コード・紹介コードをまとめて比較。tiktok・チャデポ・Cashwalk・ンポポなど人気サービスの招待コードを一覧表で紹介。新規登録ボーナスで最大数千円相当のポイントがもらえます。`,
     alternates: { canonical: "/invitations" },
+    keywords: ["招待コード", "紹介コード", "ポイ活", "招待コード一覧", "ポイ活アプリ 招待コード", "紹介コード おすすめ", "新規登録 特典"],
+    openGraph: {
+      title: `【${yearMonth}最新】ポイ活アプリの招待コード・紹介コードおすすめ一覧`,
+      description: "人気ポイ活アプリの招待コードをまとめて比較。新規登録で特典ゲット！",
+      type: "website",
+    },
   };
 }
+
+const faqItems = [
+  {
+    q: "招待コード・紹介コードとは何ですか？",
+    a: "招待コード（紹介コード）とは、ポイ活アプリなどに新規登録する際に入力することで、登録者と紹介者の両方が特典（ポイント・ボーナス）を受け取れる特別なコードです。多くのサービスで数百〜数千円相当のボーナスがもらえます。",
+  },
+  {
+    q: "招待コードはどこで入力しますか？",
+    a: "通常はアプリの新規会員登録画面、またはアカウント設定の「招待コード入力」「紹介コード入力」欄から入力できます。登録後に入力できるサービスもありますが、登録前の入力を求めるサービスもあるため、事前に確認しておきましょう。",
+  },
+  {
+    q: "招待コードを使うとどんな特典がもらえますか？",
+    a: "サービスによって異なりますが、ポイント付与・現金相当ボーナス・特別キャンペーン参加権などが主な特典です。例えばtiktokでは最大5,000円相当、チャデポでは登録ボーナスなど、各サービスの特典をこのページの一覧表でご確認ください。",
+  },
+  {
+    q: "招待コードは無料で使えますか？",
+    a: "はい、招待コードの利用は完全無料です。アプリに登録するだけで特典が受け取れます。ただし、各サービスの利用規約に従って正しく使用してください。",
+  },
+  {
+    q: "招待コードが使えない場合はどうすればいいですか？",
+    a: "招待コードには有効期限がある場合や、キャンペーン終了で無効になる場合があります。使えない場合は、このページ下部の「掲示板」でユーザーが共有している最新コードをお試しください。",
+  },
+];
 
 export default async function InvitationsPage() {
   const supabase = await createClient();
@@ -43,65 +72,141 @@ export default async function InvitationsPage() {
       };
     });
 
-  return (
-    <div>
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-8">
-            <div>
-              <h1 className="text-3xl font-black text-gray-900 mb-2">🎁 招待コードおすすめ一覧</h1>
-              <p className="text-gray-500 text-sm">各サービスのおすすめ招待コード・招待リンクと特典をまとめてご紹介します</p>
-            </div>
+  const now = new Date();
+  const yearMonth = `${now.getFullYear()}年${now.getMonth() + 1}月`;
 
-            <div className="w-full lg:w-80 shrink-0">
-              <p className="font-bold text-gray-900 text-sm mb-2 flex items-center gap-2">
-                <svg className="w-4 h-4 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                サービス名で探す
-              </p>
-              <SearchBox />
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebPage",
+        "@id": "https://jp-point-navi.com/invitations",
+        "url": "https://jp-point-navi.com/invitations",
+        "name": `【${yearMonth}最新】ポイ活アプリの招待コード・紹介コードおすすめ一覧`,
+        "description": "ポイ活・副業アプリの招待コード・紹介コードを一覧で比較。新規登録で特典ゲット。",
+        "breadcrumb": {
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://jp-point-navi.com/" },
+            { "@type": "ListItem", "position": 2, "name": "招待コードおすすめ一覧", "item": "https://jp-point-navi.com/invitations" },
+          ],
+        },
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": faqItems.map((f) => ({
+          "@type": "Question",
+          "name": f.q,
+          "acceptedAnswer": { "@type": "Answer", "text": f.a },
+        })),
+      },
+    ],
+  };
+
+  return (
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+
+      <div>
+        <div className="bg-white border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+            <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-8">
+              <div>
+                <p className="text-xs text-gray-400 mb-1">ホーム &gt; 招待コードおすすめ一覧</p>
+                <h1 className="text-3xl font-black text-gray-900 mb-2">🎁 招待コード・紹介コードおすすめ一覧</h1>
+                <p className="text-gray-500 text-sm">ポイ活・副業アプリの招待コードを比較表でまとめてご紹介。新規登録で特典ゲット！</p>
+              </div>
+              <div className="w-full lg:w-80 shrink-0">
+                <p className="font-bold text-gray-900 text-sm mb-2 flex items-center gap-2">
+                  <svg className="w-4 h-4 text-brand-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  サービス名で探す
+                </p>
+                <SearchBox />
+              </div>
             </div>
           </div>
         </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+          {/* リード文 */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
+            <h2 className="font-black text-gray-900 text-base mb-3">📖 このページについて</h2>
+            <p className="text-sm text-gray-600 leading-relaxed mb-3">
+              このページでは、<strong>ポイ活・副業アプリの招待コード・紹介コード</strong>を特典額付きの比較表でまとめています。
+              新規登録時に招待コードを入力するだけで、数百〜数千円相当のポイントやボーナスがもらえます。
+            </p>
+            <p className="text-sm text-gray-600 leading-relaxed mb-3">
+              掲載しているコードは実際に登録して特典を受け取れたものを厳選しています。
+              tiktok・チャデポ・Cashwalk・ンポポ・カウシェファームなど、人気サービスの最新招待コードを随時更新中です。
+            </p>
+            <div className="flex flex-wrap gap-2 mt-4">
+              {["招待コード", "紹介コード", "ポイ活", "新規登録特典", "無料でポイント", "副業アプリ"].map((tag) => (
+                <span key={tag} className="text-xs bg-brand-50 text-brand-700 px-3 py-1 rounded-full font-bold">{tag}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* コード一覧表 */}
+          <h2 className="font-black text-gray-900 text-base mb-3">📋 招待コード・紹介コードおすすめ一覧表（{yearMonth}最新）</h2>
+          <InvitationCodeTable rows={codeRows} />
+
+          {/* 掲示板への誘導バナー */}
+          <a
+            href="/codes"
+            className="flex items-center gap-4 bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:bg-amber-100 transition-colors mt-3 mb-8"
+          >
+            <span className="text-3xl shrink-0">💬</span>
+            <div className="flex-1 min-w-0">
+              <p className="font-black text-gray-900 text-sm">コードが使えない・最新コードを探している方へ</p>
+              <p className="text-xs text-gray-600 mt-0.5">掲示板ではユーザーが最新の招待コードをリアルタイムでシェアしています。ここで見つからない場合はチェックしてみてください。</p>
+            </div>
+            <span className="text-amber-600 font-black text-sm shrink-0">掲示板を見る →</span>
+          </a>
+
+          {/* サービス別招待コードカード */}
+          <h2 className="font-black text-gray-900 text-base mb-4">🏆 サービス別・招待コード詳細ガイド</h2>
+          {articles.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
+              {articles.filter((a: any) => a.primary_service).map((a: any) => (
+                <InvitationCard key={a.id} article={a} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-20 text-gray-400">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/mascot/library/squirrel-empty-square.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
+              <p>招待コード記事はまだありません</p>
+            </div>
+          )}
+
+          {/* FAQ */}
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-8">
+            <h2 className="font-black text-gray-900 text-lg mb-5">❓ 招待コード・紹介コードよくある質問</h2>
+            <div className="space-y-3">
+              {faqItems.map((item, i) => (
+                <details key={i} className="border border-gray-100 rounded-xl overflow-hidden group">
+                  <summary className="flex items-center justify-between px-4 py-3.5 cursor-pointer font-bold text-sm text-gray-900 hover:bg-gray-50 select-none">
+                    <span>Q. {item.q}</span>
+                    <span className="text-gray-400 group-open:rotate-180 transition-transform shrink-0 ml-2">▼</span>
+                  </summary>
+                  <div className="px-4 py-3 text-sm text-gray-600 leading-relaxed bg-gray-50 border-t border-gray-100">
+                    {item.a}
+                  </div>
+                </details>
+              ))}
+            </div>
+          </div>
+
+          {/* 注意書き */}
+          <div className="bg-gray-50 rounded-xl p-4 text-xs text-gray-500 leading-relaxed">
+            <p className="font-bold mb-1">ご利用にあたって</p>
+            <p>掲載している招待コードは取材・登録時点の情報です。キャンペーン終了・コード変更により予告なく変更される場合があります。最新情報は各サービスの公式サイトをご確認ください。招待コードの利用によるトラブルについて当サイトは責任を負いかねます。</p>
+          </div>
+        </div>
       </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-sm text-gray-600 leading-relaxed mb-8">
-          このページでは、りすくんが実際に登録して特典を受け取れたポイ活サービスの招待コード・招待リンクをおすすめ順にまとめています。
-          新規登録ボーナスの金額やポイント還元率、キャンペーン情報を比較しながら、お得なサービスを選ぶ際の参考にしてください。
-          気になるサービスが見つかったら、招待コードをコピーするか招待リンクから登録するだけで特典の対象になります。
-        </p>
-        <h2 className="font-black text-gray-900 text-base mb-3">📋 招待コードおすすめ一覧表</h2>
-        <InvitationCodeTable rows={codeRows} />
-
-        {/* 掲示板への誘導バナー */}
-        <a
-          href="/codes"
-          className="flex items-center gap-4 bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:bg-amber-100 transition-colors mt-3 mb-8"
-        >
-          <span className="text-3xl shrink-0">💬</span>
-          <div className="flex-1 min-w-0">
-            <p className="font-black text-gray-900 text-sm">コードが使えない・最新コードを探している方へ</p>
-            <p className="text-xs text-gray-600 mt-0.5">掲示板ではユーザーが最新の招待コードをリアルタイムでシェアしています。ここで見つからない場合はチェックしてみてください。</p>
-          </div>
-          <span className="text-amber-600 font-black text-sm shrink-0">掲示板を見る →</span>
-        </a>
-
-        {articles.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {articles.filter((a: any) => a.primary_service).map((a: any) => (
-              <InvitationCard key={a.id} article={a} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-20 text-gray-400">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/mascot/library/squirrel-empty-square.png" alt="" className="w-32 sm:w-40 h-auto mx-auto mb-4 opacity-90" />
-            <p>招待コード記事はまだありません</p>
-          </div>
-        )}
-      </div>
-    </div>
+    </>
   );
 }
