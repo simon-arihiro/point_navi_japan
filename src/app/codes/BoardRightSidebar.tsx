@@ -48,17 +48,17 @@ export default function BoardRightSidebar({ recent, ranking, searchOnly }: Props
   };
 
   const searchForm = (
-    <form onSubmit={handleSearch} className="flex gap-0">
+    <form onSubmit={handleSearch} className="flex rounded-xl overflow-hidden border border-gray-200">
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         placeholder="サービス名を検索"
-        className="flex-1 border border-gray-200 rounded-l-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
+        className="flex-1 px-3 py-2 text-sm focus:outline-none border-0"
       />
       <button
         type="submit"
-        className="bg-blue-600 text-white px-3 min-w-[40px] rounded-r-xl hover:bg-blue-700 transition-colors shrink-0 flex items-center justify-center"
+        className="bg-blue-600 text-white px-3 min-w-[40px] hover:bg-blue-700 transition-colors shrink-0 flex items-center justify-center"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
