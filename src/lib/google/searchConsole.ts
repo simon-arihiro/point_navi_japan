@@ -39,7 +39,7 @@ export async function getGscSummary(days: number): Promise<GscSummary | null> {
   };
 }
 
-export async function getGscTopQueries(days: number, limit = 25): Promise<GscQueryRow[] | null> {
+export async function getGscTopQueries(days: number, limit = 50): Promise<GscQueryRow[] | null> {
   const siteUrl = process.env.GSC_SITE_URL;
   const client = getClient();
   if (!client || !siteUrl) return null;
@@ -63,7 +63,7 @@ export async function getGscTopQueries(days: number, limit = 25): Promise<GscQue
   }));
 }
 
-export async function getGscTopPages(days: number, limit = 25): Promise<GscPageRow[] | null> {
+export async function getGscTopPages(days: number, limit = 50): Promise<GscPageRow[] | null> {
   const siteUrl = process.env.GSC_SITE_URL;
   const client = getClient();
   if (!client || !siteUrl) return null;

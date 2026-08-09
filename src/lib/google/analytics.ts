@@ -52,7 +52,7 @@ export async function getGa4Summary(days: number): Promise<Ga4Summary | null> {
   };
 }
 
-export async function getGa4TopPages(days: number, limit = 20): Promise<Ga4PageRow[] | null> {
+export async function getGa4TopPages(days: number, limit = 50): Promise<Ga4PageRow[] | null> {
   const propertyId = process.env.GA4_PROPERTY_ID;
   const client = getClient();
   if (!client || !propertyId) return null;
