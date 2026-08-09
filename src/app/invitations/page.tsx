@@ -78,7 +78,7 @@ export default async function InvitationsPage() {
         {/* 掲示板への誘導バナー */}
         <a
           href="/codes"
-          className="flex items-center gap-4 bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:bg-amber-100 transition-colors"
+          className="flex items-center gap-4 bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:bg-amber-100 transition-colors mt-3 mb-8"
         >
           <span className="text-3xl shrink-0">💬</span>
           <div className="flex-1 min-w-0">
