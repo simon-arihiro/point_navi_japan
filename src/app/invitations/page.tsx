@@ -75,6 +75,19 @@ export default async function InvitationsPage() {
         <h2 className="font-black text-gray-900 text-base mb-3">📋 招待コードおすすめ一覧表</h2>
         <InvitationCodeTable rows={codeRows} />
 
+        {/* 掲示板への誘導バナー */}
+        <a
+          href="/codes"
+          className="flex items-center gap-4 bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:bg-amber-100 transition-colors"
+        >
+          <span className="text-3xl shrink-0">💬</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-black text-gray-900 text-sm">コードが使えない・最新コードを探している方へ</p>
+            <p className="text-xs text-gray-600 mt-0.5">掲示板ではユーザーが最新の招待コードをリアルタイムでシェアしています。ここで見つからない場合はチェックしてみてください。</p>
+          </div>
+          <span className="text-amber-600 font-black text-sm shrink-0">掲示板を見る →</span>
+        </a>
+
         {articles.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {articles.filter((a: any) => a.primary_service).map((a: any) => (
