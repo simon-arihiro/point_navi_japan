@@ -47,6 +47,13 @@ const faqItems = [
 export default async function InvitationsPage() {
   const supabase = await createClient();
 
+  const { data: recentPosts } = await supabase
+    .from("code_submissions")
+    .select("nickname, referral_code, created_at, service:services(name, slug)")
+    .eq("status", "approved")
+    .order("created_at", { ascending: false })
+    .limit(3);
+
   const { data } = await supabase
     .from("articles")
     .select(`*, primary_service:services!articles_primary_service_id_fkey(*, categories:service_categories(category:categories(*)))`)
@@ -156,14 +163,40 @@ export default async function InvitationsPage() {
           {/* 掲示板への誘導バナー */}
           <a
             href="/codes"
-            className="flex items-center gap-4 bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:bg-amber-100 transition-colors mt-3 mb-8"
+            className="block bg-amber-50 border-2 border-amber-300 rounded-2xl px-5 py-4 hover:bg-amber-100 transition-colors mt-3 mb-8"
           >
-            <span className="text-3xl shrink-0">💬</span>
-            <div className="flex-1 min-w-0">
-              <p className="font-black text-gray-900 text-sm">コードが使えない・最新コードを探している方へ</p>
-              <p className="text-xs text-gray-600 mt-0.5">掲示板ではユーザーが最新の招待コードをリアルタイムでシェアしています。ここで見つからない場合はチェックしてみてください。</p>
+            <div className="flex items-center gap-3 mb-3">
+              <span className="text-2xl shrink-0">💬</span>
+              <div className="flex-1 min-w-0">
+                <p className="font-black text-gray-900 text-sm">コードが使えない・最新コードを探している方へ</p>
+                <p className="text-xs text-gray-600 mt-0.5">掲示板ではユーザーが最新の招待コードをリアルタイムでシェアしています。</p>
+              </div>
+              <span className="text-amber-600 font-black text-sm shrink-0">掲示板を見る →</span>
             </div>
-            <span className="text-amber-600 font-black text-sm shrink-0">掲示板を見る →</span>
+            {recentPosts && recentPosts.length > 0 && (
+              <div className="border-t border-amber-200 pt-3 space-y-1.5">
+                {recentPosts.map((post: any, i: number) => {
+                  const svc = post.service as { name: string; slug: string } | null;
+                  const relTime = (() => {
+                    const diff = Date.now() - new Date(post.created_at).getTime();
+                    const h = Math.floor(diff / 3600000);
+                    const d = Math.floor(diff / 86400000);
+                    if (h < 1) return "たった今";
+                    if (h < 24) return `${h}時間前`;
+                    return `${d}日前`;
+                  })();
+                  return (
+                    <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
+                      <span className="text-amber-500 shrink-0">▸</span>
+                      <span className="font-bold text-gray-800 shrink-0">{svc?.name ?? "不明"}</span>
+                      <span className="font-mono bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold shrink-0">{post.referral_code}</span>
+                      <span className="text-gray-400 shrink-0">{post.nickname}</span>
+                      <span className="text-gray-400 ml-auto shrink-0">{relTime}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </a>
 
           {/* サービス別招待コードカード */}

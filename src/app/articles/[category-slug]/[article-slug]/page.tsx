@@ -283,16 +283,20 @@ export default async function ArticlePage(
             {service?.slug && (
               <Link
                 href={`/codes/${service.slug}`}
-                className="flex items-center gap-4 mt-6 bg-amber-50 border border-amber-200 rounded-2xl p-4 hover:bg-amber-100 transition-colors"
+                className="block mt-6 bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 hover:bg-amber-100 transition-colors"
               >
-                <div className="text-2xl shrink-0">💬</div>
-                <div>
-                  <p className="font-bold text-amber-900 text-sm">
-                    {service.name}の招待コード掲示板
-                  </p>
-                  <p className="text-amber-700 text-xs mt-0.5">
-                    みんなが投稿した最新の招待コード・紹介コードをチェック →
-                  </p>
+                <p className="font-black text-amber-900 text-sm mb-1">
+                  🚨 招待コードが使えない・期限切れの場合
+                </p>
+                <p className="text-amber-800 text-xs leading-relaxed mb-2">
+                  招待コードには有効期限があり、予告なく変更される場合があります。<br />
+                  掲示板ではユーザーが最新のコードをリアルタイムで共有しています。
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">💬</span>
+                  <span className="text-amber-700 text-sm font-bold underline">
+                    {service.name}の最新招待コードを掲示板で探す →
+                  </span>
                 </div>
               </Link>
             )}
