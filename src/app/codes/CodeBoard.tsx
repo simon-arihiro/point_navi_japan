@@ -144,11 +144,11 @@ export default function CodeBoard({ service, searchQuery }: Props) {
       {/* 投稿テンプレート（サービスページのみ） */}
       {isServicePage && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-          <div className="bg-gray-100 px-4 py-2.5 text-sm font-bold text-gray-700">招待コード募集テンプレ</div>
+          <div className="bg-gray-100 px-4 py-2.5 text-sm font-bold text-gray-700">📝 投稿テンプレート（任意）</div>
           <div className="p-4">
-            <p className="text-xs text-gray-500 mb-2">コメント欄に招待コードを記載願います。</p>
-            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-700 font-mono whitespace-pre-wrap leading-relaxed">
-              {`【招待コード】\n〇〇\n\n【ひとこと】\n〇〇`}
+            <p className="text-xs text-gray-500 mb-2">以下の形式を参考にコメントを書いてみてください。</p>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-700 whitespace-pre-wrap leading-relaxed">
+              {`コード: 〇〇〇〇〇〇\n特典: 登録ボーナスXXXポイント\nひとこと: ぜひ使ってみてください！`}
             </div>
             <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 leading-relaxed">
               【ご利用にあたって】<br />
@@ -171,7 +171,7 @@ export default function CodeBoard({ service, searchQuery }: Props) {
                   type="text"
                   value={form.nickname}
                   onChange={(e) => setForm((f) => ({ ...f, nickname: e.target.value }))}
-                  placeholder="ななしの投稿者"
+                  placeholder="ポイ活ユーザー"
                   maxLength={20}
                   className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400"
                 />

@@ -123,7 +123,7 @@ export async function POST(request: NextRequest) {
   // 投稿
   const { data, error } = await db.from("code_submissions").insert({
     service_id,
-    nickname: nickname?.trim() || "ななしの投稿者",
+    nickname: nickname?.trim() || "ポイ活ユーザー",
     referral_code: "",
     comment: comment.trim(),
     ip_hash: ipHash,
