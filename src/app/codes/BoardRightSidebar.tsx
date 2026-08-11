@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type RecentPost = {
   id: string;
@@ -37,14 +37,22 @@ type Props = {
 };
 
 export default function BoardRightSidebar({ recent, ranking, searchOnly }: Props) {
-  const [query, setQuery] = useState("");
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState(() => searchParams.get("q") ?? "");
   const router = useRouter();
+
+  // URLの?qが変わったら入力欄を同期する
+  useEffect(() => {
+    setQuery(searchParams.get("q") ?? "");
+  }, [searchParams]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (query.trim()) {
-      router.push(`/codes?q=${encodeURIComponent(query.trim())}`);
-    }
+    const q = query.trim();
+    if (!q) return;
+    const target = `/codes?q=${encodeURIComponent(q)}`;
+    // 同じURLでも確実に再検索させるためreplace→pushで強制ナビゲーション
+    router.push(target);
   };
 
   const searchForm = (
