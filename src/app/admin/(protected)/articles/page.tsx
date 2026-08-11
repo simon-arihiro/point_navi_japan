@@ -5,6 +5,7 @@ import UpdateExistingArticlesButton from "@/components/admin/UpdateExistingArtic
 import AiCleanupAllButton from "@/components/admin/AiCleanupAllButton";
 import RepairThumbnailsButton from "@/components/admin/RepairThumbnailsButton";
 import RepairImageMarkdownButton from "@/components/admin/RepairImageMarkdownButton";
+import BulkCreateInvitationsButton from "@/components/admin/BulkCreateInvitationsButton";
 import type { Category } from "@/types/database";
 
 export const metadata: Metadata = { title: "記事管理" };
@@ -71,6 +72,7 @@ export default async function AdminArticlesPage() {
       <div className="flex items-center justify-between mb-2">
         <h1 className="text-2xl font-black text-gray-900">記事管理</h1>
         <div className="flex items-center gap-2">
+          <BulkCreateInvitationsButton />
           <AiCleanupAllButton />
           <UpdateExistingArticlesButton />
           <RepairThumbnailsButton />
