@@ -22,32 +22,45 @@ export interface ServiceRanking {
 }
 
 /**
- * analytics_daily（過去日分の集計済みデータ）に加えて、
- * 当日分は analytics_events から直接集計することで、
- * クリック直後でもランキング・サービス行動明細に反映されるようにする。
+ * cronはUTC 15:00（JST 0:00）に前日分(UTC)を analytics_daily へ集計する。
+ * したがって「まだ集計されていないイベント」は UTC昨日 00:00Z 以降に存在する。
+ * - analytics_daily: windowStart ～ UTCの前日まで
+ * - analytics_events: UTCの前日 00:00Z 以降（未集計分をすべてカバー）
+ * この2区間を合わせることで二重計上なく全データを取得できる。
  */
-export async function getServiceStatsMap(supabase: SupabaseClient, windowDays: number): Promise<Map<string, ServiceStats>> {
-  // JST（UTC+9）基準で「今日」を計算する
-  // JSTの0時 = 前日UTC15:00。これより前のイベントはcronで集計されているため
-  // eventsクエリはJST今日0時（UTC）以降を対象にする
-  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const jstTodayStr = jstNow.toISOString().split("T")[0]; // JST基準の今日 YYYY-MM-DD
-  const jstMidnightUTC = new Date(`${jstTodayStr}T00:00:00+09:00`).toISOString(); // JST0時のUTC表現
+function getQueryBoundaries(windowDays: number) {
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0]; // UTC今日 YYYY-MM-DD
 
-  const todayStr = new Date().toISOString().split("T")[0]; // UTCの今日（analytics_dailyのdate列と比較用）
-  const windowStart = new Date();
+  const utcYesterday = new Date(now);
+  utcYesterday.setDate(utcYesterday.getDate() - 1);
+  const utcYesterdayStr = utcYesterday.toISOString().split("T")[0];
+
+  const windowStart = new Date(now);
   windowStart.setDate(windowStart.getDate() - windowDays);
+  const windowStartStr = windowStart.toISOString().split("T")[0];
 
-  const [{ data: dailyData }, { data: todayEvents }] = await Promise.all([
+  return {
+    todayStr,
+    utcYesterdayStr,
+    windowStartStr,
+    eventsStartISO: `${utcYesterdayStr}T00:00:00Z`,
+  };
+}
+
+export async function getServiceStatsMap(supabase: SupabaseClient, windowDays: number): Promise<Map<string, ServiceStats>> {
+  const { utcYesterdayStr, windowStartStr, eventsStartISO } = getQueryBoundaries(windowDays);
+
+  const [{ data: dailyData }, { data: recentEvents }] = await Promise.all([
     supabase
       .from("analytics_daily")
       .select("service_id, page_views, referral_clicks, copy_code_count")
-      .gte("date", windowStart.toISOString().split("T")[0])
-      .lt("date", todayStr),
+      .gte("date", windowStartStr)
+      .lt("date", utcYesterdayStr),
     supabase
       .from("analytics_events")
       .select("service_id, event_type")
-      .gte("created_at", jstMidnightUTC)
+      .gte("created_at", eventsStartISO)
       .not("service_id", "is", null),
   ]);
 
@@ -61,7 +74,7 @@ export async function getServiceStatsMap(supabase: SupabaseClient, windowDays: n
     statsMap.set(row.service_id, s);
   }
 
-  for (const e of todayEvents ?? []) {
+  for (const e of recentEvents ?? []) {
     const serviceId = e.service_id as string;
     const s = statsMap.get(serviceId) ?? { pv: 0, rc: 0, cc: 0 };
     if (e.event_type === "page_view" || e.event_type === "service_view" || e.event_type === "article_view") s.pv++;
@@ -73,9 +86,6 @@ export async function getServiceStatsMap(supabase: SupabaseClient, windowDays: n
   return statsMap;
 }
 
-/**
- * 記事単体の閲覧回数（article_view の総数、全期間）。
- */
 export async function getArticleViewCount(supabase: SupabaseClient, articleId: string): Promise<number> {
   const { count } = await supabase
     .from("analytics_events")
@@ -86,9 +96,6 @@ export async function getArticleViewCount(supabase: SupabaseClient, articleId: s
   return count ?? 0;
 }
 
-/**
- * 記事別の閲覧回数（article_id ごとの article_view 総数、全期間）。
- */
 export async function getArticleViewCounts(supabase: SupabaseClient): Promise<Map<string, number>> {
   const { data } = await supabase
     .from("analytics_events")
@@ -105,9 +112,6 @@ export async function getArticleViewCounts(supabase: SupabaseClient): Promise<Ma
   return counts;
 }
 
-/**
- * 指定した記事IDのみを対象とした閲覧回数（article_id ごとの article_view 総数、全期間）。
- */
 export async function getArticleViewCountsForIds(supabase: SupabaseClient, articleIds: string[]): Promise<Map<string, number>> {
   const counts = new Map<string, number>();
   if (articleIds.length === 0) return counts;
@@ -126,7 +130,6 @@ export async function getArticleViewCountsForIds(supabase: SupabaseClient, artic
   return counts;
 }
 
-// イベント種別を集計用カウンタに振り分ける
 function addEventToStats(stats: { pv: number; rc: number; cc: number; share: number }, eventType: string) {
   if (eventType === "page_view" || eventType === "service_view" || eventType === "article_view") stats.pv++;
   if (eventType === "referral_click") stats.rc++;
@@ -134,31 +137,27 @@ function addEventToStats(stats: { pv: number; rc: number; cc: number; share: num
   if (eventType === "share_link") stats.share++;
 }
 
-/**
- * 日別トレンド: 直近days日間（当日含む）のPV・紹介リンククリック・コピー・シェア数を日付ごとに返す。
- * serviceIdを指定するとそのサービスのみに絞り込む。
- */
 export async function getDailyTrend(supabase: SupabaseClient, days: number, serviceId?: string): Promise<DailyStats[]> {
-  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const jstTodayStr = jstNow.toISOString().split("T")[0];
-  const jstMidnightUTC = new Date(`${jstTodayStr}T00:00:00+09:00`).toISOString();
-  const todayStr = new Date().toISOString().split("T")[0];
+  const { utcYesterdayStr, windowStartStr, eventsStartISO } = getQueryBoundaries(days);
 
-  const start = new Date();
+  const now = new Date();
+  const start = new Date(now);
   start.setDate(start.getDate() - (days - 1));
-  const startStr = start.toISOString().split("T")[0];
 
   let dailyQuery = supabase
     .from("analytics_daily")
     .select("date, service_id, page_views, referral_clicks, copy_code_count, share_count")
-    .gte("date", startStr)
-    .lt("date", todayStr);
+    .gte("date", windowStartStr)
+    .lt("date", utcYesterdayStr);
   if (serviceId) dailyQuery = dailyQuery.eq("service_id", serviceId);
 
-  let eventsQuery = supabase.from("analytics_events").select("event_type, service_id").gte("created_at", jstMidnightUTC);
+  let eventsQuery = supabase
+    .from("analytics_events")
+    .select("event_type, service_id, created_at")
+    .gte("created_at", eventsStartISO);
   if (serviceId) eventsQuery = eventsQuery.eq("service_id", serviceId);
 
-  const [{ data: dailyData }, { data: todayEvents }] = await Promise.all([dailyQuery, eventsQuery]);
+  const [{ data: dailyData }, { data: recentEvents }] = await Promise.all([dailyQuery, eventsQuery]);
 
   const map = new Map<string, DailyStats>();
   for (let i = 0; i < days; i++) {
@@ -177,38 +176,36 @@ export async function getDailyTrend(supabase: SupabaseClient, days: number, serv
     entry.share += row.share_count;
   }
 
-  const todayEntry = map.get(todayStr);
-  if (todayEntry) {
-    for (const e of todayEvents ?? []) addEventToStats(todayEntry, e.event_type);
+  for (const e of recentEvents ?? []) {
+    const eventDate = (e.created_at as string).split("T")[0];
+    const entry = map.get(eventDate);
+    if (!entry) continue;
+    addEventToStats(entry, e.event_type);
   }
 
   return Array.from(map.values());
 }
 
-/**
- * 月別トレンド: 直近months ヶ月間（今月含む）のPV・紹介リンククリック・コピー・シェア数を月ごとに返す。
- * serviceIdを指定するとそのサービスのみに絞り込む。
- */
 export async function getMonthlyTrend(supabase: SupabaseClient, months: number, serviceId?: string): Promise<DailyStats[]> {
-  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const jstTodayStr = jstNow.toISOString().split("T")[0];
-  const jstMidnightUTC = new Date(`${jstTodayStr}T00:00:00+09:00`).toISOString();
+  const { utcYesterdayStr, eventsStartISO } = getQueryBoundaries(30);
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
   const startStr = start.toISOString().split("T")[0];
-  const todayStr = now.toISOString().split("T")[0];
 
   let dailyQuery = supabase
     .from("analytics_daily")
     .select("date, service_id, page_views, referral_clicks, copy_code_count, share_count")
     .gte("date", startStr)
-    .lt("date", todayStr);
+    .lt("date", utcYesterdayStr);
   if (serviceId) dailyQuery = dailyQuery.eq("service_id", serviceId);
 
-  let eventsQuery = supabase.from("analytics_events").select("event_type, service_id").gte("created_at", jstMidnightUTC);
+  let eventsQuery = supabase
+    .from("analytics_events")
+    .select("event_type, service_id, created_at")
+    .gte("created_at", eventsStartISO);
   if (serviceId) eventsQuery = eventsQuery.eq("service_id", serviceId);
 
-  const [{ data: dailyData }, { data: todayEvents }] = await Promise.all([dailyQuery, eventsQuery]);
+  const [{ data: dailyData }, { data: recentEvents }] = await Promise.all([dailyQuery, eventsQuery]);
 
   const map = new Map<string, DailyStats>();
   for (let i = 0; i < months; i++) {
@@ -226,33 +223,25 @@ export async function getMonthlyTrend(supabase: SupabaseClient, months: number, 
     entry.share += row.share_count;
   }
 
-  const currentMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const currentEntry = map.get(currentMonthKey);
-  if (currentEntry) {
-    for (const e of todayEvents ?? []) addEventToStats(currentEntry, e.event_type);
+  for (const e of recentEvents ?? []) {
+    const monthKey = (e.created_at as string).slice(0, 7);
+    const entry = map.get(monthKey);
+    if (!entry) continue;
+    addEventToStats(entry, e.event_type);
   }
 
   return Array.from(map.values());
 }
 
-/**
- * サービス別の招待コードランキング: 直近days日間（当日含む）の紹介リンククリック数・コピー回数が多い順。
- */
 export async function getServiceRanking(supabase: SupabaseClient, days: number): Promise<ServiceRanking[]> {
-  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
-  const jstTodayStr = jstNow.toISOString().split("T")[0];
-  const jstMidnightUTC = new Date(`${jstTodayStr}T00:00:00+09:00`).toISOString();
-  const todayStr = new Date().toISOString().split("T")[0];
-  const start = new Date();
-  start.setDate(start.getDate() - (days - 1));
-  const startStr = start.toISOString().split("T")[0];
+  const { utcYesterdayStr, windowStartStr, eventsStartISO } = getQueryBoundaries(days);
 
-  const [{ data: dailyData }, { data: todayEvents }, { data: services }] = await Promise.all([
-    supabase.from("analytics_daily").select("service_id, referral_clicks, copy_code_count").gte("date", startStr).lt("date", todayStr),
+  const [{ data: dailyData }, { data: recentEvents }, { data: services }] = await Promise.all([
+    supabase.from("analytics_daily").select("service_id, referral_clicks, copy_code_count").gte("date", windowStartStr).lt("date", utcYesterdayStr),
     supabase
       .from("analytics_events")
       .select("service_id, event_type")
-      .gte("created_at", jstMidnightUTC)
+      .gte("created_at", eventsStartISO)
       .not("service_id", "is", null)
       .in("event_type", ["referral_click", "copy_code"]),
     supabase.from("services").select("id, name").is("deleted_at", null),
@@ -265,7 +254,7 @@ export async function getServiceRanking(supabase: SupabaseClient, days: number):
     s.cc += row.copy_code_count;
     map.set(row.service_id, s);
   }
-  for (const e of todayEvents ?? []) {
+  for (const e of recentEvents ?? []) {
     const serviceId = e.service_id as string;
     const s = map.get(serviceId) ?? { rc: 0, cc: 0 };
     if (e.event_type === "referral_click") s.rc++;
@@ -281,9 +270,6 @@ export async function getServiceRanking(supabase: SupabaseClient, days: number):
     .sort((a, b) => (b.rc + b.cc) - (a.rc + a.cc));
 }
 
-/**
- * サービス別の閲覧回数（そのサービスに紐づく記事の article_view 総数、全期間）。
- */
 export async function getServiceArticleViewCounts(supabase: SupabaseClient): Promise<Map<string, number>> {
   const { data } = await supabase
     .from("analytics_events")

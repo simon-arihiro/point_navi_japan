@@ -3,6 +3,7 @@ import { getServiceStatsMap } from "@/lib/analytics";
 import Link from "next/link";
 import type { Metadata } from "next";
 import ImageFailedBanner from "./ImageFailedBanner";
+import AdminAutoRefresh from "./AdminAutoRefresh";
 
 export const metadata: Metadata = { title: "ダッシュボード" };
 
@@ -93,16 +94,19 @@ export default async function AdminDashboard(props: PageProps<"/admin">) {
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 mb-8">
         <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between flex-wrap gap-3">
           <h2 className="font-bold text-gray-900">サービス行動明細</h2>
-          <div className="flex gap-2">
-            {[7, 30].map((d) => (
-              <Link
-                key={d}
-                href={`/admin?days=${d}`}
-                className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${days === d ? "bg-red-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
-              >
-                {d}日
-              </Link>
-            ))}
+          <div className="flex items-center gap-3">
+            <AdminAutoRefresh />
+            <div className="flex gap-2">
+              {[7, 30].map((d) => (
+                <Link
+                  key={d}
+                  href={`/admin?days=${d}`}
+                  className={`text-xs px-3 py-1.5 rounded-lg font-medium transition-colors ${days === d ? "bg-red-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"}`}
+                >
+                  {d}日
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
         <div className="overflow-x-auto">
