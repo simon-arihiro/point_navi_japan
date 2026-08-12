@@ -8,6 +8,17 @@ import { toDatetimeLocalValue, fromDatetimeLocalValue } from "@/lib/campaign";
 import PromptInputWithImages, { PendingImage } from "@/components/admin/PromptInputWithImages";
 import { getArticleStatusLabel } from "@/lib/articleTypes";
 
+function buildInvitationTemplate(data: any): string {
+  const name = data.name || "サービス名";
+  const code = data.referral_code || "XXXXXXXX";
+  const bonus = data.bonus_amount
+    ? `新規登録で約${data.bonus_amount}円相当のポイントがもらえます。`
+    : data.bonus_points
+    ? `新規登録で${data.bonus_points}pt（約${Math.round(Number(data.bonus_points) / 10)}円）もらえます。`
+    : "新規登録でボーナスポイントがもらえます。";
+  return `【${name}】\n\n${name}の招待コードです🎁\n\n招待コード：${code}\n\n${bonus}\n\n👉 詳しくはこちら：https://jp-point-navi.com/invitations`;
+}
+
 export default function EditServicePage() {
   const params = useParams();
   const id = params.id as string;
@@ -34,7 +45,9 @@ export default function EditServicePage() {
     fetch(`/api/services/${id}`)
       .then((r) => r.json())
       .then(({ data }) => {
-        setForm({ ...data, campaign_expires_at: toDatetimeLocalValue(data.campaign_expires_at) });
+        // invitation_text が未設定の場合はデフォルトテンプレートを自動挿入
+        const invitationText = data.invitation_text || buildInvitationTemplate(data);
+        setForm({ ...data, invitation_text: invitationText, campaign_expires_at: toDatetimeLocalValue(data.campaign_expires_at) });
         setCategoryNames((data.categories ?? []).map((c: any) => c.category?.name).filter(Boolean));
         setLoading(false);
       });
@@ -254,15 +267,6 @@ export default function EditServicePage() {
             value={form.invitation_text ?? ""}
             onChange={set("invitation_text")}
             rows={7}
-            placeholder={`**【${form.name || "サービス名"}】**
-
-${form.name || "サービス名"}の招待コードです🎁
-
-招待コード：${form.referral_code || "XXXXXXXX"}
-
-新規登録で〇〇pt（約〇〇円）もらえます。
-
-👉 詳しくはこちら：https://jp-point-navi.com/invitations`}
             className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-mono resize-none"
           />
         </div>
