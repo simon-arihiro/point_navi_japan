@@ -240,16 +240,21 @@ export default function EditServicePage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            招待文
-            <span className="text-xs text-gray-400 ml-2">SNSやLINEでシェアする際のテンプレート文</span>
+          <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center justify-between">
+            <span>招待文 <span className="text-xs text-gray-400 font-normal">SNSやLINEでシェアする際のテンプレート文</span></span>
+            <button
+              type="button"
+              onClick={() => navigator.clipboard.writeText(form.invitation_text ?? "")}
+              className="text-xs text-brand-600 hover:underline font-normal"
+            >
+              📋 コピー
+            </button>
           </label>
           <textarea
             value={form.invitation_text ?? ""}
             onChange={set("invitation_text")}
             rows={7}
-            placeholder={`例：
-**【${form.name || "サービス名"}】**
+            placeholder={`**【${form.name || "サービス名"}】**
 
 ${form.name || "サービス名"}の招待コードです🎁
 
@@ -258,19 +263,8 @@ ${form.name || "サービス名"}の招待コードです🎁
 新規登録で〇〇pt（約〇〇円）もらえます。
 
 👉 詳しくはこちら：https://jp-point-navi.com/invitations`}
-            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-mono"
+            className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-red-500 font-mono resize-none"
           />
-          {form.invitation_text && (
-            <button
-              type="button"
-              onClick={() => {
-                navigator.clipboard.writeText(form.invitation_text);
-              }}
-              className="mt-1.5 text-xs text-brand-600 hover:underline"
-            >
-              📋 クリップボードにコピー
-            </button>
-          )}
         </div>
 
         <CategorySelector allCategories={allCategories} selected={categoryNames} onToggle={toggleCategory} />
