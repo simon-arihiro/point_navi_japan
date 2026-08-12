@@ -42,7 +42,22 @@ export async function GET(request: NextRequest) {
     .limit(limit);
 
   if (serviceId) query = query.eq("service_id", serviceId);
-  if (keyword) query = query.or(`referral_code.ilike.%${keyword}%,comment.ilike.%${keyword}%`);
+  if (keyword) {
+    // サービス名でも検索（キーワードがサービス名にマッチするIDを取得してOR条件に追加）
+    const { data: matchedServices } = await db
+      .from("services")
+      .select("id")
+      .ilike("name", `%${keyword}%`);
+    const matchedIds = (matchedServices ?? []).map((s: { id: string }) => s.id);
+
+    if (matchedIds.length > 0) {
+      query = query.or(
+        `referral_code.ilike.%${keyword}%,comment.ilike.%${keyword}%,service_id.in.(${matchedIds.join(",")})`
+      );
+    } else {
+      query = query.or(`referral_code.ilike.%${keyword}%,comment.ilike.%${keyword}%`);
+    }
+  }
 
   const { data, error } = await query;
   if (error) return Response.json({ error: error.message }, { status: 500 });
