@@ -50,7 +50,6 @@ export default async function InvitationsPage() {
   const { data: recentPosts } = await supabase
     .from("code_submissions")
     .select("nickname, referral_code, created_at, service:services(name, slug)")
-    .eq("status", "approved")
     .order("created_at", { ascending: false })
     .limit(3);
 

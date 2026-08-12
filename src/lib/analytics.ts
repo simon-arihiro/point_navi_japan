@@ -27,7 +27,14 @@ export interface ServiceRanking {
  * クリック直後でもランキング・サービス行動明細に反映されるようにする。
  */
 export async function getServiceStatsMap(supabase: SupabaseClient, windowDays: number): Promise<Map<string, ServiceStats>> {
-  const todayStr = new Date().toISOString().split("T")[0];
+  // JST（UTC+9）基準で「今日」を計算する
+  // JSTの0時 = 前日UTC15:00。これより前のイベントはcronで集計されているため
+  // eventsクエリはJST今日0時（UTC）以降を対象にする
+  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const jstTodayStr = jstNow.toISOString().split("T")[0]; // JST基準の今日 YYYY-MM-DD
+  const jstMidnightUTC = new Date(`${jstTodayStr}T00:00:00+09:00`).toISOString(); // JST0時のUTC表現
+
+  const todayStr = new Date().toISOString().split("T")[0]; // UTCの今日（analytics_dailyのdate列と比較用）
   const windowStart = new Date();
   windowStart.setDate(windowStart.getDate() - windowDays);
 
@@ -40,7 +47,7 @@ export async function getServiceStatsMap(supabase: SupabaseClient, windowDays: n
     supabase
       .from("analytics_events")
       .select("service_id, event_type")
-      .gte("created_at", `${todayStr}T00:00:00Z`)
+      .gte("created_at", jstMidnightUTC)
       .not("service_id", "is", null),
   ]);
 
@@ -132,7 +139,11 @@ function addEventToStats(stats: { pv: number; rc: number; cc: number; share: num
  * serviceIdを指定するとそのサービスのみに絞り込む。
  */
 export async function getDailyTrend(supabase: SupabaseClient, days: number, serviceId?: string): Promise<DailyStats[]> {
+  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const jstTodayStr = jstNow.toISOString().split("T")[0];
+  const jstMidnightUTC = new Date(`${jstTodayStr}T00:00:00+09:00`).toISOString();
   const todayStr = new Date().toISOString().split("T")[0];
+
   const start = new Date();
   start.setDate(start.getDate() - (days - 1));
   const startStr = start.toISOString().split("T")[0];
@@ -144,7 +155,7 @@ export async function getDailyTrend(supabase: SupabaseClient, days: number, serv
     .lt("date", todayStr);
   if (serviceId) dailyQuery = dailyQuery.eq("service_id", serviceId);
 
-  let eventsQuery = supabase.from("analytics_events").select("event_type, service_id").gte("created_at", `${todayStr}T00:00:00Z`);
+  let eventsQuery = supabase.from("analytics_events").select("event_type, service_id").gte("created_at", jstMidnightUTC);
   if (serviceId) eventsQuery = eventsQuery.eq("service_id", serviceId);
 
   const [{ data: dailyData }, { data: todayEvents }] = await Promise.all([dailyQuery, eventsQuery]);
@@ -179,6 +190,9 @@ export async function getDailyTrend(supabase: SupabaseClient, days: number, serv
  * serviceIdを指定するとそのサービスのみに絞り込む。
  */
 export async function getMonthlyTrend(supabase: SupabaseClient, months: number, serviceId?: string): Promise<DailyStats[]> {
+  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const jstTodayStr = jstNow.toISOString().split("T")[0];
+  const jstMidnightUTC = new Date(`${jstTodayStr}T00:00:00+09:00`).toISOString();
   const now = new Date();
   const start = new Date(now.getFullYear(), now.getMonth() - (months - 1), 1);
   const startStr = start.toISOString().split("T")[0];
@@ -191,7 +205,7 @@ export async function getMonthlyTrend(supabase: SupabaseClient, months: number, 
     .lt("date", todayStr);
   if (serviceId) dailyQuery = dailyQuery.eq("service_id", serviceId);
 
-  let eventsQuery = supabase.from("analytics_events").select("event_type, service_id").gte("created_at", `${todayStr}T00:00:00Z`);
+  let eventsQuery = supabase.from("analytics_events").select("event_type, service_id").gte("created_at", jstMidnightUTC);
   if (serviceId) eventsQuery = eventsQuery.eq("service_id", serviceId);
 
   const [{ data: dailyData }, { data: todayEvents }] = await Promise.all([dailyQuery, eventsQuery]);
@@ -225,6 +239,9 @@ export async function getMonthlyTrend(supabase: SupabaseClient, months: number, 
  * サービス別の招待コードランキング: 直近days日間（当日含む）の紹介リンククリック数・コピー回数が多い順。
  */
 export async function getServiceRanking(supabase: SupabaseClient, days: number): Promise<ServiceRanking[]> {
+  const jstNow = new Date(Date.now() + 9 * 60 * 60 * 1000);
+  const jstTodayStr = jstNow.toISOString().split("T")[0];
+  const jstMidnightUTC = new Date(`${jstTodayStr}T00:00:00+09:00`).toISOString();
   const todayStr = new Date().toISOString().split("T")[0];
   const start = new Date();
   start.setDate(start.getDate() - (days - 1));
@@ -235,7 +252,7 @@ export async function getServiceRanking(supabase: SupabaseClient, days: number):
     supabase
       .from("analytics_events")
       .select("service_id, event_type")
-      .gte("created_at", `${todayStr}T00:00:00Z`)
+      .gte("created_at", jstMidnightUTC)
       .not("service_id", "is", null)
       .in("event_type", ["referral_click", "copy_code"]),
     supabase.from("services").select("id, name").is("deleted_at", null),
