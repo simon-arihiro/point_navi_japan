@@ -191,6 +191,18 @@ export default async function ServicePage(
             {/* Conversion Area */}
             <ConversionArea service={service} />
 
+            {/* 招待コード掲示板リンク */}
+            <Link
+              href={`/codes/${service.slug}`}
+              className="block bg-amber-50 border border-amber-200 rounded-2xl p-4 hover:bg-amber-100 transition-colors"
+            >
+              <p className="text-xs font-bold text-amber-800 mb-1">💬 招待コード掲示板</p>
+              <p className="text-xs text-amber-700 leading-relaxed">
+                {service.name}の最新招待コードをユーザーがリアルタイムでシェアしています
+              </p>
+              <p className="text-xs text-amber-600 font-bold mt-2">掲示板を見る →</p>
+            </Link>
+
             {/* 公式サイトリンク */}
             <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
               <h3 className="font-bold text-gray-900 mb-3 text-sm">公式サイト</h3>
