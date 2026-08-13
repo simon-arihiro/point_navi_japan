@@ -35,7 +35,8 @@ export default function EditServicePage() {
 
   // AI記事生成
   const [genType, setGenType] = useState<"introduction" | "related" | "invitation">("related");
-  const [genPrompt, setGenPrompt] = useState("");
+  const DEFAULT_INVITATION_PROMPT = "基于这个app的最新情報来个招待文章。文章前后需要加上邀请码，邀请链接各一次。";
+  const [genPrompt, setGenPrompt] = useState(DEFAULT_INVITATION_PROMPT);
   const [genImages, setGenImages] = useState<PendingImage[]>([]);
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState("");
@@ -344,7 +345,7 @@ export default function EditServicePage() {
               </button>
               <button
                 type="button"
-                onClick={() => setGenType("invitation")}
+                onClick={() => { setGenType("invitation"); setGenPrompt((p) => p || DEFAULT_INVITATION_PROMPT); }}
                 className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                   genType === "invitation" ? "bg-red-600 text-white border-red-600" : "bg-white text-gray-700 border-gray-200 hover:bg-gray-50"
                 }`}
