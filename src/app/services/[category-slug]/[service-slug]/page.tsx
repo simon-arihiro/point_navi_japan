@@ -7,7 +7,24 @@ import LogoFallback from "@/components/LogoFallback";
 import Sidebar from "@/components/Sidebar";
 import TrackView from "@/components/TrackView";
 import { renderMarkdown, ARTICLE_PROSE_CLASS } from "@/lib/markdown";
+import RelatedServices from "@/components/RelatedServices";
 import type { Metadata } from "next";
+
+function buildServiceTitle(svc: { name: string; bonus_amount?: number | null; bonus_points?: number | null } | null): string {
+  if (!svc) return "サービス詳細";
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  const prefix = `【${year}年${month}月最新】`;
+  // ボーナス情報を末尾に付加
+  const bonus = svc.bonus_amount
+    ? `${svc.bonus_amount}円分もらえる`
+    : svc.bonus_points
+    ? `${Number(svc.bonus_points).toLocaleString()}ptもらえる`
+    : null;
+  const suffix = bonus ? `の招待コード・紹介コード｜${bonus}` : "の招待コード・紹介コード";
+  return `${prefix}${svc.name}${suffix}`;
+}
 
 export async function generateMetadata(
   props: PageProps<"/services/[category-slug]/[service-slug]">
@@ -16,26 +33,30 @@ export async function generateMetadata(
   const supabase = await createClient();
   const { data: svc } = await supabase
     .from("services")
-    .select("name, description, logo_url, logo_storage_path")
+    .select("name, description, logo_url, logo_storage_path, bonus_amount, bonus_points")
     .eq("slug", serviceSlug)
     .single();
   const ogImage = svc?.logo_storage_path
     ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${svc.logo_storage_path}`
     : svc?.logo_url ?? "/mascot/library/poinavi-header-banner-lg.png";
+  const seoTitle = buildServiceTitle(svc);
+  const description = svc?.description
+    ? svc.description
+    : `${svc?.name ?? "このサービス"}の最新招待コード・紹介コードをまとめています。新規登録でポイントがもらえるキャンペーン情報も確認できます。`;
   return {
-    title: svc?.name ?? "サービス詳細",
-    description: svc?.description ?? "",
+    title: seoTitle,
+    description,
     alternates: { canonical: `/services/${categorySlug}/${serviceSlug}` },
     openGraph: {
       type: "website",
-      title: svc?.name ?? "サービス詳細",
-      description: svc?.description ?? "",
+      title: seoTitle,
+      description,
       images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
-      title: svc?.name ?? "サービス詳細",
-      description: svc?.description ?? "",
+      title: seoTitle,
+      description,
       images: [ogImage],
     },
   };
@@ -69,9 +90,37 @@ export default async function ServicePage(
     supabase.from("categories").select("*").order("name"),
   ]);
 
+  // 同カテゴリの関連サービス取得（現在のサービスを除く）
+  const categoryIds: string[] = [];
+  if (svcRes.data) {
+    for (const c of (svcRes.data.categories ?? [])) {
+      if (c.category?.id) categoryIds.push(c.category.id);
+    }
+  }
+
   if (!svcRes.data) notFound();
   const service = svcRes.data;
   const categories = categoriesRes.data ?? [];
+
+  // 同カテゴリのサービス取得
+  let relatedServices: any[] = [];
+  if (categoryIds.length > 0) {
+    const { data: relSvcData } = await supabase
+      .from("services")
+      .select("id, name, slug, description, logo_url, logo_storage_path, bonus_amount, bonus_points, categories:service_categories(category:categories(slug, name))")
+      .eq("status", "active")
+      .is("deleted_at", null)
+      .neq("id", service.id)
+      .in("id",
+        (await supabase
+          .from("service_categories")
+          .select("service_id")
+          .in("category_id", categoryIds)
+        ).data?.map((r: any) => r.service_id) ?? []
+      )
+      .limit(6);
+    relatedServices = relSvcData ?? [];
+  }
 
   // この Service の introduction 記事
   const introArticle = introRes.data?.find((a: any) => a.primary_service_id === service.id);
@@ -184,6 +233,9 @@ export default async function ServicePage(
                 </div>
               </div>
             )}
+
+            {/* 同カテゴリの関連サービス */}
+            <RelatedServices services={relatedServices} title="同じカテゴリのおすすめポイ活" />
           </div>
 
           {/* サイドバー */}

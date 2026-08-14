@@ -6,6 +6,7 @@ type Ga4Summary = { sessions: number; activeUsers: number; screenPageViews: numb
 type Ga4PageRow = { path: string; views: number; sessions: number };
 type GscSummary = { clicks: number; impressions: number; ctr: number; position: number };
 type GscQueryRow = { query: string; clicks: number; impressions: number; ctr: number; position: number };
+type KeywordStatus = { query: string; status: "pending" | "in_progress" | "done"; notes?: string | null };
 type GscPageRow = { page: string; clicks: number; impressions: number; ctr: number; position: number };
 
 type Ga4DailyRow = { date: string; views: number; sessions: number; activeUsers: number };
@@ -164,24 +165,63 @@ function PvChart({ data }: { data: Ga4DailyRow[] }) {
   );
 }
 
+const STATUS_LABELS: Record<string, { label: string; color: string }> = {
+  pending:     { label: "未処理", color: "bg-gray-100 text-gray-600" },
+  in_progress: { label: "最適化中", color: "bg-blue-100 text-blue-700" },
+  done:        { label: "完了", color: "bg-green-100 text-green-700" },
+};
+
+function StatusBadge({ status }: { status: string }) {
+  const s = STATUS_LABELS[status] ?? STATUS_LABELS.pending;
+  return <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${s.color}`}>{s.label}</span>;
+}
+
 export default function AdminSeoPage() {
   const [days, setDays] = useState(28);
   const [data, setData] = useState<SeoData | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"queries" | "pages" | "ga4">("queries");
+  const [keywordStatuses, setKeywordStatuses] = useState<Map<string, KeywordStatus>>(new Map());
+  const [savingQuery, setSavingQuery] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const res = await fetch(`/api/admin/seo?days=${days}`);
-    const json = await res.json();
+    const [seoRes, statusRes] = await Promise.all([
+      fetch(`/api/admin/seo?days=${days}`),
+      fetch("/api/admin/seo-status"),
+    ]);
+    const json = await seoRes.json();
+    const statusJson = await statusRes.json();
     setData(json);
+    const map = new Map<string, KeywordStatus>();
+    for (const row of (statusJson.data ?? [])) map.set(row.query, row);
+    setKeywordStatuses(map);
     setLoading(false);
   }, [days]);
 
   useEffect(() => { load(); }, [load]);
 
+  const updateStatus = async (query: string, status: string) => {
+    setSavingQuery(query);
+    await fetch("/api/admin/seo-status", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, status }),
+    });
+    setKeywordStatuses((prev) => {
+      const next = new Map(prev);
+      next.set(query, { query, status: status as KeywordStatus["status"] });
+      return next;
+    });
+    setSavingQuery(null);
+  };
+
   const opportunities = data?.gscTopQueries?.filter(isOpportunity) ?? [];
   const pageOpportunities = data?.gscTopPages?.filter(isOpportunity) ?? [];
+  // S級：順位5-10 かつ Impressions >= 100
+  const sGradeOpportunities = opportunities.filter((q) => q.position <= 10 && q.impressions >= 100);
+  // A級：順位10-20 かつ Impressions >= 100（S級除く）
+  const aGradeOpportunities = opportunities.filter((q) => q.position > 10 && q.impressions >= 100);
 
   return (
     <div className="max-w-6xl mx-auto">
@@ -247,30 +287,105 @@ export default function AdminSeoPage() {
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 mb-6">Search Console 未接続（GOOGLE_SERVICE_ACCOUNT_KEY / GSC_SITE_URL 未設定）</div>
           )}
 
-          {/* 改善機会 */}
-          {(opportunities.length > 0 || pageOpportunities.length > 0) && (
+          {/* 改善機会 - S/A級 */}
+          {(sGradeOpportunities.length > 0 || aGradeOpportunities.length > 0 || opportunities.length > 0) && (
             <div className="bg-amber-50 border border-amber-300 rounded-2xl p-5 mb-6">
-              <h3 className="font-black text-amber-900 mb-3">🎯 改善チャンス（表示回数50以上・順位5〜20位）</h3>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {opportunities.slice(0, 5).map((q) => (
-                  <div key={q.query} className="bg-white rounded-xl p-3 border border-amber-200">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-bold text-gray-900 text-sm">{q.query}</span>
-                      {positionBadge(q.position)}
-                    </div>
-                    <p className="text-xs text-gray-500">表示 {q.impressions} / クリック {q.clicks} / CTR {(q.ctr * 100).toFixed(1)}%</p>
-                  </div>
-                ))}
-                {pageOpportunities.slice(0, 5).map((p) => (
-                  <div key={p.page} className="bg-white rounded-xl p-3 border border-amber-200">
-                    <div className="flex justify-between items-start mb-1">
-                      <span className="font-bold text-gray-900 text-sm truncate max-w-[200px]">{shortPath(p.page)}</span>
-                      {positionBadge(p.position)}
-                    </div>
-                    <p className="text-xs text-gray-500">表示 {p.impressions} / クリック {p.clicks} / CTR {(p.ctr * 100).toFixed(1)}%</p>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-black text-amber-900">🎯 改善チャンス（表示回数50以上・順位5〜20位）</h3>
+                <div className="flex gap-3 text-xs text-amber-700">
+                  <span>S級 <strong>{sGradeOpportunities.length}</strong>件</span>
+                  <span>A級 <strong>{aGradeOpportunities.length}</strong>件</span>
+                </div>
               </div>
+
+              {/* S級 */}
+              {sGradeOpportunities.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs font-bold text-red-700 mb-2">🔴 S級（順位5〜10位・表示100以上） — 最優先</p>
+                  <div className="space-y-2">
+                    {sGradeOpportunities.map((q) => {
+                      const ks = keywordStatuses.get(q.query);
+                      return (
+                        <div key={q.query} className="bg-white rounded-xl p-3 border border-red-200 flex items-center gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-gray-900 text-sm">{q.query}</span>
+                              {positionBadge(q.position)}
+                            </div>
+                            <p className="text-xs text-gray-500">表示 {q.impressions} / クリック {q.clicks} / CTR {(q.ctr * 100).toFixed(1)}%</p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <StatusBadge status={ks?.status ?? "pending"} />
+                            <select
+                              value={ks?.status ?? "pending"}
+                              disabled={savingQuery === q.query}
+                              onChange={(e) => updateStatus(q.query, e.target.value)}
+                              className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white"
+                            >
+                              <option value="pending">未処理</option>
+                              <option value="in_progress">最適化中</option>
+                              <option value="done">完了</option>
+                            </select>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* A級 */}
+              {aGradeOpportunities.length > 0 && (
+                <div className="mb-4">
+                  <p className="text-xs font-bold text-amber-700 mb-2">🟡 A級（順位10〜20位・表示100以上）</p>
+                  <div className="space-y-2">
+                    {aGradeOpportunities.map((q) => {
+                      const ks = keywordStatuses.get(q.query);
+                      return (
+                        <div key={q.query} className="bg-white rounded-xl p-3 border border-amber-200 flex items-center gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-bold text-gray-900 text-sm">{q.query}</span>
+                              {positionBadge(q.position)}
+                            </div>
+                            <p className="text-xs text-gray-500">表示 {q.impressions} / クリック {q.clicks} / CTR {(q.ctr * 100).toFixed(1)}%</p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <select
+                              value={ks?.status ?? "pending"}
+                              disabled={savingQuery === q.query}
+                              onChange={(e) => updateStatus(q.query, e.target.value)}
+                              className="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white"
+                            >
+                              <option value="pending">未処理</option>
+                              <option value="in_progress">最適化中</option>
+                              <option value="done">完了</option>
+                            </select>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* その他（B級：表示50以上だがS/A条件外） */}
+              {opportunities.filter((q) => q.impressions < 100).length > 0 && (
+                <details className="mt-2">
+                  <summary className="text-xs text-amber-700 cursor-pointer font-bold">🟢 その他（表示50〜99件） {opportunities.filter((q) => q.impressions < 100).length}件</summary>
+                  <div className="mt-2 grid grid-cols-1 lg:grid-cols-2 gap-2">
+                    {opportunities.filter((q) => q.impressions < 100).map((q) => (
+                      <div key={q.query} className="bg-white rounded-xl p-3 border border-amber-100">
+                        <div className="flex justify-between items-start mb-1">
+                          <span className="font-bold text-gray-900 text-sm">{q.query}</span>
+                          {positionBadge(q.position)}
+                        </div>
+                        <p className="text-xs text-gray-500">表示 {q.impressions} / クリック {q.clicks} / CTR {(q.ctr * 100).toFixed(1)}%</p>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
             </div>
           )}
 
