@@ -161,6 +161,10 @@ export default function CodeBoard({ service, searchQuery }: Props) {
       {/* 投稿フォーム（サービスページのみ） */}
       {isServicePage && (
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="bg-gradient-to-r from-amber-500 to-orange-500 px-4 py-3">
+            <p className="text-white font-black text-sm">🎁 あなたの招待コードをシェアしよう！</p>
+            <p className="text-amber-100 text-xs mt-0.5">コードを投稿すると、他のユーザーが使ってくれて<strong className="text-white">あなたにも特典が入る</strong>かも！無料・匿名OK</p>
+          </div>
           <div className="bg-gray-100 px-4 py-2.5 text-sm font-bold text-gray-700">コメントを投稿</div>
           <div className="p-4">
             <form onSubmit={handleSubmit} className="space-y-3">

@@ -246,13 +246,17 @@ export default async function ServicePage(
             {/* 招待コード掲示板リンク */}
             <Link
               href={`/codes/${service.slug}`}
-              className="block bg-amber-50 border border-amber-200 rounded-2xl p-4 hover:bg-amber-100 transition-colors"
+              className="block bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-300 rounded-2xl p-4 hover:from-amber-100 hover:to-orange-100 transition-colors"
             >
-              <p className="text-xs font-bold text-amber-800 mb-1">💬 招待コード掲示板</p>
-              <p className="text-xs text-amber-700 leading-relaxed">
-                {service.name}の最新招待コードをユーザーがリアルタイムでシェアしています
+              <p className="text-sm font-black text-amber-900 mb-1">💬 招待コード掲示板</p>
+              <p className="text-xs text-amber-700 leading-relaxed mb-2">
+                {service.name}の招待コードをユーザーがシェアしています
               </p>
-              <p className="text-xs text-amber-600 font-bold mt-2">掲示板を見る →</p>
+              <div className="bg-white rounded-xl px-3 py-2 border border-amber-200">
+                <p className="text-xs text-amber-800 font-bold">🎁 あなたのコードをシェアして特典ゲット！</p>
+                <p className="text-xs text-amber-600 mt-0.5">無料・匿名で投稿OK</p>
+              </div>
+              <p className="text-xs text-amber-600 font-bold mt-2 text-right">掲示板を見る・投稿する →</p>
             </Link>
 
             {/* 公式サイトリンク */}
