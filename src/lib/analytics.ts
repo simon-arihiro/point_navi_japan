@@ -269,16 +269,13 @@ export async function getServiceRanking(supabase: SupabaseClient, days: number):
 }
 
 export async function getServiceArticleViewCounts(supabase: SupabaseClient): Promise<Map<string, number>> {
-  const { data } = await supabase
-    .from("analytics_events")
-    .select("service_id")
-    .eq("event_type", "article_view")
-    .not("service_id", "is", null);
+  // DB側でGROUP BY集計することでPostgRESTのmax_rows制限を回避する
+  // service_view（サービス詳細ページ）+ article_view（記事ページ）を合算
+  const { data } = await supabase.rpc("get_service_total_view_counts");
 
   const counts = new Map<string, number>();
   for (const row of data ?? []) {
-    const serviceId = row.service_id as string;
-    counts.set(serviceId, (counts.get(serviceId) ?? 0) + 1);
+    counts.set(row.service_id as string, Number(row.pv));
   }
 
   return counts;
