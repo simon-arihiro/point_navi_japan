@@ -22,6 +22,7 @@ type ArticleRow = {
   status: string;
   created_at: string;
   published_at: string | null;
+  view_count?: number;
   primary_service: {
     name: string;
     logo_url: string | null;
@@ -140,6 +141,9 @@ export default function ArticleListClient({ articles, allCategories }: Props) {
               </span>
               <span className="text-gray-400">作成: {formatDate(a.created_at)}</span>
               {a.published_at && <span className="text-gray-400">公開: {formatDate(a.published_at)}</span>}
+              {(a.view_count ?? 0) > 0 && (
+                <span className="text-blue-600 font-bold bg-blue-50 rounded-full px-2 py-0.5">👁 {(a.view_count ?? 0).toLocaleString()} PV</span>
+              )}
               <span className={`ml-auto rounded-full px-2.5 py-0.5 font-bold ${getArticleStatusBadgeClass(a.status)}`}>
                 {getArticleStatusLabel(a.status)}
               </span>

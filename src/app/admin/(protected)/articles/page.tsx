@@ -1,6 +1,7 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import ArticleListClient from "@/components/admin/ArticleListClient";
+import { getArticleViewCountsForIds } from "@/lib/analytics";
 import UpdateExistingArticlesButton from "@/components/admin/UpdateExistingArticlesButton";
 import AiCleanupAllButton from "@/components/admin/AiCleanupAllButton";
 import RepairThumbnailsButton from "@/components/admin/RepairThumbnailsButton";
@@ -46,6 +47,9 @@ export default async function AdminArticlesPage() {
     supabase.from("categories").select("id, name, slug, created_at, updated_at").is("deleted_at", null).order("name").returns<Category[]>(),
   ]);
 
+  const articleIds = (articles ?? []).map((a) => a.id);
+  const viewCounts = await getArticleViewCountsForIds(supabase, articleIds);
+
   const rows = (articles ?? []).map((a) => ({
     id: a.id,
     title: a.title,
@@ -53,6 +57,7 @@ export default async function AdminArticlesPage() {
     status: a.status,
     created_at: a.created_at,
     published_at: a.published_at,
+    view_count: viewCounts.get(a.id) ?? 0,
     primary_service: a.primary_service
       ? {
           name: a.primary_service.name,
