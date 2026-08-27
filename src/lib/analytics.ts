@@ -116,18 +116,13 @@ export async function getArticleViewCountsForIds(supabase: SupabaseClient, artic
   const counts = new Map<string, number>();
   if (articleIds.length === 0) return counts;
 
-  // analytics_eventsはPostgRESTのデフォルト1000行制限があるため、
-  // 十分な上限を指定して全件取得する
-  const { data } = await supabase
-    .from("analytics_events")
-    .select("article_id")
-    .eq("event_type", "article_view")
-    .in("article_id", articleIds)
-    .limit(100000);
+  // DB側でGROUP BY集計することでPostgRESTのmax_rows制限を回避する
+  const { data } = await supabase.rpc("get_article_view_counts", {
+    article_ids: articleIds,
+  });
 
   for (const row of data ?? []) {
-    const articleId = row.article_id as string;
-    counts.set(articleId, (counts.get(articleId) ?? 0) + 1);
+    counts.set(row.article_id as string, Number(row.pv));
   }
 
   return counts;
