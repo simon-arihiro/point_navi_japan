@@ -7,7 +7,7 @@ SECURITY DEFINER
 AS $$
   SELECT service_id, COUNT(*) AS pv
   FROM analytics_events
-  WHERE event_type IN ('service_view', 'article_view')
+  WHERE event_type = 'article_view'
     AND service_id IS NOT NULL
   GROUP BY service_id;
 $$;
