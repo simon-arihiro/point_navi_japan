@@ -141,6 +141,11 @@ export default async function ArticlePage(
   const publishedDate = article.published_at
     ? new Date(article.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })
     : "";
+  const updatedDate = article.updated_at
+    ? new Date(article.updated_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })
+    : "";
+  // 更新日が公開日と同じ場合は表示しない
+  const showUpdatedDate = updatedDate && updatedDate !== publishedDate;
 
   const service = article.primary_service;
   const tocItems = extractHeadings(article.content);
@@ -236,11 +241,12 @@ export default async function ArticlePage(
                   {service.name}
                 </Link>
               )}
-              {publishedDate && <span className="text-xs text-gray-400">{publishedDate}</span>}
+              {publishedDate && <span className="text-xs text-gray-400">公開: {publishedDate}</span>}
+              {showUpdatedDate && <span className="text-xs text-blue-500 font-medium">更新: {updatedDate}</span>}
             </div>
 
             <h1 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-6">
-              <HighlightServiceName title={article.title} serviceName={article.primary_service?.name} />
+              <HighlightServiceName title={refreshTitleDate(article.title)} serviceName={article.primary_service?.name} />
             </h1>
 
             {article.description && (
