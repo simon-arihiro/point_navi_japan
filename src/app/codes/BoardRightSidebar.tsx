@@ -9,6 +9,7 @@ type RecentPost = {
   service_id: string;
   nickname: string;
   referral_code: string;
+  comment: string | null;
   created_at: string;
   service: { name: string; slug: string } | null;
 };
@@ -94,17 +95,25 @@ export default function BoardRightSidebar({ recent, ranking, searchOnly }: Props
         <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
           <div className="bg-gray-700 text-white text-sm font-bold px-4 py-2.5">最近の更新</div>
           <ul className="divide-y divide-gray-50">
-            {recent.map((p) => (
-              <li key={p.id}>
-                <Link
-                  href={`/codes/${p.service?.slug ?? ""}`}
-                  className="flex items-center justify-between gap-2 px-3 py-2 hover:bg-gray-50 transition-colors"
-                >
-                  <span className="text-xs font-bold text-brand-700 truncate">{p.service?.name}</span>
-                  <span className="text-[10px] text-gray-400 shrink-0">{formatDate(p.created_at)}</span>
-                </Link>
-              </li>
-            ))}
+            {recent.map((p) => {
+              const preview = (p.comment || p.referral_code || "").slice(0, 30);
+              return (
+                <li key={p.id}>
+                  <Link
+                    href={`/codes/${p.service?.slug ?? ""}`}
+                    className="block px-3 py-2.5 hover:bg-gray-50 transition-colors"
+                  >
+                    <div className="flex items-center justify-between gap-2 mb-0.5">
+                      <span className="text-xs font-bold text-brand-700 truncate">{p.service?.name}</span>
+                      <span className="text-[10px] text-gray-400 shrink-0">{formatDate(p.created_at)}</span>
+                    </div>
+                    {preview && (
+                      <p className="text-[11px] text-gray-500 truncate">{preview}…</p>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}

@@ -31,7 +31,7 @@ async function getBoardStats() {
 
   const { data: recent } = await supabase
     .from("code_submissions")
-    .select("id, service_id, nickname, referral_code, created_at, service:services!code_submissions_service_id_fkey(name, slug)")
+    .select("id, service_id, nickname, referral_code, comment, created_at, service:services!code_submissions_service_id_fkey(name, slug)")
     .order("created_at", { ascending: false })
     .limit(8);
 
