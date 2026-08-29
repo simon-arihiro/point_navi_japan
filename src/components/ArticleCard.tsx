@@ -20,7 +20,14 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
     : "";
 
   if (size === "featured") {
-    const thumbnailUrl = extractFirstImageUrl(article.content);
+    // featured_image_url → 本文内の最初の画像 → サービスロゴ の順でフォールバック
+    const thumbnailUrl =
+      (article as any).featured_image_url ||
+      extractFirstImageUrl(article.content) ||
+      (svc?.logo_storage_path
+        ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${svc.logo_storage_path}`
+        : svc?.logo_url) ||
+      null;
 
     return (
       <Link href={href} className="group block h-full">
