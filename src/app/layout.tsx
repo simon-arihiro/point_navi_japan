@@ -13,6 +13,7 @@ const notoSansJP = Noto_Sans_JP({
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"),
   applicationName: "ポイナビ",
+  publisher: "ポイナビ",
   title: {
     default: "りすくんのポイナビ｜招待コード・ポイ活アプリを正直レビュー",
     template: "%s | ポイナビ",
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   keywords: "ポイ活, 招待コード, 招待リンク, ポイントサービス, トリマ, Powl, モッピー",
   openGraph: {
     type: "website",
-    siteName: "りすくんのポイナビ",
+    siteName: "ポイナビ",
     locale: "ja_JP",
     title: "りすくんのポイナビ｜招待コード・ポイ活アプリを正直レビュー",
     description: "招待コード・お得な入会特典を実際に試した体験談をもとに正直レビュー。トリマ・Powl・モッピーなど人気ポイ活アプリの始め方・稼ぎ方をりすくんがわかりやすく解説。",
@@ -51,7 +52,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const siteJsonLd = {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    name: "りすくんのポイナビ",
+    name: "ポイナビ",
     url: siteUrl,
     potentialAction: {
       "@type": "SearchAction",
@@ -62,7 +63,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const organizationJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "りすくんのポイナビ",
+    name: "ポイナビ",
     url: siteUrl,
     logo: `${siteUrl}/mascot/library/poinavi-header-banner-lg.png`,
   };
