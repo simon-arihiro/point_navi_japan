@@ -11,6 +11,11 @@ type Service = {
   logo_storage_path: string | null;
   slug: string;
   description?: string | null;
+  referral_code?: string | null;
+  bonus_points?: number | null;
+  bonus_amount?: number | null;
+  campaign_bonus?: string | null;
+  official_url?: string | null;
 };
 
 type Submission = {
@@ -44,6 +49,60 @@ function formatDate(iso: string) {
 // IDっぽい短縮文字列（表示用）
 function shortId(id: string) {
   return id.replace(/-/g, "").slice(0, 8);
+}
+
+function OfficialCodeCard({ service }: { service: Service }) {
+  const [copied, setCopied] = useState(false);
+  const code = service.referral_code!;
+
+  const bonus = service.campaign_bonus
+    || (service.bonus_amount ? `${service.bonus_amount}円相当のポイント` : null)
+    || (service.bonus_points ? `${service.bonus_points}ポイント` : null)
+    || "登録ボーナスあり";
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="rounded-xl border-2 border-brand-400 bg-gradient-to-br from-brand-50 to-orange-50 shadow-sm overflow-hidden">
+      <div className="bg-brand-500 text-white px-4 py-2 flex items-center gap-2">
+        <span className="text-sm font-black">🎁 管理人の招待コード（公式）</span>
+        <span className="ml-auto text-xs bg-white text-brand-600 font-bold px-2 py-0.5 rounded-full">りすくん推薦</span>
+      </div>
+      <div className="p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="flex-1">
+            <p className="text-xs text-gray-500 mb-1">
+              <span className="font-bold text-gray-700">{service.name}</span> の招待コード
+            </p>
+            <p className="text-xs text-brand-700 font-medium">✅ 特典: {bonus}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex-1 bg-white border-2 border-brand-300 rounded-lg px-4 py-2.5 text-center">
+            <span className="text-xl font-black tracking-widest text-gray-900">{code}</span>
+          </div>
+          <button
+            onClick={handleCopy}
+            className={`shrink-0 px-4 py-2.5 rounded-lg font-bold text-sm transition-all ${
+              copied
+                ? "bg-green-500 text-white"
+                : "bg-brand-500 hover:bg-brand-600 text-white"
+            }`}
+          >
+            {copied ? "✓ コピー済" : "コピー"}
+          </button>
+        </div>
+        <p className="text-[11px] text-gray-400 mt-2">
+          ※ このコードを使って登録すると特典がもらえます。登録前に入力してください。
+        </p>
+      </div>
+    </div>
+  );
 }
 
 export default function CodeBoard({ service, searchQuery }: Props) {
@@ -140,6 +199,11 @@ export default function CodeBoard({ service, searchQuery }: Props) {
           </p>
         )}
       </div>
+
+      {/* 管理人の公式招待コード（サービスページ・コードあり時のみ） */}
+      {isServicePage && service.referral_code && (
+        <OfficialCodeCard service={service} />
+      )}
 
       {/* 投稿テンプレート（サービスページのみ） */}
       {isServicePage && (
