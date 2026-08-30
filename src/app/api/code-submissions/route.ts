@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
   const db = getClient();
   let query = db
     .from("code_submissions")
-    .select("id, service_id, nickname, referral_code, comment, created_at, service:services!code_submissions_service_id_fkey(name, logo_url, logo_storage_path, slug)")
+    .select("id, service_id, nickname, referral_code, comment, created_at, service:services!code_submissions_service_id_fkey(name, logo_url, logo_storage_path, slug, official_url)")
     .order("created_at", { ascending: false })
     .limit(limit);
 

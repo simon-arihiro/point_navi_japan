@@ -25,7 +25,7 @@ type Submission = {
   referral_code: string;
   comment: string | null;
   created_at: string;
-  service: { name: string; logo_url: string | null; logo_storage_path: string | null; slug: string } | null;
+  service: { name: string; logo_url: string | null; logo_storage_path: string | null; slug: string; official_url?: string | null } | null;
 };
 
 type Props = {
@@ -173,7 +173,7 @@ export default function CodeBoard({ service, searchQuery }: Props) {
               name={service.name}
               logoUrl={service.logo_url}
               logoStoragePath={service.logo_storage_path}
-              officialUrl={undefined}
+              officialUrl={service.official_url ?? undefined}
               size={40}
               className="shrink-0"
             />
@@ -336,7 +336,7 @@ export default function CodeBoard({ service, searchQuery }: Props) {
                       name={s.service.name}
                       logoUrl={s.service.logo_url}
                       logoStoragePath={s.service.logo_storage_path}
-                      officialUrl={undefined}
+                      officialUrl={s.service.official_url ?? undefined}
                       size={20}
                       className="shrink-0"
                     />
