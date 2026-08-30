@@ -15,9 +15,14 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
   const svc = article.primary_service as any;
   const cat = categorySlug ?? svc?.categories?.[0]?.category?.slug ?? "all";
   const href = `/articles/${cat}/${article.slug}`;
-  const publishedDate = article.published_at
-    ? new Date(article.published_at).toLocaleDateString("ja-JP")
+  // published_at がない場合は created_at にフォールバック
+  const publishedDate = (article.published_at ?? (article as any).created_at)
+    ? new Date(article.published_at ?? (article as any).created_at).toLocaleDateString("ja-JP")
     : "";
+  const updatedDate = (article as any).updated_at
+    ? new Date((article as any).updated_at).toLocaleDateString("ja-JP")
+    : "";
+  const showUpdatedDate = updatedDate && updatedDate !== publishedDate;
 
   if (size === "featured") {
     // featured_image_url → 本文内の最初の画像 → サービスロゴ の順でフォールバック
@@ -55,7 +60,10 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
               {article.description && (
                 <p className="text-sm text-gray-500 line-clamp-3 leading-relaxed mb-2">{article.description}</p>
               )}
-              {publishedDate && <p className="text-xs text-gray-400">{publishedDate}</p>}
+              <div className="flex flex-col gap-0.5">
+                {publishedDate && <p className="text-xs text-gray-400">公開: {publishedDate}</p>}
+                {showUpdatedDate && <p className="text-xs text-blue-500 font-medium">更新: {updatedDate}</p>}
+              </div>
             </div>
           </div>
         </div>
@@ -85,7 +93,10 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
           {article.description && (
             <p className="text-sm text-gray-500 line-clamp-2 mb-3 leading-relaxed">{article.description}</p>
           )}
-          {publishedDate && <p className="text-xs text-gray-400">{publishedDate}</p>}
+          <div className="flex gap-3">
+            {publishedDate && <p className="text-xs text-gray-400">公開: {publishedDate}</p>}
+            {showUpdatedDate && <p className="text-xs text-blue-500 font-medium">更新: {updatedDate}</p>}
+          </div>
         </div>
       </Link>
     );
@@ -117,9 +128,10 @@ export default function ArticleCard({ article, categorySlug, size = "sm" }: Prop
         {article.description && (
           <p className="text-xs text-gray-500 line-clamp-2 mb-3">{article.description}</p>
         )}
-        {publishedDate && (
-          <p className="text-xs text-gray-400">{publishedDate}</p>
-        )}
+        <div className="flex gap-3">
+          {publishedDate && <p className="text-xs text-gray-400">公開: {publishedDate}</p>}
+          {showUpdatedDate && <p className="text-xs text-blue-500 font-medium">更新: {updatedDate}</p>}
+        </div>
       </div>
     </Link>
   );
