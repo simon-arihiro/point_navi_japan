@@ -138,8 +138,9 @@ export default async function ArticlePage(
     .filter((a) => a.primary_service)
     .slice(0, RELATED_LIMIT);
 
-  const publishedDate = article.published_at
-    ? new Date(article.published_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })
+  // published_at がない場合は created_at にフォールバック
+  const publishedDate = (article.published_at ?? article.created_at)
+    ? new Date(article.published_at ?? article.created_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })
     : "";
   const updatedDate = article.updated_at
     ? new Date(article.updated_at).toLocaleDateString("ja-JP", { year: "numeric", month: "long", day: "numeric" })
@@ -241,13 +242,21 @@ export default async function ArticlePage(
                   {service.name}
                 </Link>
               )}
-              {publishedDate && <span className="text-xs text-gray-400">公開: {publishedDate}</span>}
-              {showUpdatedDate && <span className="text-xs text-blue-500 font-medium">更新: {updatedDate}</span>}
             </div>
 
-            <h1 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-6">
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-3">
               <HighlightServiceName title={refreshTitleDate(article.title)} serviceName={article.primary_service?.name} />
             </h1>
+
+            {/* 公開日・更新日 */}
+            <div className="flex items-center gap-3 mb-6 text-xs text-gray-400">
+              {publishedDate && (
+                <span>📅 公開: {publishedDate}</span>
+              )}
+              {showUpdatedDate && (
+                <span className="text-blue-500 font-medium">🔄 更新: {updatedDate}</span>
+              )}
+            </div>
 
             {article.description && (
               <div className="bg-brand-50 border-l-4 border-brand-400 rounded-r-xl p-4 mb-8">
