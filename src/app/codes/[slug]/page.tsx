@@ -16,14 +16,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq("status", "active")
     .single();
 
-  if (!service) return { title: "招待コード掲示板まとめ" };
+  if (!service) return { title: "招待コード掲示板" };
 
   return {
-    title: `${service.name}の招待コード・紹介コード掲示板まとめ｜最新コードをゲット`,
-    description: `${service.name}の招待コード・紹介コードを投稿・検索できる掲示板まとめ。新規登録でポイントがもらえる最新コードを探そう！コピーしてお得に始めよう。`,
-    keywords: [`${service.name}`, `${service.name} 招待コード`, `${service.name} 紹介コード`, "招待コード掲示板", "ポイ活"],
+    title: `${service.name} 招待コード掲示板｜最新の紹介コードをコピーして登録ボーナスをもらおう`,
+    description: `${service.name}の招待コード掲示板。ユーザーが投稿した最新の招待コード・紹介コードを無料で検索・コピーできます。新規登録時に入力してポイントや特典をゲットしよう。`,
+    keywords: [`${service.name} 招待コード`, `${service.name} 招待コード 掲示板`, `${service.name} 紹介コード`, `${service.name}`, "招待コード 掲示板", "招待コード"],
     openGraph: {
-      title: `${service.name}の招待コード・紹介コード掲示板まとめ`,
+      title: `${service.name} 招待コード掲示板｜最新コードをゲット`,
       description: `${service.name}の最新招待コードを検索・コピーできます。新規登録でポイントがもらえるお得なコードを探そう！`,
       type: "website",
       url: `https://jp-point-navi.com/codes/${slug}`,
@@ -79,15 +79,15 @@ export default async function ServiceBoardPage({ params }: Props) {
     "@graph": [
       {
         "@type": "WebPage",
-        "name": `${service.name}の招待コード・紹介コード掲示板まとめ`,
-        "description": `${service.name}の招待コード・紹介コードを投稿・検索できる掲示板。新規登録でポイントがもらえる最新コードをコピーして活用しよう。`,
+        "name": `${service.name} 招待コード掲示板`,
+        "description": `${service.name}の招待コード掲示板。ユーザーが投稿した最新の招待コード・紹介コードを無料で検索・コピーできます。`,
         "url": `https://jp-point-navi.com/codes/${slug}`,
         "breadcrumb": {
           "@type": "BreadcrumbList",
           "itemListElement": [
             { "@type": "ListItem", "position": 1, "name": "ホーム", "item": "https://jp-point-navi.com" },
-            { "@type": "ListItem", "position": 2, "name": "招待コード掲示板まとめ", "item": "https://jp-point-navi.com/codes" },
-            { "@type": "ListItem", "position": 3, "name": `${service.name} 招待コード`, "item": `https://jp-point-navi.com/codes/${slug}` },
+            { "@type": "ListItem", "position": 2, "name": "招待コード掲示板", "item": "https://jp-point-navi.com/codes" },
+            { "@type": "ListItem", "position": 3, "name": `${service.name} 招待コード掲示板`, "item": `https://jp-point-navi.com/codes/${slug}` },
           ]
         }
       },
