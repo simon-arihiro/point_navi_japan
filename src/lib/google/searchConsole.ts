@@ -20,14 +20,14 @@ function dateNDaysAgo(days: number): string {
 }
 
 // Search Console API未設定（GOOGLE_SERVICE_ACCOUNT_KEY または GSC_SITE_URL 未設定）の場合はnullを返す
-export async function getGscSummary(days: number): Promise<GscSummary | null> {
+export async function getGscSummary(days: number, offsetDays = 0): Promise<GscSummary | null> {
   const siteUrl = process.env.GSC_SITE_URL;
   const client = getClient();
   if (!client || !siteUrl) return null;
 
   const res = await client.searchanalytics.query({
     siteUrl,
-    requestBody: { startDate: dateNDaysAgo(days), endDate: dateNDaysAgo(0) },
+    requestBody: { startDate: dateNDaysAgo(days + offsetDays), endDate: dateNDaysAgo(offsetDays) },
   });
 
   const row = res.data.rows?.[0];

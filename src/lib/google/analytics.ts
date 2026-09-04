@@ -20,15 +20,18 @@ export type Ga4Summary = {
 export type Ga4PageRow = { path: string; views: number; sessions: number };
 
 // GA4 Data API未設定（GOOGLE_SERVICE_ACCOUNT_KEY または GA4_PROPERTY_ID 未設定）の場合はnullを返す
-export async function getGa4Summary(days: number): Promise<Ga4Summary | null> {
+export async function getGa4Summary(days: number, offsetDays = 0): Promise<Ga4Summary | null> {
   const propertyId = process.env.GA4_PROPERTY_ID;
   const client = getClient();
   if (!client || !propertyId) return null;
 
+  const endDate = offsetDays > 0 ? `${offsetDays}daysAgo` : "today";
+  const startDate = offsetDays > 0 ? `${days + offsetDays}daysAgo` : `${days}daysAgo`;
+
   const res = await client.properties.runReport({
     property: `properties/${propertyId}`,
     requestBody: {
-      dateRanges: [{ startDate: `${days}daysAgo`, endDate: "today" }],
+      dateRanges: [{ startDate, endDate }],
       metrics: [
         { name: "sessions" },
         { name: "activeUsers" },

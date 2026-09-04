@@ -18,6 +18,8 @@ type SeoData = {
   gscSummary: GscSummary | null;
   gscTopQueries: GscQueryRow[] | null;
   gscTopPages: GscPageRow[] | null;
+  ga4SummaryPrev: Ga4Summary | null;
+  gscSummaryPrev: GscSummary | null;
 };
 
 const PERIODS = [
@@ -26,12 +28,59 @@ const PERIODS = [
   { label: "90日間", value: 90 },
 ];
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function diffPct(current: number, prev: number): number | null {
+  if (!prev) return null;
+  return ((current - prev) / prev) * 100;
+}
+
+function DiffBadge({ pct, inverse = false }: { pct: number | null; inverse?: boolean }) {
+  if (pct === null) return null;
+  const up = inverse ? pct < 0 : pct > 0;
+  const color = up ? "text-green-600" : "text-red-500";
+  const sign = pct > 0 ? "+" : "";
+  return <span className={`text-xs font-bold ml-1 ${color}`}>{sign}{pct.toFixed(1)}%</span>;
+}
+
+function StatCard({ label, value, sub, diff, diffInverse }: { label: string; value: string; sub?: string; diff?: number | null; diffInverse?: boolean }) {
   return (
     <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-      <p className="text-2xl font-black text-gray-900">{value}</p>
+      <div className="flex items-baseline gap-1 flex-wrap">
+        <p className="text-2xl font-black text-gray-900">{value}</p>
+        {diff !== undefined && <DiffBadge pct={diff ?? null} inverse={diffInverse} />}
+      </div>
       {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
       <p className="text-sm mt-1 text-gray-500">{label}</p>
+    </div>
+  );
+}
+
+function RevenueSimulator({ pvPerPeriod, days }: { pvPerPeriod: number; days: number }) {
+  const monthlyPv = Math.round((pvPerPeriod / days) * 30);
+  const tiers = [
+    { label: "控えめ", cpm: 50, color: "text-gray-600" },
+    { label: "標準", cpm: 150, color: "text-blue-600" },
+    { label: "好調時", cpm: 300, color: "text-green-600" },
+  ];
+  return (
+    <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-100 rounded-2xl p-4 mb-6">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-base">💰</span>
+        <h3 className="font-bold text-gray-900 text-sm">AdSense収益シミュレーター</h3>
+        <span className="text-xs text-gray-400 ml-1">月間PV {monthlyPv.toLocaleString()} 回想定</span>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        {tiers.map((t) => {
+          const monthly = Math.round((monthlyPv / 1000) * t.cpm);
+          return (
+            <div key={t.label} className="bg-white rounded-xl p-3 text-center shadow-sm">
+              <p className="text-xs text-gray-500 mb-1">{t.label} (CPM ¥{t.cpm})</p>
+              <p className={`text-xl font-black ${t.color}`}>¥{monthly.toLocaleString()}</p>
+              <p className="text-xs text-gray-400">/ 月</p>
+            </div>
+          );
+        })}
+      </div>
+      <p className="text-[11px] text-gray-400 mt-2">※ 日本のコンテンツサイト目安。実際の収益はジャンル・広告配置・季節により大きく変動します。</p>
     </div>
   );
 }
@@ -264,11 +313,11 @@ export default function AdminSeoPage() {
           <h2 className="font-bold text-gray-700 text-sm mb-3 uppercase tracking-wide">Google Analytics（GA4）</h2>
           {data.ga4Summary ? (
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-              <StatCard label="セッション数" value={data.ga4Summary.sessions.toLocaleString()} />
-              <StatCard label="アクティブユーザー" value={data.ga4Summary.activeUsers.toLocaleString()} />
-              <StatCard label="ページビュー" value={data.ga4Summary.screenPageViews.toLocaleString()} />
-              <StatCard label="平均セッション時間" value={`${Math.round(data.ga4Summary.averageSessionDuration)}秒`} sub={`約${Math.floor(data.ga4Summary.averageSessionDuration / 60)}分`} />
-              <StatCard label="直帰率" value={`${(data.ga4Summary.bounceRate * 100).toFixed(1)}%`} />
+              <StatCard label="セッション数" value={data.ga4Summary.sessions.toLocaleString()} diff={diffPct(data.ga4Summary.sessions, data.ga4SummaryPrev?.sessions ?? 0)} />
+              <StatCard label="アクティブユーザー" value={data.ga4Summary.activeUsers.toLocaleString()} diff={diffPct(data.ga4Summary.activeUsers, data.ga4SummaryPrev?.activeUsers ?? 0)} />
+              <StatCard label="ページビュー" value={data.ga4Summary.screenPageViews.toLocaleString()} diff={diffPct(data.ga4Summary.screenPageViews, data.ga4SummaryPrev?.screenPageViews ?? 0)} />
+              <StatCard label="平均セッション時間" value={`${Math.round(data.ga4Summary.averageSessionDuration)}秒`} sub={`約${Math.floor(data.ga4Summary.averageSessionDuration / 60)}分`} diff={diffPct(data.ga4Summary.averageSessionDuration, data.ga4SummaryPrev?.averageSessionDuration ?? 0)} />
+              <StatCard label="直帰率" value={`${(data.ga4Summary.bounceRate * 100).toFixed(1)}%`} diff={diffPct(data.ga4Summary.bounceRate, data.ga4SummaryPrev?.bounceRate ?? 0)} diffInverse />
             </div>
           ) : (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 mb-6">GA4 未接続（GOOGLE_SERVICE_ACCOUNT_KEY / GA4_PROPERTY_ID 未設定）</div>
@@ -277,12 +326,17 @@ export default function AdminSeoPage() {
           {/* GSCサマリー */}
           <h2 className="font-bold text-gray-700 text-sm mb-3 uppercase tracking-wide">Google Search Console</h2>
           {data.gscSummary ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-              <StatCard label="クリック数" value={data.gscSummary.clicks.toLocaleString()} />
-              <StatCard label="表示回数" value={data.gscSummary.impressions.toLocaleString()} />
-              <StatCard label="平均CTR" value={`${(data.gscSummary.ctr * 100).toFixed(2)}%`} />
-              <StatCard label="平均掲載順位" value={data.gscSummary.position.toFixed(1)} sub="低いほど良い" />
-            </div>
+            <>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
+                <StatCard label="クリック数" value={data.gscSummary.clicks.toLocaleString()} diff={diffPct(data.gscSummary.clicks, data.gscSummaryPrev?.clicks ?? 0)} />
+                <StatCard label="表示回数" value={data.gscSummary.impressions.toLocaleString()} diff={diffPct(data.gscSummary.impressions, data.gscSummaryPrev?.impressions ?? 0)} />
+                <StatCard label="平均CTR" value={`${(data.gscSummary.ctr * 100).toFixed(2)}%`} diff={diffPct(data.gscSummary.ctr, data.gscSummaryPrev?.ctr ?? 0)} />
+                <StatCard label="平均掲載順位" value={data.gscSummary.position.toFixed(1)} sub="低いほど良い" diff={diffPct(data.gscSummaryPrev?.position ?? 0, data.gscSummary.position)} />
+              </div>
+              {data.ga4Summary && (
+                <RevenueSimulator pvPerPeriod={data.ga4Summary.screenPageViews} days={days} />
+              )}
+            </>
           ) : (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 mb-6">Search Console 未接続（GOOGLE_SERVICE_ACCOUNT_KEY / GSC_SITE_URL 未設定）</div>
           )}
