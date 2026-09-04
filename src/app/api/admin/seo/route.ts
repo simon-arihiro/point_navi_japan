@@ -14,8 +14,8 @@ export async function GET(request: NextRequest) {
     getGscSummary(days),
     getGscTopQueries(days),
     getGscTopPages(days),
-    getGa4Summary(days, days),      // 前期
-    getGscSummary(days, days),      // 前期
+    getGa4Summary(days, days).catch(() => null),   // 前期（エラー時はnull）
+    getGscSummary(days, days).catch(() => null),   // 前期（エラー時はnull）
   ]);
 
   return Response.json({ ga4Summary, ga4TopPages, ga4Daily, gscSummary, gscTopQueries, gscTopPages, ga4SummaryPrev, gscSummaryPrev });
