@@ -33,7 +33,8 @@ function diffPct(current: number, prev: number): number | null {
   return ((current - prev) / prev) * 100;
 }
 
-function DiffBadge({ pct, inverse = false }: { pct: number | null; inverse?: boolean }) {
+function DiffBadge({ pct, inverse = false }: { pct: number | null | undefined; inverse?: boolean }) {
+  if (pct === undefined) return <span className="text-xs text-gray-300 ml-1">---</span>;
   if (pct === null) return null;
   const up = inverse ? pct < 0 : pct > 0;
   const color = up ? "text-green-600" : "text-red-500";
@@ -46,7 +47,7 @@ function StatCard({ label, value, sub, diff, diffInverse }: { label: string; val
     <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
       <div className="flex items-baseline gap-1 flex-wrap">
         <p className="text-2xl font-black text-gray-900">{value}</p>
-        {diff !== undefined && <DiffBadge pct={diff ?? null} inverse={diffInverse} />}
+        <DiffBadge pct={diff} inverse={diffInverse} />
       </div>
       {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
       <p className="text-sm mt-1 text-gray-500">{label}</p>
@@ -313,11 +314,11 @@ export default function AdminSeoPage() {
           <h2 className="font-bold text-gray-700 text-sm mb-3 uppercase tracking-wide">Google Analytics（GA4）</h2>
           {data.ga4Summary ? (
             <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
-              <StatCard label="セッション数" value={data.ga4Summary.sessions.toLocaleString()} diff={diffPct(data.ga4Summary.sessions, data.ga4SummaryPrev?.sessions ?? 0)} />
-              <StatCard label="アクティブユーザー" value={data.ga4Summary.activeUsers.toLocaleString()} diff={diffPct(data.ga4Summary.activeUsers, data.ga4SummaryPrev?.activeUsers ?? 0)} />
-              <StatCard label="ページビュー" value={data.ga4Summary.screenPageViews.toLocaleString()} diff={diffPct(data.ga4Summary.screenPageViews, data.ga4SummaryPrev?.screenPageViews ?? 0)} />
-              <StatCard label="平均セッション時間" value={`${Math.round(data.ga4Summary.averageSessionDuration)}秒`} sub={`約${Math.floor(data.ga4Summary.averageSessionDuration / 60)}分`} diff={diffPct(data.ga4Summary.averageSessionDuration, data.ga4SummaryPrev?.averageSessionDuration ?? 0)} />
-              <StatCard label="直帰率" value={`${(data.ga4Summary.bounceRate * 100).toFixed(1)}%`} diff={diffPct(data.ga4Summary.bounceRate, data.ga4SummaryPrev?.bounceRate ?? 0)} diffInverse />
+              <StatCard label="セッション数" value={data.ga4Summary.sessions.toLocaleString()} diff={data.ga4SummaryPrev ? diffPct(data.ga4Summary.sessions, data.ga4SummaryPrev.sessions) : null} />
+              <StatCard label="アクティブユーザー" value={data.ga4Summary.activeUsers.toLocaleString()} diff={data.ga4SummaryPrev ? diffPct(data.ga4Summary.activeUsers, data.ga4SummaryPrev.activeUsers) : null} />
+              <StatCard label="ページビュー" value={data.ga4Summary.screenPageViews.toLocaleString()} diff={data.ga4SummaryPrev ? diffPct(data.ga4Summary.screenPageViews, data.ga4SummaryPrev.screenPageViews) : null} />
+              <StatCard label="平均セッション時間" value={`${Math.round(data.ga4Summary.averageSessionDuration)}秒`} sub={`約${Math.floor(data.ga4Summary.averageSessionDuration / 60)}分`} diff={data.ga4SummaryPrev ? diffPct(data.ga4Summary.averageSessionDuration, data.ga4SummaryPrev.averageSessionDuration) : null} />
+              <StatCard label="直帰率" value={`${(data.ga4Summary.bounceRate * 100).toFixed(1)}%`} diff={data.ga4SummaryPrev ? diffPct(data.ga4Summary.bounceRate, data.ga4SummaryPrev.bounceRate) : null} diffInverse />
             </div>
           ) : (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 mb-6">GA4 未接続（GOOGLE_SERVICE_ACCOUNT_KEY / GA4_PROPERTY_ID 未設定）</div>
@@ -328,10 +329,10 @@ export default function AdminSeoPage() {
           {data.gscSummary ? (
             <>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-3">
-                <StatCard label="クリック数" value={data.gscSummary.clicks.toLocaleString()} diff={diffPct(data.gscSummary.clicks, data.gscSummaryPrev?.clicks ?? 0)} />
-                <StatCard label="表示回数" value={data.gscSummary.impressions.toLocaleString()} diff={diffPct(data.gscSummary.impressions, data.gscSummaryPrev?.impressions ?? 0)} />
-                <StatCard label="平均CTR" value={`${(data.gscSummary.ctr * 100).toFixed(2)}%`} diff={diffPct(data.gscSummary.ctr, data.gscSummaryPrev?.ctr ?? 0)} />
-                <StatCard label="平均掲載順位" value={data.gscSummary.position.toFixed(1)} sub="低いほど良い" diff={diffPct(data.gscSummaryPrev?.position ?? 0, data.gscSummary.position)} />
+                <StatCard label="クリック数" value={data.gscSummary.clicks.toLocaleString()} diff={data.gscSummaryPrev ? diffPct(data.gscSummary.clicks, data.gscSummaryPrev.clicks) : null} />
+                <StatCard label="表示回数" value={data.gscSummary.impressions.toLocaleString()} diff={data.gscSummaryPrev ? diffPct(data.gscSummary.impressions, data.gscSummaryPrev.impressions) : null} />
+                <StatCard label="平均CTR" value={`${(data.gscSummary.ctr * 100).toFixed(2)}%`} diff={data.gscSummaryPrev ? diffPct(data.gscSummary.ctr, data.gscSummaryPrev.ctr) : null} />
+                <StatCard label="平均掲載順位" value={data.gscSummary.position.toFixed(1)} sub="低いほど良い" diff={data.gscSummaryPrev ? diffPct(data.gscSummaryPrev.position, data.gscSummary.position) : null} />
               </div>
               {data.ga4Summary && (
                 <RevenueSimulator pvPerPeriod={data.ga4Summary.screenPageViews} days={days} />
