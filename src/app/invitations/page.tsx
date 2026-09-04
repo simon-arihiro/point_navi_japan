@@ -10,9 +10,9 @@ export function generateMetadata(): Metadata {
 
   return {
     title: `【${yearMonth}最新】ポイ活アプリの招待コードおすすめ一覧｜新規登録で特典ゲット`,
-    description: `${yearMonth}更新。ポイ活・副業アプリの招待コードをまとめて比較。tiktok・チャデポ・Cashwalk・ンポポなど人気サービスの招待コードを一覧表で紹介。新規登録ボーナスで最大数千円相当のポイントがもらえます。`,
+    description: `${yearMonth}最新。Cashwalk・うさぽ・わんポ・トリマ・モッピーなど人気ポイ活アプリの招待コードを一覧表で比較。新規登録時にコードを入力するだけで最大数千円相当のボーナスポイントがもらえます。`,
     alternates: { canonical: "/invitations" },
-    keywords: ["招待コード", "紹介コード", "ポイ活", "招待コード一覧", "ポイ活アプリ 招待コード", "紹介コード おすすめ", "新規登録 特典"],
+    keywords: ["招待コード", "紹介コード", "ポイ活", "招待コード一覧", "ポイ活アプリ 招待コード", "紹介コード おすすめ", "新規登録 特典", "Cashwalk 招待コード", "キャッシュウォーク 招待コード"],
     openGraph: {
       title: `【${yearMonth}最新】ポイ活アプリの招待コードおすすめ一覧`,
       description: "人気ポイ活アプリの招待コードをまとめて比較。新規登録で特典ゲット！",
@@ -146,7 +146,7 @@ export default async function InvitationsPage() {
             </p>
             <p className="text-sm text-gray-600 leading-relaxed mb-3">
               掲載しているコードは実際に登録して特典を受け取れたものを厳選しています。
-              tiktok・チャデポ・Cashwalk・ンポポ・カウシェファームなど、人気サービスの最新招待コードを随時更新中です。
+              <strong>Cashwalk・うさぽ・わんポ・トリマ・モッピー</strong>など、人気ポイ活サービスの最新招待コードを随時更新中です。
             </p>
             <div className="flex flex-wrap gap-2 mt-4">
               {["招待コード", "紹介コード", "ポイ活", "新規登録特典", "無料でポイント", "副業アプリ"].map((tag) => (
